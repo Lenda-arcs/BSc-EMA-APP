@@ -25,7 +25,7 @@ const CtmPermission = () => {
                     Permissions.CAMERA,
                     Permissions.MEDIA_LIBRARY
                 )
-                console.log(response)
+                //console.log(response)
             }
 
         }

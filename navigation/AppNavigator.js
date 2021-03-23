@@ -96,15 +96,19 @@ const Home = () => {
 }
 
 
-const AssessmentNavigator = ({fistLaunch, assessmentCount}) => {
+const AssessmentNavigator = ({fistLaunch}) => {
     return (
         <AssessStack.Navigator  screenOptions={defaultNavOptions}>
             {fistLaunch
-                ? <AssessStack.Screen name='Onboarding' component={OnboardingScreen} options={{headerMode: 'none'}}/>
+                ? <AssessStack.Screen name='Onboarding' component={OnboardingScreen} options={{headerShown: false}}/>
                 : <AssessStack.Screen name='Home' component={Home}
                                       options={ ({ route }) =>
                                           ({headerTitle: getHeaderTitle(route)})}/>}
+
             <AssessStack.Screen name='Assessment' component={AssessmentScreen}/>
+
+            {/* For Testing */}
+            {/*<AssessStack.Screen name='Onboarding' component={OnboardingScreen} options={{headerShown: false}}/>*/}
         </AssessStack.Navigator>
     )
 }

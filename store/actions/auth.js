@@ -78,18 +78,7 @@ export const setDidTryAL = () => {
 
 
 export const setIsFirstLaunch = (bool) => {
-    return async (dispatch) => {
-
-        // Saving item to storage for further validation
-        try {
-            await AsyncStorage.setItem('alreadyLaunched', 'true')
-        } catch (e) {
-            throw new Error('Saving first launch to AsyncStorage failed!')
-        }
-
-        dispatch({type: SET_IS_FIRST_LAUNCH, val: bool})
-    }
-
+        return ({type: SET_IS_FIRST_LAUNCH, val: bool})
 }
 export const login = (email, password) => {
     return async (dispatch) => {
