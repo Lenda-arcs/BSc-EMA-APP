@@ -1,33 +1,59 @@
-import React, { useRef} from 'react';
-import {Dimensions, StyleSheet} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Dimensions, StyleSheet, View, Text} from 'react-native';
 import {Modal, Portal} from "react-native-paper";
 import LottieView from 'lottie-react-native';
 
-const SuccessAnimation = props => {
-    const animation = useRef()
-    const screenWidth = Math.round(Dimensions.get('window').width)
-    const screenHeight = Math.round(Dimensions.get('window').height)
+
+const getAnimation = () => {
+    const rndNum = Math.floor(Math.random() * 2)
+
+    switch (rndNum) {
+        case 0 :
+            return require('../../assets/animations/4329-confetti.json')
+        case 1 :
+            return require('../../assets/animations/4963-confetti-dark-theme.json')
+        default:
+            return null
+    }
+}
 
 
-    // toDO: store several animations and select rnd for success
-    const animations = []
+const SuccessAnimation = ({visible, onDismiss}) => {
+    const animationConfetti = useRef()
+   // const animationCheck = useRef()
+    const [animationObj] = useState(getAnimation)
+
+
 
 
 
     return (
         <Portal>
-            <Modal visible={props.visible} onDismiss={props.onDismiss} contentContainerStyle={styles.animationContainer} >
+            <Modal visible={visible} onDismiss={onDismiss}
+                   contentContainerStyle={styles.animationContainer}>
 
                 <LottieView
-                    ref={animation}
+                    ref={animationConfetti}
                     style={{
-                        width: 400 ,
-                        backgroundColor: 'transparent',
-                        height: 600,
+                        backgroundColor: 'rgb(114,141,149)',
+                        alignSelf: 'center',
+                        flexGrow: 1
                     }}
-                    source={require('../../assets/animations/4329-confetti.json')}
+                    source={animationObj}
                     autoPlay={true}
+                    resizeMode='cover'
                 />
+                {/*<LottieView*/}
+                {/*    ref={animationCheck}*/}
+                {/*    style={{*/}
+                {/*        backgroundColor: 'transparent',*/}
+                {/*        alignSelf: 'center',*/}
+                {/*        height: 300,*/}
+                {/*        width: 300*/}
+                {/*    }}*/}
+                {/*    source={require('../../assets/animations/lf30_editor_ofbyqwq3.json')}*/}
+                {/*    // autoPlay={true}*/}
+                {/*/>*/}
             </Modal>
         </Portal>
 

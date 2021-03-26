@@ -90,13 +90,13 @@ const PictureSlide = props => {
                 <List.AccordionGroup>
                     <List.Accordion id='0'  title='Mach ein Foto vom Himmel' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconSkyImg}/>}  onLongPress={showHelpDialogSkyHandler}>
-                        <ImagePicker onImageTaken={imageSkyTakenHandler}
+                        <ImagePicker key={0} onImageTaken={imageSkyTakenHandler}
                                      prePicture={props.savedData?.sky?.uri}
                                      title=''/>
                     </List.Accordion>
                     <List.Accordion id='1' title='Mach ein Foto vom Horizont' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconHorImg}/>}  onLongPress={showHelpDialogHorizonHandler} >
-                        <ImagePicker onImageTaken={imageHorizonTakenHandler}
+                        <ImagePicker key={1} onImageTaken={imageHorizonTakenHandler}
                                      prePicture={props.savedData?.horizon?.uri}
                                      title=''/>
                     </List.Accordion>
