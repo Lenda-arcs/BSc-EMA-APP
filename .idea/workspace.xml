@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9d3d59e6-d83a-4e84-920d-509c4659a0ff" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/ENV.js" beforeDir="false" afterPath="$PROJECT_DIR$/ENV.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1q9f5SUb7UbNEolBx36rTB5ExVk" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../complete-node-bootcamp-master/complete-node-bootcamp-master" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="ts.external.directory.path" value="C:\Users\lenna\AppData\Local\JetBrains\Toolbox\apps\WebStorm\ch-0\203.5981.135\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\components\helper" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9d3d59e6-d83a-4e84-920d-509c4659a0ff" name="Default Changelist" comment="" />
+      <created>1616496542961</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1616496542961</updated>
+      <workItem from="1616496544143" duration="12260000" />
+      <workItem from="1616510507605" duration="3304000" />
+      <workItem from="1616514352383" duration="668000" />
+      <workItem from="1616751092444" duration="14823000" />
+      <workItem from="1617006587166" duration="1903000" />
+      <workItem from="1617030328270" duration="5346000" />
+      <workItem from="1617092665157" duration="613000" />
+      <workItem from="1617115259582" duration="352000" />
+      <workItem from="1617123699480" duration="1023000" />
+      <workItem from="1617175396792" duration="1317000" />
+      <workItem from="1617260693770" duration="2100000" />
+      <workItem from="1617277473570" duration="4615000" />
+      <workItem from="1617364573882" duration="2340000" />
+      <workItem from="1617475943267" duration="1324000" />
+      <workItem from="1617521844172" duration="6278000" />
+      <workItem from="1617561574972" duration="2255000" />
+      <workItem from="1617605360315" duration="47320000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="bsc-project/master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>
