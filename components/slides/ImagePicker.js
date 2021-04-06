@@ -47,7 +47,7 @@ const ImgPicker = props => {
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             aspect: [4, 3],
-            quality: 1,
+            quality: 0.3,
             base64: true
         })
 

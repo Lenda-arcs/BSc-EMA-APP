@@ -56,11 +56,11 @@ const AuthScreen = props => {
 
     const [formState, dispatchFormState] = useReducer(formReducer, {
         inputValues: {
-            email: '',
+            userId: '',
             password: ''
         },
         inputValidities: {
-            email: false,
+            userId: false,
             password: false
         },
         formIsValid: false
@@ -80,7 +80,7 @@ const AuthScreen = props => {
         let action //
 
         action = authActions.login(
-            formState.inputValues.email,
+            formState.inputValues.userId,
             formState.inputValues.password
         )
         setError(null)
@@ -114,11 +114,11 @@ const AuthScreen = props => {
             <TextInputAvoidingView >
                     <Card style={styles.authCtn}>
                         <ScrollView>
-                            <Input id='email' label='E-Mail' keyboardType='email-address' required minLength={4}
-                                   autocapitalize='none' errorText='Please enter a valid email adress'
+                            <Input id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4}
+                                   autocapitalize='none' errorText='Bitte gebe deine Teilnehmer Nummer ein.'
                                    onInputChange={inputChangeHandler} initialValue=''/>
                             <Input id='password' label='Password' keyboardType='default' required minLength={5}
-                                   autocapitalize='none' secureTextEntry errorText='Please enter a valid password'
+                                   autocapitalize='none' secureTextEntry errorText='Bitte gebe dein Passwort ein.'
                                    onInputChange={inputChangeHandler} initialValue=''/>
                             <View style={styles.btnCtn}>
                                 <CtmButton loading={isLoading}

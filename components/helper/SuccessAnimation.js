@@ -43,17 +43,6 @@ const SuccessAnimation = ({visible, onDismiss}) => {
                     autoPlay={true}
                     resizeMode='cover'
                 />
-                {/*<LottieView*/}
-                {/*    ref={animationCheck}*/}
-                {/*    style={{*/}
-                {/*        backgroundColor: 'transparent',*/}
-                {/*        alignSelf: 'center',*/}
-                {/*        height: 300,*/}
-                {/*        width: 300*/}
-                {/*    }}*/}
-                {/*    source={require('../../assets/animations/lf30_editor_ofbyqwq3.json')}*/}
-                {/*    // autoPlay={true}*/}
-                {/*/>*/}
             </Modal>
         </Portal>
 

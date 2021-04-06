@@ -1,16 +1,21 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import {View, StyleSheet} from "react-native";
-import { List, withTheme} from "react-native-paper";
+import {List, withTheme} from "react-native-paper";
 
 import CtmSubheading from "../wrapper/CtmSubheading";
 import QuestionItem from "./QuestionItem";
 
 
-
-
-
-const QuestionSlide = ({ domain, theme , questions, onSlideChange, savedSelection, isComplete ,description }) => {
+const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelection, isComplete, description}) => {
+    const {colors} = theme
     const [expandedId, setExpandedId] = useState(undefined);
+    const [state, setState] = useState({
+        slideName: '',
+        answers: []
+    })
+    // Get question quantity
+    const questionCount =  questions.length
+    let pickListCount = state?.answers?.length
 
     const onAccordionPressHandler = (newExpandedId) =>
         expandedId === newExpandedId
@@ -18,37 +23,39 @@ const QuestionSlide = ({ domain, theme , questions, onSlideChange, savedSelectio
             : setExpandedId(newExpandedId);
 
 
-    const {colors} = theme
 
 
-    const [state, setState] = useState('')
 
-    // Get sizes
-    const questionCount = questions.length
-    let pickListCount = (state === '' || state?.[domain] === undefined || state?.[domain] === null) ? 0 : Object.keys(state?.[domain]).length
+    // Checking as complete if user goes to prev slide
+    useEffect(() => {
+        if (savedSelection?.length) setState({slideName: slideName, answers: savedSelection})
+        else setState({slideName: slideName, answers: []})
+    }, [slideName])
 
+    // Setting slide complete and uplift state
     useEffect(() => {
         //check if all questions has been answered
-        if (questionCount === pickListCount) {
+        if ( questionCount <= pickListCount ) {
             onSlideChange(state)
             isComplete()
-            //reset expanded question for next slide
-            setTimeout(() => setExpandedId(undefined), 1500)
         }
 
-    },[state])
+    }, [state])
 
 
 
-    //update picks obj with each selection
+    //update picks obj with each item selection
     const onChangeHandler = (pickObj) => {
-        if (state === '') setState({[domain]: {...pickObj}})
-        else setState({...state, [domain]: {...state[domain], ...pickObj}})
 
+        let objIndex = state.answers.findIndex(el => (el.domain === pickObj.domain) && (el.questionId === pickObj.questionId))
+
+        if (objIndex < 0) setState({...state, answers: state.answers.concat(pickObj)})
+        else {
+            let arrCopy = [...state.answers]
+            arrCopy[objIndex] = pickObj
+            setState({...state, answers: arrCopy})
+        }
     }
-
-
-
 
 
     return (
@@ -58,14 +65,13 @@ const QuestionSlide = ({ domain, theme , questions, onSlideChange, savedSelectio
                 <View>
                     {questions.map((question, index) =>
                         <QuestionItem
-                            key={question.id}
-                            index={index}
-                            id={index}
+                            key={question._id}
+                            domain={question.domain}
                             question={question}
                             text={question.text}
-                            items={question.items}
+                            items={question.selectionItems}
                             onChange={onChangeHandler}
-                            selection={state?.[domain]?.[question.id]}/>)}
+                            selection={savedSelection?.find(q => q.questionId === question.id && q.domain === question.domain)}/>)}
                 </View>
             </List.AccordionGroup>
         </View>
@@ -74,9 +80,7 @@ const QuestionSlide = ({ domain, theme , questions, onSlideChange, savedSelectio
 
 const styles = StyleSheet.create({
 
-    label: {
-
-    },
+    label: {},
 })
 
 

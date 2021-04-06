@@ -20,8 +20,16 @@ import CtmButton from "../components/wrapper/CtmButton";
 import * as authActions from "../store/actions/auth";
 import * as assessmentActions from '../store/actions/assessment'
 import CtmPermission from "../components/helper/CtmPermission";
-import {StatusBar} from "expo-status-bar";
+import ENV from "../ENV";
+import {ASSESSMENT_COUNT} from "../store/actions/assessment";
 
+const testData = {
+    "name": "test-slide",
+    "questions": {
+        "id" : "1",
+        "text": "...."
+    }
+}
 
 const StudyOverview = ({count, colors}) => {
 
@@ -61,9 +69,11 @@ let sendTime;
 let responseTime;
 
 const HomeScreen = props => {
-    const isAuth = useSelector(state => !!state.auth.token)
-    const [count, setCount] = useState()
+    const isAuth = useSelector(state => state.auth.token)
+
+    const userProgress = useSelector(state => state.assessments.assessmentCount)
     const [promptRes, setPromptRes] = useState(false)
+
 
 
     const dispatch = useDispatch()
@@ -71,6 +81,14 @@ const HomeScreen = props => {
 
     // todo: if not needed - delete
     const [isLoading, setIsLoading] = useState(false)
+
+
+    //  WORKING!
+    useEffect(() => {
+        isAuth && dispatch(assessmentActions.setAssessmentData())
+
+    },[isAuth, dispatch])
+
 
 
     // todo: track incoming notification
@@ -100,9 +118,13 @@ const HomeScreen = props => {
     }, [])
 
 
+
+
     useEffect(() => {
         const sendPushToken = async () => {
             const pushToken = await AsyncStorage.getItem('hasPushToken')
+            console.log(pushToken)
+
             if (!pushToken) {
                 dispatch(authActions.getUserPushToken())
             }
@@ -116,22 +138,7 @@ const HomeScreen = props => {
     useFocusEffect(() => {
             let isActive = true
             const getAssessmentCount = async () => {
-
-                try {
-                    // toDo: get with token or fetch from new server
-                    const countVal = await AsyncStorage.getItem(assessmentActions.ASSESSMENT_COUNT)
-                    if (isActive) {
-                        if (!countVal) {
-                            setCount(0)
-
-                        } else {
-                            setCount(parseInt(countVal))
-                        }
-                    }
-                } catch (err) {
-                    // toDo: show dialog to user?
-                    console.log(err)
-                }
+                isActive && dispatch(assessmentActions.getAssessmentCount())
 
             }
             getAssessmentCount()
@@ -139,27 +146,24 @@ const HomeScreen = props => {
             return () => isActive = false
         })
 
-
     return (
 
         <Screen>
             <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
 
                 {/* todo: show initial welcomeScreen if !isAuth */}
-                {isAuth ? <StudyOverview colors={colors} count={count}/> : <CtmPermission/>}
+                {isAuth ? <StudyOverview colors={colors} count={userProgress}/> : <CtmPermission/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {/*{isAuth && promptRes ? <CtmButton mode='contained' onPress={() => {*/}
-                    {/*        props.navigation.replace('Assessment', {*/}
-                    {/*            studyCount: count*/}
-                    {/*        })*/}
-                    {/*    }}>Start</CtmButton>*/}
-                    {/*    : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}*/}
-                    {isAuth && <CtmButton mode='contained' onPress={() => {
-                        props.navigation.replace('Assessment', {
-                            studyCount: count
-                        })
-                    }}>Start</CtmButton>}
+                    {isAuth && promptRes ? <CtmButton mode='contained' onPress={() => {
+                            props.navigation.replace('Assessment')
+                        }}>Start</CtmButton>
+                        : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
+                    {/*<CtmButton mode='contained' onPress={() => {*/}
+                    {/*    props.navigation.replace('Assessment', {*/}
+                    {/*        studyCount: userProgress*/}
+                    {/*    })*/}
+                    {/*}}>Start</CtmButton>*/}
                 </View>
             </View>
 

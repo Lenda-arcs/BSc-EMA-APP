@@ -83,7 +83,7 @@ const OnboardingScreen = (props) => {
                             title={'Get Started'}
                             onPress={() => {
                                 succeedHandler()
-                                StatusBar.setBarStyle('default');
+                                StatusBar.setBarStyle('default'); // ??
                             }}
                         >Anmelden</CtmButton>
                     ),

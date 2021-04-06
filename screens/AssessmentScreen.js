@@ -31,9 +31,7 @@ const AssessmentScreen = props => {
 
     const [time, setTime] = useState({
         start: new Date(),
-        end: null,
-        date: new Date().toLocaleDateString(),
-        duration: null
+        end: null
     })
     // images
     const [selectedSkyImage, setSelectedSkyImage] = useState()
@@ -41,14 +39,13 @@ const AssessmentScreen = props => {
     const [userLoc, setUserLoc] = useState()
 
     // picks
-    const [selection, setSelection] = useState('')
+    const [selection, setSelection] = useState([ ])
 
     // getting assessment data from store
     const allQuestionsSlides = useSelector(state => state.assessments.availableSlides)
 
-
-    const { studyCount } = props.route.params
-    console.log(studyCount)
+    // current user progress
+    const userProgress = useSelector(state => state.assessments.assessmentCount)
 
     // destructure color prop form withTheme wrapper
     const {colors} = props.theme
@@ -68,61 +65,60 @@ const AssessmentScreen = props => {
         setSlideComplete(true)
     }
 
-    // storing slide selections in total selection state
-    const onSlideChangeHandler =  useCallback((slideSelection) => {
-        if (selection === '') setSelection({...slideSelection})
-        else setSelection({...selection, ...slideSelection})
+    // storing slide selections in total selection state  todo: use useCallback again
+    const onSlideChangeHandler =  (slideSelection) => {
+        let objIndex = selection.findIndex(el => (el.slideName === slideSelection.slideName))
 
-    },[selection])
-
-    const goBackSlideHandler = () => {
-        setSlideComplete(true)
+        if (objIndex < 0) setSelection(selection.concat(slideSelection))
+        else {
+            let arrCopy = [...selection]
+            arrCopy[objIndex] = slideSelection
+            setSelection(arrCopy)
+        }
     }
 
-    const goNextSlideHandler = () => {
-
-    }
 
     const pictureSlide = {
         content: <PictureSlide isComplete={isPicSlideCompleteHandler}
                                savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage}}/>
     }
     const stepList =
-        allQuestionsSlides?.map(slide => ({
+        allQuestionsSlides?.map((slide) => ({
             content:
                 <QuestionSlide isLastStep={isLastStep} isComplete={isSlideCompleteHandler}
                                onSlideChange={onSlideChangeHandler}
                                questions={slide.questions}
-                               domain={slide.domain}
+                               slideName={slide.name}
                                description={slide.description}
-                               savedSelection={selection?.domain}
+                               savedSelection={selection?.find(sl => sl.slideName === slide.name)?.answers}
                 />
 
         }))
+
+
     // Dismiss demographic data slide
-    if (studyCount > 0) stepList.shift()
+    if (userProgress > 0) stepList.shift()
+    // Dismiss effect question slide
+    if (userProgress > 0 && userProgress !== 29) stepList.pop()
+
 
     // Append PictureSlide to assessment
-    stepList.unshift(pictureSlide)
+    const userGroup  = useSelector(state => state.auth.group)
+    userGroup === 'A' ?  stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
+
+
 
 
 
 
     const submitHandler = () => {
-        // User feedback (Activityindicator)
-        setIsFetching(true)
 
         // creating timeobj to get duration of user interaction
+        // calc duration on server
         const endTime = new Date()
         setTime(time.end = endTime)
 
-        // get duration in seconds
-        // maybe update it with setInterval and check  if its in valid time range
-        const duration = Math.round((time.end.getTime() - time.start.getTime()) / 1000 % 60)
-        setTime(time.duration = duration)
-
-        dispatch(actions.addAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc, studyCount))
-        setIsFetching(false)
+        dispatch(actions.saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc, studyCount))
         showModal()
     }
 
@@ -132,8 +128,6 @@ const AssessmentScreen = props => {
         // show success animation for certain time
         setTimeout(() => {
             setVisible(false)
-
-            //
             props.navigation.replace('Home')
             // maybe do it after sending the data
         }, 3000)
@@ -145,7 +139,7 @@ const AssessmentScreen = props => {
                     <ScrollView style={{flex: 1, width: '100%', backgroundColor: colors.background}}>
                         {/* Wizard component that takes question and picture slide - stepList */}
                         <Wizard useNativeDriver={true} prevStepAnimation='fade' nextStepAnimation='fade'
-                                onPrev={goBackSlideHandler}
+                                onPrev={() => {}}
                                 isFirstStep={val => setIsFirstStep(val)}
                                 isLastStep={val => setIsLastStep(val)} ref={wizard} steps={stepList}
                                 currentStep={({currentStep, isLastStep, isFirstStep}) => {

@@ -11,10 +11,10 @@ import * as Location from "expo-location";
 
 
 
-const PictureSlide = props => {
+const PictureSlide = ({isComplete, savedData}) => {
 
-    const [selectedSkyImage, setSelectedSkyImage] = useState(props.savedData?.sky)
-    const [selectedHorizonImage, setSelectedHorizonImage] = useState(props.savedData?.horizon)
+    const [selectedSkyImage, setSelectedSkyImage] = useState(savedData?.sky)
+    const [selectedHorizonImage, setSelectedHorizonImage] = useState(savedData?.horizon)
     const [userLoc, setUserLoc] = useState()
 
     const [iconSkyImg, setIconSkyImg] = useState('camera')
@@ -64,11 +64,10 @@ const PictureSlide = props => {
 
     useEffect(() => {
         if (selectedSkyImage && selectedHorizonImage && userLoc) {
-            props.isComplete(selectedSkyImage, selectedHorizonImage, userLoc)
+            isComplete(selectedSkyImage, selectedHorizonImage, userLoc)
         }
 
-
-    },[selectedSkyImage,selectedHorizonImage ])
+    },[selectedSkyImage,selectedHorizonImage])
 
 
 
@@ -85,19 +84,19 @@ const PictureSlide = props => {
 
     return (
         <ScrollView>
-            <View style={styles.container}>
+            <View style={{flex: 1}}>
                 <CtmSubheading style={styles.label}>Hier sollst du ein Foto vom den Wolken über dir, und ein Foto vom Horizont vor dir machen.</CtmSubheading>
                 <List.AccordionGroup>
                     <List.Accordion id='0'  title='Mach ein Foto vom Himmel' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconSkyImg}/>}  onLongPress={showHelpDialogSkyHandler}>
                         <ImagePicker key={0} onImageTaken={imageSkyTakenHandler}
-                                     prePicture={props.savedData?.sky?.uri}
+                                     prePicture={savedData?.sky?.uri}
                                      title=''/>
                     </List.Accordion>
                     <List.Accordion id='1' title='Mach ein Foto vom Horizont' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconHorImg}/>}  onLongPress={showHelpDialogHorizonHandler} >
                         <ImagePicker key={1} onImageTaken={imageHorizonTakenHandler}
-                                     prePicture={props.savedData?.horizon?.uri}
+                                     prePicture={savedData?.horizon?.uri}
                                      title=''/>
                     </List.Accordion>
 
@@ -113,17 +112,7 @@ const PictureSlide = props => {
 
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'transparent',
-        marginTop: 20,
-        marginBottom:20,
-        flex: 1,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginHorizontal: 10
-    },
+    label: {},
 
 })
 

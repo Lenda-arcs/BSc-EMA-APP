@@ -87,10 +87,11 @@ function getHeaderTitle(route) {
 
 
 const Home = () => {
+    const isAuth = useSelector(state => !!state.auth.token)
     return (
         <Drawer.Navigator screenOptions={defaultNavOptions} drawerContent={({navigation }) => <DrawerContent navigation={navigation}/>} >
+            {!isAuth && <Drawer.Screen name='Auth' component={AuthScreen} options={{title: 'Anmelden'}}/>}
             <Drawer.Screen name='Home' component={HomeScreen} />
-            <Drawer.Screen name='Auth' component={AuthScreen} options={{title: 'Anmelden'}}/>
         </Drawer.Navigator>
     )
 }
@@ -118,7 +119,7 @@ const AppNavigator = () => {
     const isAuth = useSelector(state => !!state.auth.token)
     const didTryAutoLogin = useSelector(state => !!state.auth.didTryAutoLogin);
     const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
-    const assessmentCount = useSelector(state => state.assessments.assessmentCount)
+
 
 
 
@@ -126,7 +127,7 @@ const AppNavigator = () => {
             <NavigationContainer>
                 {!isAuth && !didTryAutoLogin
                     ? <StartupScreen/>
-                    : <AssessmentNavigator fistLaunch={isFirstLaunch} count={assessmentCount}/>}
+                    : <AssessmentNavigator fistLaunch={isFirstLaunch}/>}
 
             </NavigationContainer>
 

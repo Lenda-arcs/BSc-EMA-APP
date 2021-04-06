@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useDispatch} from "react-redux";
 
 import Screen from "../components/wrapper/Screen";
-import * as authActions from '../store/actions/auth'
+import {authenticate, login, setDidTryAL, setIsFirstLaunch} from '../store/actions/auth'
 
 
 const StartupScreen = props => {
@@ -17,43 +17,43 @@ const StartupScreen = props => {
 
 
 
-
     // checking if first launch for onboarding sequence
     useEffect(() => {
         const isFirstLaunch = async () => {
 
             const launch = await AsyncStorage.getItem('alreadyLaunched')
              if (!launch) {
-                 dispatch(authActions.setIsFirstLaunch(true))
+                 dispatch(setIsFirstLaunch(true))
              }
         }
         isFirstLaunch()
 
     }, [dispatch])
-
-
+    //
+    // todo: refactor when own backend is working
     useEffect(() => {
         const tryLogin = async () => {
             const userData = await AsyncStorage.getItem('userData')
 
             if (!userData) {
-                dispatch(authActions.setDidTryAL())
+                dispatch(setDidTryAL())
                 return
             }
 
             const transformedData = JSON.parse(userData)
-            const {token, userId, expiryDate} = transformedData
+            const {token, userId, group} = transformedData
 
-            const expirationDate = new Date(expiryDate)
+            // const expirationDate = new Date(expiryDate)
+            //
+            // if ( expirationDate <= new Date() || !token || !userId){
+            //     dispatch(setDidTryAL())
+            //     return
+            // }
+            //
+            // const expirationTime = expirationDate.getTime() - new Date().getTime()
 
-            if ( expirationDate <= new Date() || !token || !userId){
-                dispatch(authActions.setDidTryAL())
-                return
-            }
-
-            const expirationTime = expirationDate.getTime() - new Date().getTime()
-
-            dispatch(authActions.authenticate(userId, token, expirationTime))
+            // param: expirationTime
+            dispatch(authenticate(userId, token, group))
         }
 
         tryLogin()

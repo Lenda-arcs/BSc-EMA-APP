@@ -1,19 +1,17 @@
-import React, { useState} from 'react'
+import React, {useState} from 'react'
 import {StyleSheet, Platform, TouchableOpacity, TouchableNativeFeedback} from "react-native";
 import {RadioButton, Divider, List} from 'react-native-paper'
-
-
 
 
 const QuestionItem = props => {
 
 
-    const questionId = props.question.id
+
     let preSelection = props?.selection
     if (preSelection === undefined) preSelection = null
 
     const [expanded, setExpanded] = useState(true)
-    const [checked, setChecked] = useState(preSelection);
+    const [checked, setChecked] = useState(preSelection?.answerValue);
     const [icon, setIcon] = useState(preSelection ? 'check' : 'help-circle')
 
     let platform = Platform.OS === 'android' ? 'android' : 'ios'
@@ -24,7 +22,11 @@ const QuestionItem = props => {
     }
     const savePick = (newValue) => {
         setChecked(newValue)
-        props.onChange({[questionId]: newValue})
+        props.onChange({
+            domain: props.domain,
+            questionId: props.question.id,
+            answerValue: newValue
+        })
         setIcon('check')
 
     }
@@ -32,7 +34,7 @@ const QuestionItem = props => {
     return (
 
 
-        <List.Accordion id={props.id.toString()} title={props.text} titleNumberOfLines={2}
+        <List.Accordion id={props.question._id} title={props.text} titleNumberOfLines={2}
                         left={props => <List.Icon {...props} icon={icon}/>}
                         expanded={expanded} onPress={handlePress}
                         style={props.index % 2 == 0 ? styles.even : styles.odd}>

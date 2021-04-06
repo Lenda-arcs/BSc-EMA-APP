@@ -4,11 +4,12 @@ import * as Notifications from 'expo-notifications'
 import * as Permissions from "expo-permissions";
 import {Alert} from "react-native";
 
+import * as assessmentActions from './assessment'
 export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
 export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
-export const SET_PUSH_TOKEN = 'SET_PUSH_TOKEN'
+export const INC_ASSESSMENT_COUNT = 'INC_ASSESSMENT_COUNT'
 
 let timer;
 
@@ -38,17 +39,21 @@ export const getUserPushToken = () => {
 
 }
 
-const sendPushToken = (token) => {
+const sendPushToken = (pushToken) => {
     return async (dispatch, getState) => {
-        const userToken = getState().auth.token
+        const {token, userId} = getState().auth
 
-        if (userToken) {
-            const tokenResponse = await fetch(`https://mybsc-ema-default-rtdb.firebaseio.com/token/.json?auth=${userToken}`, {
-                method: 'POST',
+
+        if (token) {
+            const tokenResponse = await fetch(`${ENV.TempOwnApi}/users/${userId[1]}`, {
+                method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/.json'
+                    'Content-Type': 'application/json',
+                    "Authorization" : `Bearer ${token}`
                 },
-                body: JSON.stringify(token)
+                body: JSON.stringify({
+                    pushToken: pushToken
+                })
             })
 
             const tokenResData = await tokenResponse.json()
@@ -60,13 +65,15 @@ const sendPushToken = (token) => {
 }
 
 
-export const authenticate = (userId, token, expiryTime) => {
+export const authenticate = (userId, token, group, expiryTime) => {
     return dispatch => {
-        dispatch(setLogoutTimer(expiryTime))
+        //dispatch(setLogoutTimer(expiryTime))
         dispatch({
             type: AUTHENTICATE,
             userId: userId,
-            token: token
+            token: token,
+            group: group
+
         })
     }
 
@@ -94,44 +101,47 @@ export const setIsFirstLaunch = (bool) => {
 export const login = (email, password) => {
     return async (dispatch) => {
 
-        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${ENV.authGoogleApiKey}`,
+        const response = await fetch(`${ENV.TempOwnApi}/users/login`,
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    returnSecureToken: true
+                    userId: email,
+                    password: password
                 })
             })
-        if (!response.ok) {
-            const errorResData = await response.json()
-            const errorId = errorResData.error.message
-            console.log(errorId)
-            let msg = 'Something went wrong!'
-            if (errorId === 'EMAIL_NOT_FOUND') {
-                msg = 'This email could not be found!'
-            } else if (errorId === 'INVALID_PASSWORD') {
-                msg = 'The entered password is not valid'
-            }
-            throw new Error(msg)
-        }
+
+       // todo: needs help
+        // if (resData.status !== 'success') {
+        //
+        //     throw new Error('errMsg')
+        // }
         const resData = await response.json()
-        //console.log(resData)
+
+
+        // for later db patching
+        const userId = [resData.data.user.userId, resData.data.user.id]
+        const userToken = resData.token
+        const userGroup = resData.data.user.group
+        const userAssessmentCount = resData.data.user.assessmentCount
 
         dispatch(
             authenticate(
-                resData.localId,
-                resData.idToken,
-                parseInt(resData.expiresIn) * 1000)
+                userId,
+                userToken,
+                userGroup
+                //parseInt(resData.expiresIn) * 1000
+                )
         )
+        dispatch(assessmentActions.setAssessmentCount(userAssessmentCount))
+        //
+        // // Calc authToken expiration time
+        // const expirationDate = new Date(new Date().getTime() + parseInt(resData.expiresIn) * 1000)
+        //
+        await saveUserToStorage(userToken, userId, userGroup)
 
-        // Calc authToken expiration time
-        const expirationDate = new Date(new Date().getTime() + parseInt(resData.expiresIn) * 1000)
-
-        saveTokenToStorage(resData.idToken, resData.localId, expirationDate)
 
     }
 }
@@ -156,13 +166,12 @@ const setLogoutTimer = expirationTime => {
 }
 
 
-const saveTokenToStorage = (token, userId, expiryDate) => {
-    AsyncStorage.setItem('userData', JSON.stringify({
+const saveUserToStorage = async (token, userId, group, expiryDate) => {
+    await AsyncStorage.setItem('userData', JSON.stringify({
         token: token,
         userId: userId,
-        expiryDate: expiryDate.toISOString()
+        group: group
+       // expiryDate: expiryDate.toISOString()
     }))
 }
-const savePushTokenToStorage = () => {
 
-}
