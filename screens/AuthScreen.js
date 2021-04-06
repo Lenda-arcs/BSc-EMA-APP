@@ -86,7 +86,7 @@ const AuthScreen = props => {
         setError(null)
         setIsLoading(true)
         try {
-            dispatch(action)
+            await dispatch(action)
             props.navigation.navigate('Home')
 
         } catch (err) {

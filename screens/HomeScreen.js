@@ -72,7 +72,7 @@ const HomeScreen = props => {
     const isAuth = useSelector(state => state.auth.token)
 
     const userProgress = useSelector(state => state.assessments.assessmentCount)
-    const [promptRes, setPromptRes] = useState(false)
+    const [promptRes, setPromptRes] = useState(true)
 
 
 
@@ -135,16 +135,23 @@ const HomeScreen = props => {
 
     }, [isAuth])
 
-    useFocusEffect(() => {
-            let isActive = true
-            const getAssessmentCount = async () => {
-                isActive && dispatch(assessmentActions.getAssessmentCount())
-
+    useEffect(() => {
+        const getAssessmentCount = async () => {
+            try {
+                await dispatch(assessmentActions.getAssessmentCount())
+            } catch (err) {
+                console.log()
             }
-            getAssessmentCount()
+        }
+        getAssessmentCount()
+    },[])
 
-            return () => isActive = false
-        })
+    // useFocusEffect(() => {
+    //         let isActive = true
+    //
+    //
+    //         return () => isActive = false
+    //     })
 
     return (
 

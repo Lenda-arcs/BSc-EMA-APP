@@ -118,7 +118,7 @@ const AssessmentScreen = props => {
         const endTime = new Date()
         setTime(time.end = endTime)
 
-        dispatch(actions.saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc, studyCount))
+        dispatch(actions.saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc))
         showModal()
     }
 

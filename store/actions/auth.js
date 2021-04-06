@@ -101,6 +101,7 @@ export const setIsFirstLaunch = (bool) => {
 export const login = (email, password) => {
     return async (dispatch) => {
 
+
         const response = await fetch(`${ENV.TempOwnApi}/users/login`,
             {
                 method: 'POST',
@@ -114,10 +115,18 @@ export const login = (email, password) => {
             })
 
        // todo: needs help
-        // if (resData.status !== 'success') {
-        //
-        //     throw new Error('errMsg')
-        // }
+        console.log("status: " + response.ok)
+        if (!response.ok) {
+            const errorResData = await response.json();
+            const errorId = errorResData.message;
+            let message = 'Something went wrong!';
+            if (errorId === 'EMAIL_EXISTS') {
+                message = 'This email exists already!';
+            }
+            throw new Error(errorId);
+
+        }
+
         const resData = await response.json()
 
 
@@ -133,7 +142,7 @@ export const login = (email, password) => {
                 userToken,
                 userGroup
                 //parseInt(resData.expiresIn) * 1000
-                )
+            )
         )
         dispatch(assessmentActions.setAssessmentCount(userAssessmentCount))
         //

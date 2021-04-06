@@ -72,9 +72,10 @@ export const getAssessmentCount = () => {
     return async (dispatch) => {
         try {
             const asyncCount = await AsyncStorage.getItem(ASSESSMENT_COUNT)
-            if (!count) {
-                await AsyncStorage.setItem(ASSESSMENT_COUNT, '0')
-                count = 0
+
+            if (!asyncCount) {
+                console.log('did set to 0..')
+                await setAssessmentCount(0)
             }
             else  {
                 count = asyncCount
@@ -152,7 +153,7 @@ export const saveAssessment = (skyImage, horizonImage, time, selection, userLoc)
 
 
         } catch (err) {
-            if (err) throw new Error('Something went wrong during fetching data')
+            throw new Error('Something went wrong during fetching data')
         }
 
     }
