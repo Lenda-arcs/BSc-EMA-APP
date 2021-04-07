@@ -15,7 +15,7 @@ const CtmDialog = (props) => {
                         <Paragraph>{props.helpText}</Paragraph>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={props.hideDialog}>Done</Button>
+                        <Button onPress={props.hideDialog}>OKAY</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>

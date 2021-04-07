@@ -98,14 +98,14 @@ const Home = () => {
 const AssessmentNavigator = () => {
 
     const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
-    console.log(isFirstLaunch)
+
     return (
         <AssessStack.Navigator screenOptions={defaultNavOptions}>
 
             {!isFirstLaunch ? <AssessStack.Screen name='Home' component={Home}
                 options={({route}) =>
                 ({headerTitle: getHeaderTitle(route)})}/> : <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/> }
-           <AssessStack.Screen name='Assessment' component={AssessmentScreen}/>
+           <AssessStack.Screen name='Assessment' component={AssessmentScreen} options={{headerTitle: `Befragung`}}/>
 
         </AssessStack.Navigator>
     )

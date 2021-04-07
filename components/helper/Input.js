@@ -30,35 +30,30 @@ const Input = props => {
         touched: false
     });
 
-    const {onInputChange, id} = props;
+    const {onInputChange, id} = props
 
     const {colors} = props.theme
 
     useEffect(() => {
-        if (inputState.touched) {
-            onInputChange(id, inputState.value, inputState.isValid);
-        }
+        if (inputState.touched) onInputChange(id, inputState.value, inputState.isValid);
     }, [inputState, onInputChange, id]);
 
     const textChangeHandler = text => {
-        // toDo: if different auth --> Regex for participants id
+
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        // toDo: Regex for participants id --> could be more specific
+        const userIdRegex = /[0-9]/
+
         let isValid = true;
-        if (props.required && text.trim().length === 0) {
-            isValid = false;
-        }
-        if (props.email && !emailRegex.test(text.toLowerCase())) {
-            isValid = false;
-        }
-        if (props.min != null && +text < props.min) {
-            isValid = false;
-        }
-        if (props.max != null && +text > props.max) {
-            isValid = false;
-        }
-        if (props.minLength != null && text.length < props.minLength) {
-            isValid = false;
-        }
+
+        if (props.required && text.trim().length === 0) isValid = false
+        if (props.email && !emailRegex.test(text.toLowerCase())) isValid = false
+        if (props.userId && !userIdRegex.test(text)) isValid = false
+        if (props.min != null && +text < props.min) isValid = false
+        if (props.max != null && +text > props.max) isValid = false;
+        if (props.minLength != null && text.length < props.minLength) isValid = false;
+
         dispatch({type: INPUT_CHANGE, value: text, isValid: isValid});
     };
 
@@ -77,10 +72,10 @@ const Input = props => {
                        onChangeText={textChangeHandler}
                        onBlur={lostFocusHandler}
                        error={!inputState.isValid && inputState.touched}/>
-            {!inputState.isValid && inputState.touched && (
-
-                <HelperText type='error'>{props.errorText}</HelperText>
-            )}
+            {
+                !inputState.isValid && inputState.touched &&
+                (<HelperText type='error'>{props.errorText}</HelperText>)
+            }
         </View>
     );
 };

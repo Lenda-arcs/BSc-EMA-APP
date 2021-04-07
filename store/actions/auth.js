@@ -84,7 +84,7 @@ export const setDidTryAL = () => {
     return {type: SET_DID_TRY_AL}
 }
 
-/// todo: NEEDS FURTHER REDO!!
+
 export const tryLogin = () => {
     return async (dispatch) => {
         const userData = await storeFac.getItemAsyncStore(USER, true)

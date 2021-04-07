@@ -50,19 +50,13 @@ const AuthScreen = props => {
     const [error, setError] = useState()
     const [visible, setVisible] = useState(false)
 
-    const showDialog = () => setVisible(true);
 
-    const hideDialog = () => setVisible(false);
+    const showDialog = () => setVisible(true)
+    const hideDialog = () => setVisible(false)
 
     const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: {
-            userId: '',
-            password: ''
-        },
-        inputValidities: {
-            userId: false,
-            password: false
-        },
+        inputValues: {userId: '', password: ''},
+        inputValidities: {userId: false, password: false},
         formIsValid: false
     });
 
@@ -88,16 +82,16 @@ const AuthScreen = props => {
         try {
             await dispatch(action)
             props.navigation.navigate('Home')
-
         } catch (err) {
-            setError(err.message)
+            let msg = err.message
+            if (err.message === 'Error: Incorrect userId or password') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
+            setError(msg)
             setIsLoading(false)
         }
 
 
 
     }
-
 
     const inputChangeHandler = useCallback((inputIdentifier, inputValue, inputValidity) => {
         dispatchFormState({
@@ -114,11 +108,11 @@ const AuthScreen = props => {
             <TextInputAvoidingView >
                     <Card style={styles.authCtn}>
                         <ScrollView>
-                            <Input id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4}
-                                   autocapitalize='none' errorText='Bitte gebe deine Teilnehmer Nummer ein.'
+                            <Input id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4} userId
+                                   autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
                                    onInputChange={inputChangeHandler} initialValue=''/>
                             <Input id='password' label='Password' keyboardType='default' required minLength={5}
-                                   autocapitalize='none' secureTextEntry errorText='Bitte gebe dein Passwort ein.'
+                                   autocapitalize='none' secureTextEntry errorText='Bitte gebe Dein Passwort ein.'
                                    onInputChange={inputChangeHandler} initialValue=''/>
                             <View style={styles.btnCtn}>
                                 <CtmButton loading={isLoading}
@@ -128,7 +122,7 @@ const AuthScreen = props => {
                             </View>
                         </ScrollView>
                     </Card>
-                <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog} helpText={error}/>
+                <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog} helpText={error} title='Fehlgeschlagen'/>
             </TextInputAvoidingView>
         </Screen>
 

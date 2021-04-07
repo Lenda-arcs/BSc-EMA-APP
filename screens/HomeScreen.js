@@ -1,15 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react'
-import {View, StyleSheet} from 'react-native'
+import {View, StyleSheet, Image} from 'react-native'
 import {useDispatch, useSelector} from "react-redux";
-import {useFocusEffect} from '@react-navigation/native';
 
 
 import * as Notifications from 'expo-notifications'
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import {withTheme, Paragraph, Text} from "react-native-paper";
+import {withTheme, Paragraph, Text ,Headline} from "react-native-paper";
 
 
 import Screen from "../components/wrapper/Screen";
@@ -18,10 +16,8 @@ import CtmButton from "../components/wrapper/CtmButton";
 
 
 import {checkPushToken} from "../store/actions/auth";
-import * as assessmentActions from '../store/actions/assessment'
+import {getAssessmentCount, setAssessmentData} from '../store/actions/assessment'
 import CtmPermission from "../components/helper/CtmPermission";
-import ENV from "../ENV";
-import {ASSESSMENT_COUNT} from "../store/actions/assessment";
 
 const testData = {
     "name": "test-slide",
@@ -41,7 +37,7 @@ const StudyOverview = ({count, colors}) => {
 
     return (
         <View style={{backgroundColor: colors.background, marginTop: 60}}>
-            <CtmSubheading style={{textAlign: 'center', marginBottom: 40}}>Willkommen!</CtmSubheading>
+            <CtmSubheading style={{textAlign: 'center', marginBottom: 40}}>Willkommen bei der Studie!</CtmSubheading>
             <AnimatedCircularProgress
                 size={250}
                 width={10}
@@ -53,13 +49,20 @@ const StudyOverview = ({count, colors}) => {
                 backgroundColor='#fff'>
                 {
                     useCallback((fill) => (
-                        <Paragraph>
-                            {count} von 30
 
-                        </Paragraph>
+                        <Headline>
+                            {count}
+
+                        </Headline>
+                           // <Image style={styles.image} source={require('./../assets/icon.png')}/>
+
                     ), [count])
                 }
             </AnimatedCircularProgress>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 40, marginTop: -20}}>
+                <Text>0</Text>
+                <Text>30</Text>
+            </View>
         </View>
     )
 }
@@ -69,24 +72,26 @@ let sendTime;
 let responseTime;
 
 const HomeScreen = props => {
+    const {colors} = props.theme
     const isAuth = useSelector(state => state.auth.token)
-    const user = useSelector(state => state.auth)
 
     const userProgress = useSelector(state => state.assessments.assessmentCount)
-    const [promptRes, setPromptRes] = useState(true)
-
+    const [notification, setNotification] = useState(true) //todo: handle notifications
 
 
     const dispatch = useDispatch()
-    const {colors} = props.theme
-
-    // todo: if not needed - delete
-    const [isLoading, setIsLoading] = useState(false)
 
 
-    //  WORKING!
+    //  Slides!
     useEffect(() => {
-        isAuth && dispatch(assessmentActions.setAssessmentData())
+        const fetchAssessmentData = async () => {
+            try {
+                await dispatch(setAssessmentData())
+            }catch (err) {
+                console.log(err.message)
+            }
+        }
+        isAuth && fetchAssessmentData()
     },[isAuth, dispatch])
 
 
@@ -94,7 +99,7 @@ const HomeScreen = props => {
     // todo: track incoming notification
     useEffect(() => {
         const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-            setPromptRes(!promptRes)
+            setNotification(!notification)
             console.log('response')
             // console.log(response)
             responseTime = response.notification.date
@@ -118,26 +123,25 @@ const HomeScreen = props => {
     }, [])
 
 
-
-
+    // P
     useEffect(() => {
-        const genPushToken = async () => {
+        const getPushToken = async () => {
             await dispatch((checkPushToken()))
         }
-        genPushToken()
+        getPushToken()
 
     }, [isAuth])
 
 
     useEffect(() => {
-        const getAssessmentCount = async () => {
+        const checkAssessmentCount = async () => {
             try {
-                await dispatch(assessmentActions.getAssessmentCount())
+                await dispatch(getAssessmentCount())
             } catch (err) {
                 console.log()
             }
         }
-        getAssessmentCount()
+        checkAssessmentCount()
     },[])
 
 
@@ -146,18 +150,19 @@ const HomeScreen = props => {
         <Screen>
             <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
                 <CtmPermission/>
-
                 {/* todo: show initial welcomeScreen if !isAuth */}
                 {isAuth && <StudyOverview colors={colors} count={userProgress}/>}
 
-                <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {isAuth && promptRes ? <CtmButton mode='contained' onPress={() => {
-                            props.navigation.replace('Assessment')
-                        }}>Start</CtmButton>
-                        : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
-                </View>
+                {isAuth && (
+                        <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
+                            {notification ? <CtmButton mode='contained' onPress={() => {
+                                    props.navigation.replace('Assessment')
+                                }}>Start</CtmButton>
+                                : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
+                        </View>
+                    )
+                }
             </View>
-
         </Screen>
 
 
@@ -174,8 +179,8 @@ const styles = StyleSheet.create({
 
     },
     image: {
-        width: '100%',
-        height: '100%',
+        width: '60%',
+        height: '60%',
     }
 })
 
