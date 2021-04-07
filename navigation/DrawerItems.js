@@ -8,7 +8,7 @@ import {
     useTheme,
 } from 'react-native-paper';
 import {useDispatch} from "react-redux";
-import * as authActions from "../store/actions/auth";
+import {logout} from "../store/actions/auth";
 
 
 
@@ -59,7 +59,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
             {/*USE IF LOGOUT NEEDED*/}
             {authStatus ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
-                          onPress={() => dispatch(authActions.logout())}/>
+                          onPress={() => dispatch(logout())}/>
                           : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID'
                                          onPress={() => navigation.navigate('Auth')}/>}
         </View>

@@ -3,14 +3,16 @@ import {StyleSheet} from "react-native";
 
 import {ActivityIndicator, withTheme} from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {useDispatch} from "react-redux";
+import * as SecureStore from 'expo-secure-store';
+import {useDispatch, useSelector} from "react-redux";
 
 import Screen from "../components/wrapper/Screen";
-import {authenticate, login, setDidTryAL, setIsFirstLaunch} from '../store/actions/auth'
+import {isFirstLaunch, tryLogin} from '../store/actions/auth'
 
 
 const StartupScreen = props => {
     const dispatch = useDispatch()
+    const firstLaunch = useSelector(state => state.auth.isFirstLaunch)
 
     // destruct color prop from withTheme
     const {colors} = props.theme
@@ -19,44 +21,16 @@ const StartupScreen = props => {
 
     // checking if first launch for onboarding sequence
     useEffect(() => {
-        const isFirstLaunch = async () => {
+        const checkFirstLaunch = async () => await dispatch(isFirstLaunch())
+        firstLaunch === undefined && checkFirstLaunch()
+    }, [])
 
-            const launch = await AsyncStorage.getItem('alreadyLaunched')
-             if (!launch) {
-                 dispatch(setIsFirstLaunch(true))
-             }
-        }
-        isFirstLaunch()
 
-    }, [dispatch])
-    //
-    // todo: refactor when own backend is working
     useEffect(() => {
-        const tryLogin = async () => {
-            const userData = await AsyncStorage.getItem('userData')
-
-            if (!userData) {
-                dispatch(setDidTryAL())
-                return
-            }
-
-            const transformedData = JSON.parse(userData)
-            const {token, userId, group} = transformedData
-
-            // const expirationDate = new Date(expiryDate)
-            //
-            // if ( expirationDate <= new Date() || !token || !userId){
-            //     dispatch(setDidTryAL())
-            //     return
-            // }
-            //
-            // const expirationTime = expirationDate.getTime() - new Date().getTime()
-
-            // param: expirationTime
-            dispatch(authenticate(userId, token, group))
+        const checkLogin = async () => {
+            await dispatch(tryLogin())
         }
-
-        tryLogin()
+        checkLogin()
 
     },[dispatch])
 

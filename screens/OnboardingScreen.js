@@ -1,4 +1,4 @@
-import { Alert, StatusBar } from 'react-native';
+import {Alert, StatusBar} from 'react-native';
 import React from 'react';
 
 import {withTheme} from "react-native-paper";
@@ -6,10 +6,9 @@ import {withTheme} from "react-native-paper";
 import {useDispatch} from "react-redux";
 import * as authActions from '../store/actions/auth'
 
-import {Icon } from 'react-native-elements';
+import {Icon} from 'react-native-elements';
 import Onboarding from 'react-native-onboarding-swiper';
 import CtmButton from "../components/wrapper/CtmButton";
-
 
 
 const Next = ({...props}) => (
@@ -30,7 +29,7 @@ const OnboardingScreen = (props) => {
 
 
     const succeedHandler = () => {
-        dispatch(authActions.setIsFirstLaunch(false))
+        dispatch(authActions.finishBoarding())
     }
 
     return (
@@ -64,7 +63,7 @@ const OnboardingScreen = (props) => {
                             name="paper-plane-o"
                             type="font-awesome"
                             size={100}
-                            color= {colors.primary}
+                            color={colors.primary}
                         />
                     ),
                 },
@@ -80,11 +79,11 @@ const OnboardingScreen = (props) => {
                     title: "Lass uns starten!",
                     subtitle: (
                         <CtmButton mode='text'
-                            title={'Get Started'}
-                            onPress={() => {
-                                succeedHandler()
-                                StatusBar.setBarStyle('default'); // ??
-                            }}
+                                   title={'Get Started'}
+                                   onPress={() => {
+                                       succeedHandler()
+                                       StatusBar.setBarStyle('default'); // ??
+                                   }}
                         >Anmelden</CtmButton>
                     ),
                     backgroundColor: colors.accent,

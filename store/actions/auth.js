@@ -1,186 +1,154 @@
 import ENV from "../../ENV";
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Notifications from 'expo-notifications'
 import * as Permissions from "expo-permissions";
+
 import {Alert} from "react-native";
 
 import * as assessmentActions from './assessment'
+import * as storeFac from './../../helpers/storeFactories'
+
 export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
 export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
-export const INC_ASSESSMENT_COUNT = 'INC_ASSESSMENT_COUNT'
+export const SET_PUSH_TOKEN = 'SET_PUSH_TOKEN'
+export const SET_FINISHED_BOARDING = 'SET_FINISHED_BOARDING'
 
-let timer;
-
-
-export const getUserPushToken = () => {
-    let pushToken
-
-    return async (dispatch) => {
-
-        let notificationStatusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-        if (notificationStatusObj.status !== 'granted') {
-            notificationStatusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-        }
-        if (notificationStatusObj.status !== 'granted') {
-            Alert.alert('Insufficient permissions!', 'You need to grand permissions to use notifications for this app',
-                [{text: 'Okay'}])
-            pushToken = null
-        } else {
-            // generate pushToken for Notifications
-            // resolve promise and store data in variable
-            pushToken = (await Notifications.getExpoPushTokenAsync()).data
+let USER = 'USER_DATA'
+const LAUNCHED = 'LAUNCHED'
+const PUSH_TOKEN = 'PUSH_TOKEN'
 
 
-            dispatch(sendPushToken(pushToken))
+export const checkPushToken = () => {
+    return async () => {
+        const asyncRes = await storeFac.getItemAsyncStore(PUSH_TOKEN)
+        if (!asyncRes) {
+            const pushToken = await getUserPushToken()
+            await storeFac.saveItemAsyncStore(PUSH_TOKEN, true)
+            await sendPushToken(pushToken)
         }
     }
-
 }
+
+const getUserPushToken = async () => {
+    let pushToken
+
+    let notificationStatusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS)
+    if (notificationStatusObj.status !== 'granted') {
+        notificationStatusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+    }
+    if (notificationStatusObj.status !== 'granted') {
+        Alert.alert('Insufficient permissions!', 'You need to grand permissions to use notifications for this app',
+            [{text: 'Okay'}])
+        pushToken = null
+    } else {
+        // generate pushToken for Notifications
+        // resolve promise and store data in variable
+        pushToken = (await Notifications.getExpoPushTokenAsync()).data
+    }
+    return pushToken
+}
+
 
 const sendPushToken = (pushToken) => {
     return async (dispatch, getState) => {
         const {token, userId} = getState().auth
-
-
         if (token) {
-            const tokenResponse = await fetch(`${ENV.TempOwnApi}/users/${userId[1]}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization" : `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    pushToken: pushToken
-                })
-            })
-
-            const tokenResData = await tokenResponse.json()
-            if (tokenResData) await AsyncStorage.setItem('hasPushToken', 'true')
-
+            try {
+                const tokenRes = await storeFac.fetchData(`${ENV.TempOwnApi}/users/${userId[1]}`,
+                    'PATCH',
+                    {pushToken: pushToken}, token)
+            } catch (err) {
+                throw new Error(err)
+            }
         }
-
     }
 }
 
 
-export const authenticate = (userId, token, group, expiryTime) => {
+export const authenticate = (user) => {
     return dispatch => {
         //dispatch(setLogoutTimer(expiryTime))
+
+        // todo: is token in redux state save?
         dispatch({
             type: AUTHENTICATE,
-            userId: userId,
-            token: token,
-            group: group
-
+            token: user.token,
+            userId: user.userId,
+            group: user.group
         })
     }
-
 }
 
 export const setDidTryAL = () => {
     return {type: SET_DID_TRY_AL}
 }
 
-
-export const setIsFirstLaunch = (bool) => {
+/// todo: NEEDS FURTHER REDO!!
+export const tryLogin = () => {
     return async (dispatch) => {
+        const userData = await storeFac.getItemAsyncStore(USER, true)
 
-        // Saving item to storage for further validation
+        if (!userData) {
+            dispatch(setDidTryAL())
+            return
+        }
+        const transformedData = JSON.parse(userData)
+        const {token, userId, group} = transformedData
+
+        dispatch(authenticate({token, userId, group}))
+    }
+}
+
+export const isFirstLaunch = () => {
+    return async (dispatch) => {
+        const isLaunched = await storeFac.getItemAsyncStore(LAUNCHED)
+        if (!isLaunched) {
+            await storeFac.saveItemAsyncStore(LAUNCHED, true)
+            dispatch({type: SET_IS_FIRST_LAUNCH, val: true})
+        } else dispatch({type: SET_IS_FIRST_LAUNCH, val: false})
+    }
+
+}
+
+export const finishBoarding = () => {
+    return {type: SET_FINISHED_BOARDING}
+}
+
+// user login
+export const login = (userId, password) => {
+    return async (dispatch) => {
         try {
-            await AsyncStorage.setItem('alreadyLaunched', 'true')
-        } catch (e) {
-            throw new Error('Saving first launch to AsyncStorage failed!')
-        }
-
-        dispatch({type: SET_IS_FIRST_LAUNCH, val: bool})
-    }
-
-}
-export const login = (email, password) => {
-    return async (dispatch) => {
-
-
-        const response = await fetch(`${ENV.TempOwnApi}/users/login`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: email,
-                    password: password
-                })
-            })
-
-       // todo: needs help
-        console.log("status: " + response.ok)
-        if (!response.ok) {
-            const errorResData = await response.json();
-            const errorId = errorResData.message;
-            let message = 'Something went wrong!';
-            if (errorId === 'EMAIL_EXISTS') {
-                message = 'This email exists already!';
+            const resData = await storeFac.fetchData(`${ENV.TempOwnApi}/users/login`, 'POST', {userId, password})
+            // for later db patching
+            const user = {
+                token: resData.token,
+                userId: [resData.data.user.userId, resData.data.user.id],
+                group: resData.data.user.group
             }
-            throw new Error(errorId);
 
+            // specific key for async storage ?? -- find way to reuse it for later actions
+            // USER = USER.concat(user.userId[0])
+
+            const userAssessmentCount = resData.data.user.assessmentCount
+
+            dispatch(authenticate(user))
+            dispatch(assessmentActions.setAssessmentCount(userAssessmentCount))
+
+            // old:  await saveUserToStorage(userToken, userId, userGroup)
+            await storeFac.saveItemAsyncStore(USER, user, true)
+        } catch (err) {
+
+            throw new Error(err)
         }
 
-        const resData = await response.json()
-
-
-        // for later db patching
-        const userId = [resData.data.user.userId, resData.data.user.id]
-        const userToken = resData.token
-        const userGroup = resData.data.user.group
-        const userAssessmentCount = resData.data.user.assessmentCount
-
-        dispatch(
-            authenticate(
-                userId,
-                userToken,
-                userGroup
-                //parseInt(resData.expiresIn) * 1000
-            )
-        )
-        dispatch(assessmentActions.setAssessmentCount(userAssessmentCount))
-        //
-        // // Calc authToken expiration time
-        // const expirationDate = new Date(new Date().getTime() + parseInt(resData.expiresIn) * 1000)
-        //
-        await saveUserToStorage(userToken, userId, userGroup)
-
-
     }
 }
-
 export const logout = () => {
-    clearLogoutTimer()
-    AsyncStorage.removeItem('userData')
-    return {type: LOGOUT}
-}
-
-const clearLogoutTimer = () => {
-    if (timer) clearTimeout(timer)
-}
-
-// if needed in production --> refactor to react-native-background-timer
-const setLogoutTimer = expirationTime => {
-    return dispatch => {
-        timer = setTimeout(() => {
-            dispatch(logout())
-        }, expirationTime)
+    //clearLogoutTimer()
+    return async (dispatch) => {
+        await storeFac.deleteItemAsyncStore(USER, true)
+        dispatch({type: LOGOUT})
     }
-}
-
-
-const saveUserToStorage = async (token, userId, group, expiryDate) => {
-    await AsyncStorage.setItem('userData', JSON.stringify({
-        token: token,
-        userId: userId,
-        group: group
-       // expiryDate: expiryDate.toISOString()
-    }))
 }
 

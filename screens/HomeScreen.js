@@ -17,7 +17,7 @@ import CtmSubheading from "../components/wrapper/CtmSubheading";
 import CtmButton from "../components/wrapper/CtmButton";
 
 
-import * as authActions from "../store/actions/auth";
+import {checkPushToken} from "../store/actions/auth";
 import * as assessmentActions from '../store/actions/assessment'
 import CtmPermission from "../components/helper/CtmPermission";
 import ENV from "../ENV";
@@ -70,6 +70,7 @@ let responseTime;
 
 const HomeScreen = props => {
     const isAuth = useSelector(state => state.auth.token)
+    const user = useSelector(state => state.auth)
 
     const userProgress = useSelector(state => state.assessments.assessmentCount)
     const [promptRes, setPromptRes] = useState(true)
@@ -86,7 +87,6 @@ const HomeScreen = props => {
     //  WORKING!
     useEffect(() => {
         isAuth && dispatch(assessmentActions.setAssessmentData())
-
     },[isAuth, dispatch])
 
 
@@ -121,19 +121,13 @@ const HomeScreen = props => {
 
 
     useEffect(() => {
-        const sendPushToken = async () => {
-            const pushToken = await AsyncStorage.getItem('hasPushToken')
-            console.log(pushToken)
-
-            if (!pushToken) {
-                dispatch(authActions.getUserPushToken())
-            }
-            else console.log('hasToken')
+        const genPushToken = async () => {
+            await dispatch((checkPushToken()))
         }
-        sendPushToken()
-
+        genPushToken()
 
     }, [isAuth])
+
 
     useEffect(() => {
         const getAssessmentCount = async () => {
@@ -146,31 +140,21 @@ const HomeScreen = props => {
         getAssessmentCount()
     },[])
 
-    // useFocusEffect(() => {
-    //         let isActive = true
-    //
-    //
-    //         return () => isActive = false
-    //     })
 
     return (
 
         <Screen>
             <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
+                <CtmPermission/>
 
                 {/* todo: show initial welcomeScreen if !isAuth */}
-                {isAuth ? <StudyOverview colors={colors} count={userProgress}/> : <CtmPermission/>}
+                {isAuth && <StudyOverview colors={colors} count={userProgress}/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
                     {isAuth && promptRes ? <CtmButton mode='contained' onPress={() => {
                             props.navigation.replace('Assessment')
                         }}>Start</CtmButton>
                         : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
-                    {/*<CtmButton mode='contained' onPress={() => {*/}
-                    {/*    props.navigation.replace('Assessment', {*/}
-                    {/*        studyCount: userProgress*/}
-                    {/*    })*/}
-                    {/*}}>Start</CtmButton>*/}
                 </View>
             </View>
 
