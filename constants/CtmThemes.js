@@ -3,7 +3,7 @@ import {configureFonts, DarkTheme, DefaultTheme} from "react-native-paper";
 
 export const CustomDefaultTheme = {
     ...DefaultTheme,
-    fonts: configureFonts({}),
+    fonts: configureFonts({}),  //todo: define own font
     colors: {
         ...DefaultTheme.colors,
         primary: 'rgb(2,113,187)',

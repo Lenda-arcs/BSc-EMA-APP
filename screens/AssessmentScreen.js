@@ -80,19 +80,18 @@ const AssessmentScreen = props => {
 
     const pictureSlide = {
         content: <PictureSlide isComplete={isPicSlideCompleteHandler}
-                               savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage}}/>
+                               savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage, loc: userLoc}}/>
     }
+
+    // creating stepList for wizard
     const stepList =
-        allQuestionsSlides?.map((slide) => ({
-            content:
+        allQuestionsSlides?.map((slide) => ({content:
                 <QuestionSlide isLastStep={isLastStep} isComplete={isSlideCompleteHandler}
                                onSlideChange={onSlideChangeHandler}
                                questions={slide.questions}
                                slideName={slide.name}
                                description={slide.description}
-                               savedSelection={selection?.find(sl => sl.slideName === slide.name)?.answers}
-                />
-
+                               savedSelection={selection?.find(sl => sl.slideName === slide.name)?.answers}/>
         }))
 
 
@@ -104,7 +103,7 @@ const AssessmentScreen = props => {
 
     // Append PictureSlide to assessment
     const userGroup  = useSelector(state => state.auth.group)
-    userGroup === 'A' ?  stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
+    userGroup === 'B' ?  stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
 
 
 

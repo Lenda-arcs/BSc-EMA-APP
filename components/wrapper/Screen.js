@@ -7,10 +7,12 @@ const Screen = props => {
     const {colors} = props.theme
     const {dark} = props.theme
 
-    return (<View style={{backgroundColor: colors.background, flex: 1, ...props.style}}>
-        <StatusBar backgroundColor={dark ? colors.background : colors.primary} barStyle='light-content' />
-        {props.children}
-    </View>)
+    return (
+        <View style={{backgroundColor: colors.background, flex: 1, ...props.style}}>
+            <StatusBar backgroundColor={dark ? colors.background : '#3D8FC6'}
+                       barStyle={dark ? 'light-content' : 'dark-content'}/>
+            {props.children}
+        </View>)
 };
 
 

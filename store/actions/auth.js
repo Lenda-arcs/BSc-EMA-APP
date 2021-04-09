@@ -5,7 +5,9 @@ import * as Permissions from "expo-permissions";
 import {Alert} from "react-native";
 
 import * as assessmentActions from './assessment'
-import * as storeFac from './../../helpers/storeFactories'
+import * as storeFac from '../../helpers/asyncStoreFactories'
+import { fetchData } from '../../helpers/fetchFactories'
+import { getUserPushToken } from '../../helpers/permissonFactories'
 
 export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
@@ -29,25 +31,25 @@ export const checkPushToken = () => {
         }
     }
 }
-
-const getUserPushToken = async () => {
-    let pushToken
-
-    let notificationStatusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-    if (notificationStatusObj.status !== 'granted') {
-        notificationStatusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-    }
-    if (notificationStatusObj.status !== 'granted') {
-        Alert.alert('Insufficient permissions!', 'You need to grand permissions to use notifications for this app',
-            [{text: 'Okay'}])
-        pushToken = null
-    } else {
-        // generate pushToken for Notifications
-        // resolve promise and store data in variable
-        pushToken = (await Notifications.getExpoPushTokenAsync()).data
-    }
-    return pushToken
-}
+//
+// const getUserPushToken = async () => {
+//     let pushToken
+//
+//     let notificationStatusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS)
+//     if (notificationStatusObj.status !== 'granted') {
+//         notificationStatusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+//     }
+//     if (notificationStatusObj.status !== 'granted') {
+//         Alert.alert('Insufficient permissions!', 'You need to grand permissions to use notifications for this app',
+//             [{text: 'Okay'}])
+//         pushToken = null
+//     } else {
+//         // generate pushToken for Notifications
+//         // resolve promise and store data in variable
+//         pushToken = (await Notifications.getExpoPushTokenAsync()).data
+//     }
+//     return pushToken
+// }
 
 
 const sendPushToken = (pushToken) => {
@@ -55,7 +57,7 @@ const sendPushToken = (pushToken) => {
         const {token, userId} = getState().auth
         if (token) {
             try {
-                const tokenRes = await storeFac.fetchData(`${ENV.TempOwnApi}/users/${userId[1]}`,
+                const tokenRes = await fetchData(`${ENV.TempOwnApi}/users/${userId[1]}`,
                     'PATCH',
                     {pushToken: pushToken}, token)
             } catch (err) {
@@ -83,7 +85,6 @@ export const authenticate = (user) => {
 export const setDidTryAL = () => {
     return {type: SET_DID_TRY_AL}
 }
-
 
 export const tryLogin = () => {
     return async (dispatch) => {
@@ -119,7 +120,7 @@ export const finishBoarding = () => {
 export const login = (userId, password) => {
     return async (dispatch) => {
         try {
-            const resData = await storeFac.fetchData(`${ENV.TempOwnApi}/users/login`, 'POST', {userId, password})
+            const resData = await fetchData(`${ENV.TempOwnApi}/users/login`, 'POST', {userId, password})
             // for later db patching
             const user = {
                 token: resData.token,

@@ -17,6 +17,7 @@ const QuestionItem = props => {
     let platform = Platform.OS === 'android' ? 'android' : 'ios'
 
 
+
     const handlePress = () => {
         setExpanded(!expanded)
     }
@@ -36,11 +37,11 @@ const QuestionItem = props => {
 
         <List.Accordion id={props.question._id} title={props.text} titleNumberOfLines={2}
                         left={props => <List.Icon {...props} icon={icon}/>}
-                        expanded={expanded} onPress={handlePress}
-                        style={props.index % 2 == 0 ? styles.even : styles.odd}>
+                        expanded={expanded} onPress={handlePress}>
             <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
                 {props.items.map((item, index) => <RadioButton.Item key={index} label={item} value={index}
-                                                                    labelStyle={styles.label} mode={platform}/>)}
+                                                                    labelStyle={styles.label} mode={platform}
+                                                                    style={styles.item}/>)}
             </RadioButton.Group>
             <Divider/>
         </List.Accordion>
@@ -49,16 +50,11 @@ const QuestionItem = props => {
 
 
 const styles = StyleSheet.create({
+    item: {
 
-    odd: {
-        //  backgroundColor: '#EDEDED'
-
-    },
-    even: {
-        // backgroundColor: '#FAFAFA',
     },
     label: {
-        marginLeft: 10
+        marginLeft: 10,
     }
 })
 
