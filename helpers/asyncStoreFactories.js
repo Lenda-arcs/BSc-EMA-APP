@@ -8,6 +8,7 @@ export const saveItemAsyncStore = async (key, value, safe = false) => {
 
     // transform item for storage
     if (typeof value === 'object' && value !== null) val = JSON.stringify(value)
+    if (typeof value === 'array' && value !== null) val = JSON.stringify(value)
     if (typeof value === 'number' || typeof value === 'boolean') val = value.toString()
 
     try {
@@ -18,7 +19,7 @@ export const saveItemAsyncStore = async (key, value, safe = false) => {
     }
 }
 
-export const getItemAsyncStore = async (key, safe = false) => {
+export const getItemAsyncStore = async (key, safe = false, parse = undefined) => {
     let result
     try {
         if (safe) result = await SecureStore.getItemAsync(key)
@@ -26,6 +27,7 @@ export const getItemAsyncStore = async (key, safe = false) => {
     } catch (err) {
         throw new Error(err.message)
     }
+    if (parse) return JSON.parse(result)
     return result
 }
 

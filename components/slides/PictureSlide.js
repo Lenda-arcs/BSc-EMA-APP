@@ -37,7 +37,12 @@ const PictureSlide = ({isComplete, savedData}) => {
         const userLocation = async () => {
 
             const userCoords = await getUserLocation()
-            setUserLoc({lat: userCoords.coords.latitude, lng: userCoords.coords.longitude})
+
+            const userLoc = {
+                lat: userCoords.coords.latitude,
+                lng: userCoords.coords.longitude
+            }
+            setUserLoc(userLoc)
         }
         // prevent from getting second location after coming back to slide
         !userLoc && userLocation()

@@ -88,14 +88,14 @@ export const setDidTryAL = () => {
 
 export const tryLogin = () => {
     return async (dispatch) => {
-        const userData = await storeFac.getItemAsyncStore(USER, true)
+        const userData = await storeFac.getItemAsyncStore(USER, true, true)
 
         if (!userData) {
             dispatch(setDidTryAL())
             return
         }
-        const transformedData = JSON.parse(userData)
-        const {token, userId, group} = transformedData
+
+        const {token, userId, group} = userData
 
         dispatch(authenticate({token, userId, group}))
     }

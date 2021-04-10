@@ -110,26 +110,23 @@ const AssessmentScreen = props => {
 
 
 
-    const submitHandler = () => {
-
+    const submitHandler = async () => {
         // creating timeobj to get duration of user interaction
         // calc duration on server
         const endTime = new Date()
         setTime(time.end = endTime)
+        setIsFetching(true)
+        setVisible(!visible);
 
-        dispatch(actions.saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc))
-        showModal()
+        await dispatch(actions.saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc))
+        setIsFetching(false)
+
+
     }
 
-    const showModal = () => {
-        setVisible(true);
-
-        // show success animation for certain time
-        setTimeout(() => {
-            setVisible(false)
-            props.navigation.replace('Home')
-            // maybe do it after sending the data
-        }, 3000)
+    const closeModal = () => {
+        setVisible(!visible)
+        props.navigation.replace('Home')
     }
 
 
@@ -151,12 +148,6 @@ const AssessmentScreen = props => {
                                    icon='arrow-left' mode='text'
                                    onPress={() => wizard.current.prev()}>Zurück
                         </CtmButton>
-                        {/*<CtmButton*/}
-                        {/*           icon='arrow-left' mode='text'*/}
-                        {/*           onPress={() => {*/}
-                        {/*               isFirstStep ? props.navigation.replace('Home') : wizard.current.prev()*/}
-                        {/*           }}>Zurück*/}
-                        {/*</CtmButton>*/}
                         <Stepper currentStep={currentStep}
                                  stepList={stepList}/>
                         {isLastStep
@@ -172,7 +163,7 @@ const AssessmentScreen = props => {
                         }
                     </View>
             {/* Will be rendered if data submit is successful */}
-            <SuccessAnimation visible={visible}/>
+            <SuccessAnimation success={!isFetching} visible={visible} close={closeModal} />
         </Screen>
 
 
