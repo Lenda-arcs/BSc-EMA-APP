@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Dimensions, StyleSheet, View, Text} from 'react-native';
-import {ActivityIndicator, Button, Modal, Portal, withTheme} from "react-native-paper";
+import {Animated, StyleSheet, Easing, Text} from 'react-native';
+import {ActivityIndicator, IconButton, Modal, Portal, withTheme} from "react-native-paper";
 import LottieView from 'lottie-react-native';
+import CtmDialog from "./CtmDialog";
 
 
 const getAnimation = () => {
@@ -20,12 +21,30 @@ const getAnimation = () => {
 
 const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
     const {colors} = theme
-    const animationConfetti = useRef()
+    const animationConfetti = useRef(new Animated.Value(0)).current
     // const animationCheck = useRef()
     const [animationObj, setAnimationObj] = useState('')
+    const [dialogVisible, setDialogVisible] = useState(false)
+
+    const showDialog = () => setDialogVisible(true)
+    const hideDialog = () => {
+        setDialogVisible(false)
+        close()
+
+    }
 
     useEffect(() => {
         success && setAnimationObj(getAnimation)
+        Animated.timing(animationConfetti, {
+            toValue: 1,
+            duration: 1,
+            easing: Easing.bounce
+        }).start
+        const timer = setTimeout(() => {
+            showDialog()
+        }, 5000)
+        return () => clearTimeout(timer)
+
     }, [success])
 
 
@@ -35,13 +54,15 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
                    contentContainerStyle={styles.animationContainer}>
                 {success
                     ? <><LottieView
-                        ref={animationConfetti}
+                        progress={animationConfetti}
+                        speed={1}
                         style={{
-                            backgroundColor: 'rgb(114,141,149)',
                             alignSelf: 'center',
                             flexGrow: 1
                         }} source={animationObj} autoPlay={true} resizeMode='cover'/>
-                        <Button onPress={close}>Cool</Button></>
+                        <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog}
+                                   helpText='Deine Antworten sind bei uns angekommen, danke für Deine Teilnahme '
+                                   title='Erfolgreich!'/></>
                     : <><ActivityIndicator animating={true} size='large' color={colors.accent}/></>}
             </Modal>
         </Portal>
