@@ -1,126 +1,108 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import {View, StyleSheet, Image} from 'react-native'
+import React, {useEffect, useRef, useState} from 'react'
+import {View, StyleSheet, Vibration, Animated} from 'react-native'
+import {withTheme, Paragraph} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
-
 
 import * as Notifications from 'expo-notifications'
 
-
-import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import {withTheme, Paragraph, Text ,Headline} from "react-native-paper";
-
-
 import Screen from "../components/wrapper/Screen";
-import CtmSubheading from "../components/wrapper/CtmSubheading";
 import CtmButton from "../components/wrapper/CtmButton";
+import CtmPermission from "../components/helper/CtmPermission";
+import StudyOverview from "../components/helper/StudyOverview";
 
 
 import {checkPushToken} from "../store/actions/auth";
-import {getAssessmentCount, setAssessmentData} from '../store/actions/assessment'
-import CtmPermission from "../components/helper/CtmPermission";
+import {getAssessmentCount, setAssessmentData, setNotifications} from '../store/actions/assessment'
 
-const testData = {
-    "name": "test-slide",
-    "questions": {
-        "id" : "1",
-        "text": "...."
+
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => {
+        return {
+            shouldShowAlert: true,
+            shouldSetBadge: true,
+            shouldPlaySound: false
+        }
     }
-}
-
-const StudyOverview = ({count, colors}) => {
-
-    const [fill, setFill] = useState(0)
-
-    useEffect(() => {
-        setFill(count / 30 * 100)
-    }, [count])
-
-    return (
-        <View style={{backgroundColor: colors.background, marginTop: 60}}>
-            <CtmSubheading style={{textAlign: 'center', marginBottom: 40}}>Willkommen bei der Studie!</CtmSubheading>
-            <AnimatedCircularProgress
-                size={250}
-                width={10}
-                arcSweepAngle={270}
-                rotation={225}
-                lineCap="round"
-                fill={fill}
-                tintColor={colors.accent}
-                backgroundColor='#fff'>
-                {
-                    useCallback((fill) => (
-
-                        <Headline>
-                            {count}
-
-                        </Headline>
-                           // <Image style={styles.image} source={require('./../assets/icon.png')}/>
-
-                    ), [count])
-                }
-            </AnimatedCircularProgress>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 40, marginTop: -20}}>
-                <Text>0</Text>
-                <Text>30</Text>
-            </View>
-        </View>
-    )
-}
-
-
-let sendTime;
-let responseTime;
+})
 
 const HomeScreen = props => {
     const {colors} = props.theme
     const isAuth = useSelector(state => state.auth.token)
 
-    const userProgress = useSelector(state => state.assessments.assessmentCount)
-    const [notification, setNotification] = useState(true) //todo: handle notifications
+    const {userProgress, notificationScheduled} = useSelector(state => state.assessment)
+    const [notification, setNotification] = useState() //todo: handle notifications
 
 
     const dispatch = useDispatch()
 
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+
+    const fadeIn = () => {
+        console.log('called')
+        // Will change fadeAnim value to 0 in 3 seconds
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true
+        }).start();
+    };
+
+    useEffect(() => {
+        fadeIn()
+    },[isAuth])
 
     //  Slides!
     useEffect(() => {
         const fetchAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
-            }catch (err) {
+            } catch (err) {
                 console.log(err.message)
             }
         }
         isAuth && fetchAssessmentData()
-    },[isAuth, dispatch])
+    }, [isAuth, dispatch])
+
+    useEffect(() => {
+        const scheduleNotification = async () => {
+            try {
+                await dispatch(setNotifications())
+                //await Notifications.cancelAllScheduledNotificationsAsync() // cancel all //todo: do cancellation when user is finished
+                const nextDate = await Notifications.getAllScheduledNotificationsAsync()
+
+              //  console.log(nextDate) //todo: testing
+
+            } catch (err) {
+                console.log(err.message)
+            }
+        }
+        !notificationScheduled && scheduleNotification()
+    }, [])
+
+    const _handleNotification = notification => {
+        Vibration.vibrate();
+        setNotification({notification});
+    };
+
 
 
 
     // todo: track incoming notification
     useEffect(() => {
         const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-            setNotification(!notification)
-            console.log('response')
-            // console.log(response)
-            responseTime = response.notification.date
-            console.log(responseTime)
-
+            console.log(response)
         })
 
-        const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => {
-
-            console.log('notification')
-            sendTime = notification.date
-            console.log(sendTime)
-
-        })
+        const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => _handleNotification(notification))
 
         // Clear-out function
         return () => {
             foregroundSubscription.remove()
             backgroundSubscription.remove()
         }
-    }, [])
+    },[])
 
 
     // P
@@ -142,27 +124,27 @@ const HomeScreen = props => {
             }
         }
         checkAssessmentCount()
-    },[])
+    }, [])
 
 
     return (
 
         <Screen>
-            <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
+            <Animated.View style={{flex: 1, justifyContent: 'center', alignItems: 'center', opacity: fadeAnim}}>
                 <CtmPermission/>
                 {/* todo: show initial welcomeScreen if !isAuth */}
                 {isAuth && <StudyOverview colors={colors} count={userProgress}/>}
 
-                {isAuth && (
-                        <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                            {notification ? <CtmButton mode='contained' onPress={() => {
-                                    props.navigation.replace('Assessment')
-                                }}>Start</CtmButton>
-                                : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
-                        </View>
-                    )
+                {isAuth && userProgress < 30  && (
+                    <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
+                        {!notification ? <CtmButton mode={Platform.OS === 'ios' ? 'outline' : 'contained'} onPress={() => {
+                                props.navigation.replace('Assessment')
+                            }}>Start</CtmButton>
+                            : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
+                    </View>
+                )
                 }
-            </View>
+            </Animated.View>
         </Screen>
 
 
