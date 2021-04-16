@@ -6,8 +6,10 @@ import {Alert} from "react-native";
 
 import * as assessmentActions from './assessment'
 import * as storeFac from '../../helpers/asyncStoreFactories'
-import { fetchData } from '../../helpers/fetchFactories'
-import { getUserPushToken } from '../../helpers/permissonFactories'
+import {fetchData} from '../../helpers/fetchFactories'
+import {getUserPushToken} from '../../helpers/permissonFactories'
+import {saveItemAsyncStore, getItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
+
 
 export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
@@ -15,6 +17,7 @@ export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
 export const SET_PUSH_TOKEN = 'SET_PUSH_TOKEN'
 export const SET_FINISHED_BOARDING = 'SET_FINISHED_BOARDING'
+export const SET_FEEDBACK = 'SET_FEEDBACK'
 
 let USER = 'USER_DATA'
 const LAUNCHED = 'LAUNCHED'
@@ -31,25 +34,34 @@ export const checkPushToken = () => {
         }
     }
 }
-//
-// const getUserPushToken = async () => {
-//     let pushToken
-//
-//     let notificationStatusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-//     if (notificationStatusObj.status !== 'granted') {
-//         notificationStatusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-//     }
-//     if (notificationStatusObj.status !== 'granted') {
-//         Alert.alert('Insufficient permissions!', 'You need to grand permissions to use notifications for this app',
-//             [{text: 'Okay'}])
-//         pushToken = null
-//     } else {
-//         // generate pushToken for Notifications
-//         // resolve promise and store data in variable
-//         pushToken = (await Notifications.getExpoPushTokenAsync()).data
-//     }
-//     return pushToken
-// }
+export const sendFeedback = (message, topic) => {
+    return async (dispatch, getState) => {
+
+
+        const feedbackCount = await getItemAsyncStore(SET_FEEDBACK, undefined, undefined)
+        const {token, userId} = getState().auth
+        const newFeedback = {
+            user: userId[1],
+            feedback: {
+                topic: topic,
+                text: message,
+                rating: 0
+            }
+        }
+        if (token) {
+            try {
+                if (!feedbackCount || feedbackCount <= 3) {
+                    await fetchData(`${ENV.TempOwnApi}/feedback`, 'POST', newFeedback, token)
+                    const newFeedbackCount = +feedbackCount + 1
+                    await saveItemAsyncStore(SET_FEEDBACK, newFeedbackCount)
+                    dispatch({type: SET_FEEDBACK})
+                }
+            } catch (err) {
+                throw new Error(err)
+            }
+        }
+    }
+}
 
 
 const sendPushToken = (pushToken) => {
