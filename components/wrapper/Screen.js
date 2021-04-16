@@ -1,18 +1,28 @@
 import React from 'react';
-import {View} from 'react-native';
+import {View, SafeAreaView, StatusBar} from 'react-native';
 import {withTheme} from "react-native-paper";
-import {StatusBar} from "expo-status-bar";
+//import {StatusBar} from "expo-status-bar";
+
+
+let CtmView
+
+
 
 const Screen = props => {
     const {colors} = props.theme
     const {dark} = props.theme
+    const { darkContent, noSaveArea } = props
+
+    noSaveArea ? CtmView = View : CtmView = SafeAreaView
+
 
     return (
-        <View style={{backgroundColor: colors.background, flex: 1, ...props.style}}>
-            <StatusBar backgroundColor={dark ? colors.background : '#3D8FC6'}
-                       barStyle={dark ? 'light-content' : 'dark-content'}/>
+        <CtmView style={{backgroundColor: colors.background, flex: 1, ...props.style}}>
+            <StatusBar  animated={true} translucent={true}
+                        backgroundColor={dark ? '#252525' : noSaveArea ? colors.background : '#0261A1'}
+                        barStyle={darkContent && !dark ? 'dark-content' : 'light-content'} />
             {props.children}
-        </View>)
+        </CtmView>)
 };
 
 
