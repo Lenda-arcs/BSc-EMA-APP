@@ -9,10 +9,9 @@ import {Provider as PaperProvider} from 'react-native-paper'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-
-import assessmentsReducer from "./store/reducers/assessment";
+import assessmentReducer from "./store/reducers/assessment";
 import authReducer from "./store/reducers/auth"
-// import {init} from "./helpers/db";
+
 
 import AppNavigator from "./navigation/AppNavigator";
 
@@ -22,29 +21,18 @@ import * as Theme from './constants/CtmThemes'
 
 const PREFERENCES_KEY = 'APP_PREFERENCES';
 
-//
-//
-// init().then(() => {
-//     //console.log('Initialized database')
-// }).catch(err => {
-//     console.log('Initializing database failed')
-//     throw err
-// });
-
-
-
 
 
 const rootReducer = combineReducers({
     // toDo: refactor name to store ?
-    assessments: assessmentsReducer,
+    assessment: assessmentReducer,
     auth: authReducer,
 })
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk))
 
 
-
+// todo: refactor asyncStorage functions
 export default function App() {
   //  useKeepAwake()
 

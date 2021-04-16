@@ -1,6 +1,8 @@
-import React, {useReducer, useEffect} from 'react';
-import {View, StyleSheet} from 'react-native';
+import React, {useReducer, useEffect, useState} from 'react';
+import {View, StyleSheet, Dimensions, ScrollView} from 'react-native';
 import {TextInput, withTheme, Text, HelperText} from 'react-native-paper'
+import {useSelector} from "react-redux";
+import CtmDialog from "./CtmDialog";
 
 const INPUT_CHANGE = 'INPUT_CHANGE';
 const INPUT_BLUR = 'INPUT_BLUR';
@@ -34,6 +36,10 @@ const Input = props => {
 
     const {colors} = props.theme
 
+    const [dialogVisible, setDialogVisible] = useState(false)
+    const showDialog = () => setDialogVisible(true)
+    const hideDialog = () => setDialogVisible(false)
+
     useEffect(() => {
         if (inputState.touched) onInputChange(id, inputState.value, inputState.isValid);
     }, [inputState, onInputChange, id]);
@@ -65,25 +71,37 @@ const Input = props => {
         <View style={styles.formControl}>
             {/* for validation maybe works also with text-input-mask */}
 
-            <TextInput {...props} mode='contained'
-                       style={{backgroundColor: colors.background}}
+            <TextInput {...props} mode={props.mode ? props.mode : 'flat'}
+                       style={{backgroundColor: colors.background, width: '80%', ...props.style}}
                        label={props.label}
                        value={inputState.value}
                        onChangeText={textChangeHandler}
                        onBlur={lostFocusHandler}
-                       error={!inputState.isValid && inputState.touched}/>
+                       error={!inputState.isValid && inputState.touched}
+                       right={
+                           <TextInput.Icon
+                               name={ props.icon }
+                               onPress={showDialog}
+                               size={20}
+                               forceTextInputFocus={false}
+                           />
+                       }/>
             {
                 !inputState.isValid && inputState.touched &&
                 (<HelperText type='error'>{props.errorText}</HelperText>)
             }
+            <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog} helpText={props.helpText}
+                       title='Eingabehilfe'/>
         </View>
     );
 };
-
+const screenWidth = Dimensions.get('window').width
 const styles = StyleSheet.create({
     formControl: {
-        width: '100%',
-        marginBottom: 10
+        width: screenWidth,
+        marginBottom: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     label: {
         marginVertical: 8

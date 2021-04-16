@@ -18,8 +18,8 @@ export const CustomDarkTheme = {
     fonts: configureFonts({}),
     colors: {
         ...DarkTheme.colors,
-        primary: '#08b6d1',
-        accent: '#DB0B8B',
+         primary: '#08B6D1',
+         accent: '#DB0B8B',
     },
     dark: true,
     mode: 'adaptive'

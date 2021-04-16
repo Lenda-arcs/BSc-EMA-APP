@@ -14,7 +14,8 @@ const QuestionItem = props => {
     const [checked, setChecked] = useState(preSelection?.answerValue);
     const [icon, setIcon] = useState(preSelection ? 'check' : 'help-circle')
 
-    let platform = Platform.OS === 'android' ? 'android' : 'ios'
+    // todo: find better solution for ios unchecked items
+    //let platform = Platform.OS === 'android' ? 'android' : 'ios'
 
 
 
@@ -40,8 +41,8 @@ const QuestionItem = props => {
                         expanded={expanded} onPress={handlePress}>
             <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
                 {props.items.map((item, index) => <RadioButton.Item key={index} label={item} value={index}
-                                                                    labelStyle={styles.label} mode={platform}
-                                                                    style={styles.item}/>)}
+                                                                    labelStyle={styles.label} mode='android'
+                                                                    style={styles.item} uncheckedColor='#ccc'/>)}
             </RadioButton.Group>
             <Divider/>
         </List.Accordion>

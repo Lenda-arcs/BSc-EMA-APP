@@ -1,49 +1,19 @@
-import React, {useContext, useState, useReducer, useCallback, useEffect} from 'react'
-import {ScrollView, StyleSheet, KeyboardAvoidingView, View, Platform} from "react-native";
-import {Button, Card} from 'react-native-paper'
+import React, {useContext, useState, useReducer, useCallback, useEffect, useRef} from 'react'
+import {Animated, StyleSheet, View, TouchableWithoutFeedback, Keyboard, ScrollView} from "react-native";
+import {Headline} from 'react-native-paper'
 import {useDispatch} from "react-redux";
 
 import Input from "../components/helper/Input";
 import Screen from "../components/wrapper/Screen";
+import TextInputAvoidingView from "../components/helper/TextInputAvoidingView";
 import CtmDialog from "../components/helper/CtmDialog";
 import CtmButton from "../components/wrapper/CtmButton";
 
 import * as authActions from '../store/actions/auth'
+import {formReducer, FORM_INPUT_UPDATE} from '../helpers/ctmReducer'
 
 
-const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE';
 
-const formReducer = (state, action) => {
-    if (action.type === FORM_INPUT_UPDATE) {
-        const updatedValues = {
-            ...state.inputValues,
-            [action.input]: action.value
-        };
-        const updatedValidities = {
-            ...state.inputValidities,
-            [action.input]: action.isValid
-        };
-        let updatedFormIsValid = true;
-        for (const key in updatedValidities) {
-            updatedFormIsValid = updatedFormIsValid && updatedValidities[key];
-        }
-        return {
-            formIsValid: updatedFormIsValid,
-            inputValidities: updatedValidities,
-            inputValues: updatedValues
-        };
-    }
-    return state;
-};
-
-
-const TextInputAvoidingView = ({children}) => {
-    return Platform.OS === 'ios'
-        ? (<KeyboardAvoidingView style={styles.wrapper} behavior='padding' keyboardVerticalOffset={80}>
-            {children}
-        </KeyboardAvoidingView>)
-        : <>{children}</>
-}
 
 const AuthScreen = props => {
     const [isLoading, setIsLoading] = useState(false)
@@ -61,12 +31,27 @@ const AuthScreen = props => {
     });
 
 
+    // Transition when Screen visible
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const fadeIn = () => {
+        console.log('called')
+        // Will change fadeAnim value to 0 in 3 seconds
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true
+        }).start();
+    };
+    useEffect(() => {
+        fadeIn()
+    },[])
+
+
     useEffect(() => {
         if (error) {
             showDialog()
         }
-    },[error])
-
+    }, [error])
 
 
     const dispatch = useDispatch()
@@ -81,15 +66,12 @@ const AuthScreen = props => {
         setIsLoading(true)
         try {
             await dispatch(action)
-            props.navigation.navigate('Home')
         } catch (err) {
             let msg = err.message
             if (err.message === 'Error: Incorrect userId or password') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
             setError(msg)
             setIsLoading(false)
         }
-
-
 
     }
 
@@ -104,26 +86,40 @@ const AuthScreen = props => {
 
 
     return (
-        <Screen style={{alignItems: 'center' , justifyContent:'center'}} >
-            <TextInputAvoidingView >
-                    <Card style={styles.authCtn}>
-                        <ScrollView>
-                            <Input id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4} userId
-                                   autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
-                                   onInputChange={inputChangeHandler} initialValue=''/>
-                            <Input id='password' label='Password' keyboardType='default' required minLength={5}
-                                   autocapitalize='none' secureTextEntry errorText='Bitte gebe Dein Passwort ein.'
-                                   onInputChange={inputChangeHandler} initialValue=''/>
-                            <View style={styles.btnCtn}>
-                                <CtmButton loading={isLoading}
-                                           mode='contained'
-                                           disabled=''
-                                           onPress={signInHandler}>Teilnehmen</CtmButton>
-                            </View>
-                        </ScrollView>
-                    </Card>
-                <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog} helpText={error} title='Fehlgeschlagen'/>
-            </TextInputAvoidingView>
+        <Screen style={{alignItems: 'center', justifyContent: 'center'}} darkContent noSaveArea>
+                <TextInputAvoidingView style={{flex: 1}}>
+                    <TouchableWithoutFeedback  onPress={Keyboard.dismiss} accessible={false}>
+                        <Animated.View style={{opacity: fadeAnim}}>
+                            <ScrollView contentContainerStyle={styles.inner}>
+                                <View style={styles.header}>
+                                    <Headline style={{fontWeight: 'bold'}}>Willkommen!</Headline>
+                                </View>
+
+                                <View style={styles.actions}>
+                                    <Input  id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4}
+                                           userId style={styles.input} icon='account' helpText='TEXT'
+                                           autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
+                                           onInputChange={inputChangeHandler} initialValue=''/>
+                                    <Input id='password' label='Password' keyboardType='default' required minLength={5}
+                                           style={styles.input} icon='lock' helpText='TEXT'
+                                           autocapitalize='none' secureTextEntry errorText='Bitte gebe Dein Passwort ein.'
+                                           onInputChange={inputChangeHandler} initialValue=''/>
+
+                                </View>
+                                <View style={styles.btnCtn}>
+                                    <CtmButton loading={isLoading}
+                                               mode='contained'
+                                               disabled={!formState.formIsValid}
+                                               onPress={signInHandler}>Teilnehmen</CtmButton>
+                                </View>
+
+                                <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog} helpText={error}
+                                           title='Fehlgeschlagen'/>
+                            </ScrollView>
+                        </Animated.View>
+                    </TouchableWithoutFeedback>
+                </TextInputAvoidingView>
+
         </Screen>
 
     )
@@ -132,25 +128,30 @@ const AuthScreen = props => {
 
 
 const styles = StyleSheet.create({
-    wrapper: {
+    inner: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
     },
-
-    authCtn: {
-        width: '80%',
-        minWidth:300,
-        maxWidth: 400,
-        maxHeight: 600,
-        padding: 15
+    header: {
+        flex: .25,
+        justifyContent: 'flex-end',
+        marginHorizontal: 10,
+        paddingBottom: 50
+    },
+    action: {
+        marginTop: 10,
+        width: '100%'
+    },
+    wrapper: {
+        flex: 1
+    },
+    input:{
+      width: '60%'
     },
     btnCtn: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        marginTop: 20
-
+        width: '70%',
+        marginTop: 25
     }
 
 })

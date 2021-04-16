@@ -17,10 +17,6 @@ const ImgPicker = props => {
 
 
 
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableCmp = TouchableNativeFeedback
-    }
-
     const pickImage = async () => {
         if (Platform.OS !== 'web') {
             const resCamPermissions = await ImagePicker.getCameraPermissionsAsync()

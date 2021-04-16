@@ -8,7 +8,7 @@ const CtmSubheading = props => {return <Subheading style={{...props.style ,...st
 
 const styles = StyleSheet.create({
     heading: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         marginHorizontal: 10,
         paddingTop: 10

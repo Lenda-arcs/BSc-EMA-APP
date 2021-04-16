@@ -72,7 +72,7 @@ const PictureSlide = ({isComplete, savedData}) => {
     return (
         <ScrollView>
             <View style={{flex: 1}}>
-                <CtmSubheading style={styles.label}>Bitte mache nun Fotos vom Himmel.</CtmSubheading>
+                <CtmSubheading>Bitte mache nun Fotos vom Himmel.</CtmSubheading>
                 <List.AccordionGroup>
                     <List.Accordion id='0'  title='Mach ein Foto vom Himmel' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconSkyImg}/>}
@@ -99,9 +99,5 @@ const PictureSlide = ({isComplete, savedData}) => {
 }
 
 
-const styles = StyleSheet.create({
-    label: {},
-
-})
 
 export default PictureSlide;

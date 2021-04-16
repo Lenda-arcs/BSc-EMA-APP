@@ -68,11 +68,11 @@ const OnboardingScreen = (props) => {
                     ),
                 },
                 {
-                    title: 'Push Nachricht',
-                    subtitle: 'Du erhälts eine Benachrichtigung sobald es wieder an der Zeit ist die Befragung durchzuführen',
+                    title: 'Benachrichtigung',
+                    subtitle: 'Du erhälst eine Benachrichtigung sobald es wieder an der Zeit ist die Befragung durchzuführen',
                     backgroundColor: colors.primary,
                     image: (
-                        <Icon name="bell-o" type="font-awesome" size={100} color={colors.primary}/>
+                        <Icon name="bell-o" type="font-awesome" size={100} color={colors.accent}/>
                     ),
                 },
                 {

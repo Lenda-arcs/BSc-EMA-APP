@@ -12,6 +12,7 @@ import * as Theme from '../constants/CtmThemes'
 
 import StartupScreen from "../screens/StartupScreen";
 import HomeScreen from "../screens/HomeScreen";
+import FeedbackScreen from "../screens/FeedbackScreen";
 import AssessmentScreen from "../screens/AssessmentScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import AuthScreen from "../screens/AuthScreen";
@@ -75,8 +76,8 @@ function getHeaderTitle(route) {
     switch (routeName) {
         case 'Home':
             return 'Home'
-        case 'Auth':
-            return 'Anmelden'
+        case 'Feedback':
+            return 'Feedback'
         default:
             return 'default'
     }
@@ -84,28 +85,31 @@ function getHeaderTitle(route) {
 
 
 const Home = () => {
-    const isAuth = useSelector(state => !!state.auth.token)
     return (
         <Drawer.Navigator screenOptions={defaultNavOptions}
                           drawerContent={({navigation}) => <DrawerContent navigation={navigation}/>}>
-            {!isAuth && <Drawer.Screen name='Auth' component={AuthScreen} options={{title: 'Anmelden'}}/>}
             <Drawer.Screen name='Home' component={HomeScreen}/>
+
         </Drawer.Navigator>
     )
 }
 
-
 const AssessmentNavigator = () => {
 
     const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
+    const isAuth = useSelector(state => !!state.auth.token)
 
     return (
         <AssessStack.Navigator screenOptions={defaultNavOptions}>
 
-            {!isFirstLaunch ? <AssessStack.Screen name='Home' component={Home}
-                options={({route}) =>
-                ({headerTitle: getHeaderTitle(route)})}/> : <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/> }
+            {!isFirstLaunch
+                ? isAuth
+                    ? <AssessStack.Screen name='Home' component={Home}
+                                          options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
+                    : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>
+                : <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/> }
            <AssessStack.Screen name='Assessment' component={AssessmentScreen} options={{headerTitle: `Befragung`}}/>
+            <AssessStack.Screen name='Feedback' component={FeedbackScreen}/>
 
         </AssessStack.Navigator>
     )

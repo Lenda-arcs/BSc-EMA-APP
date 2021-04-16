@@ -60,10 +60,10 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
 
     return (
         <View style={{flex: 1}}>
-            <CtmSubheading style={styles.label}>{description}</CtmSubheading>
+            <CtmSubheading>{description}</CtmSubheading>
             <List.AccordionGroup onAccordionPress={onAccordionPressHandler} expandedId={expandedId}>
                 <View>
-                    {questions.map((question, index) =>
+                    {questions.map((question) =>
                         <QuestionItem
                             key={question._id}
                             domain={question.domain}
@@ -78,10 +78,8 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
     )
 };
 
-const styles = StyleSheet.create({
 
-    label: {},
-})
+
 
 
 export default withTheme(QuestionSlide)

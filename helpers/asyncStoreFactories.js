@@ -35,7 +35,7 @@ export const getItemAsyncStore = async (key, safe = false, parse = undefined) =>
 export const deleteItemAsyncStore = async (key, safe = false) => {
     try {
         if (safe) await SecureStore.deleteItemAsync(key)
-        else await AsyncStorage.setItem(key)
+        else await AsyncStorage.removeItem(key)
     } catch (err) {
         throw new Error(err.message)
     }
