@@ -1,5 +1,5 @@
 const vars = {
-    TempOwnApi:'https://b34e851ada93.ngrok.io/api/v1',
+    TempOwnApi:'http://cloud-ema-study.hopto.org:443/api/v1',
     WeatherApi: 'https://api.synopticdata.com/v2',
     WeatherToken: '008ac7505ca54e30a8e973ed7da716d1',
 
