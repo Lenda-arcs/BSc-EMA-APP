@@ -46,7 +46,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                     </TouchableRipple>
                 </Drawer.Section>
                 <Drawer.Section title="Feedback">
-                    <TouchableRipple onPress={() => {}}>
+                    <TouchableRipple onPress={() => navigation.navigate('Feedback')}>
                         <View style={styles.preference}>
                             <Text>Schreib eine Nachricht</Text>
                         </View>
