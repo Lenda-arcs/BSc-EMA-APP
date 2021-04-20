@@ -17,12 +17,12 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.university-Hamburg.ema-study-sky",
+      "bundleIdentifier": "com.university_Hamburg.ema_study_sky",
       "buildNumber": "1.0.0",
       "supportsTablet": false
     },
     "android": {
-      "package": "com.university-Hamburg.ema-study-sky",
+      "package": "com.university_Hamburg.ema_study_sky",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
