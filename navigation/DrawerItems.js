@@ -1,28 +1,28 @@
-import * as React from 'react';
+import React from 'react';
 import {View, StyleSheet, Platform} from 'react-native';
-import {
-    Drawer,
-    Switch,
-    TouchableRipple,
-    Text,
-    useTheme,
-} from 'react-native-paper';
+import {Drawer, Switch, TouchableRipple, Text, useTheme} from 'react-native-paper';
 import {useDispatch} from "react-redux";
 import {logout} from "../store/actions/auth";
+import {useState} from "react";
+import CtmDialog from "../components/helper/CtmDialog";
 
 
+//todo: get  text from server?
+const text = 'LLorem ipsum dolor sit t, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore etLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
 
 const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
     const {colors} = useTheme();
 
     const dispatch = useDispatch()
+    const [visible, setVisible] = useState(false)
 
 
 
     return (
         <View style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
             <View>
+                <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
                 <Drawer.Section title="Einstellungen">
                     <TouchableRipple onPress={toggleTheme}>
                         <View style={styles.preference}>
@@ -34,12 +34,13 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                     </TouchableRipple>
                 </Drawer.Section>
                 <Drawer.Section title="Rechtlich">
-                    <TouchableRipple onPress={() => {}}>
-                        <View style={styles.preference}>
-                            <Text>Impressum</Text>
-                        </View>
-                    </TouchableRipple>
-                    <TouchableRipple onPress={() => {}}>
+                    {/*<TouchableRipple onPress={() => {*/}
+                    {/*}}>*/}
+                    {/*    <View style={styles.preference}>*/}
+                    {/*        <Text>Impressum</Text>*/}
+                    {/*    </View>*/}
+                    {/*</TouchableRipple>*/}
+                    <TouchableRipple onPress={() => setVisible(true)}>
                         <View style={styles.preference}>
                             <Text>Datenschutz</Text>
                         </View>
@@ -53,15 +54,9 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                     </TouchableRipple>
                 </Drawer.Section>
             </View>
-            {/* USE IF NO LOGOUT NEEDED*/}
-            {/*{!authStatus ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID'*/}
-            {/*                             onPress={() => navigation.navigate('Auth')}/> : null}*/}
-
-            {/*USE IF LOGOUT NEEDED*/}
-            {authStatus ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
-                          onPress={() => dispatch(logout())}/>
-                          : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID'
-                                         onPress={() => navigation.navigate('Auth')}/>}
+            {authStatus
+                ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
+                : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID' onPress={() => navigation.navigate('Auth')}/>}
         </View>
     );
 };
