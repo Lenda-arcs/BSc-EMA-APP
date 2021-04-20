@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9d3d59e6-d83a-4e84-920d-509c4659a0ff" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/ENV.js" beforeDir="false" afterPath="$PROJECT_DIR$/ENV.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,15 +29,17 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../complete-node-bootcamp-master/complete-node-bootcamp-master" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/components/helper" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="ts.external.directory.path" value="C:\Users\lenna\AppData\Local\JetBrains\Toolbox\apps\WebStorm\ch-0\203.5981.135\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
       <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\components\helper" />
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\store\actions" />
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\store\reducers" />
+      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
@@ -67,7 +69,19 @@
       <workItem from="1617475943267" duration="1324000" />
       <workItem from="1617521844172" duration="6278000" />
       <workItem from="1617561574972" duration="2255000" />
-      <workItem from="1617605360315" duration="47320000" />
+      <workItem from="1617605360315" duration="53583000" />
+      <workItem from="1617779256137" duration="25543000" />
+      <workItem from="1617949685885" duration="7916000" />
+      <workItem from="1618046585877" duration="2202000" />
+      <workItem from="1618070308781" duration="8723000" />
+      <workItem from="1618122820589" duration="29752000" />
+      <workItem from="1618301041399" duration="9024000" />
+      <workItem from="1618434980117" duration="36530000" />
+      <workItem from="1618663659155" duration="11000" />
+      <workItem from="1618663690915" duration="18000" />
+      <workItem from="1618665454453" duration="7042000" />
+      <workItem from="1618729398374" duration="33222000" />
+      <workItem from="1618902555811" duration="5981000" />
     </task>
     <servers />
   </component>
