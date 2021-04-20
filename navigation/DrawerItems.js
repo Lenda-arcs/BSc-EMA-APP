@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Platform} from 'react-native';
+import {View, StyleSheet, Platform, SafeAreaView} from 'react-native';
 import {Drawer, Switch, TouchableRipple, Text, useTheme} from 'react-native-paper';
 import {useDispatch} from "react-redux";
 import {logout} from "../store/actions/auth";
@@ -20,44 +20,44 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
 
     return (
-        <View style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
-            <View>
-                <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
-                <Drawer.Section title="Einstellungen">
-                    <TouchableRipple onPress={toggleTheme}>
-                        <View style={styles.preference}>
-                            <Text>Dunkle Ansicht</Text>
-                            <View pointerEvents="none">
-                                <Switch value={isDarkTheme}/>
+            <SafeAreaView style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
+                <View>
+                    <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
+                    <Drawer.Section title="Einstellungen">
+                        <TouchableRipple onPress={toggleTheme}>
+                            <View style={styles.preference}>
+                                <Text>Dunkle Ansicht</Text>
+                                <View pointerEvents="none">
+                                    <Switch value={isDarkTheme}/>
+                                </View>
                             </View>
-                        </View>
-                    </TouchableRipple>
-                </Drawer.Section>
-                <Drawer.Section title="Rechtlich">
-                    {/*<TouchableRipple onPress={() => {*/}
-                    {/*}}>*/}
-                    {/*    <View style={styles.preference}>*/}
-                    {/*        <Text>Impressum</Text>*/}
-                    {/*    </View>*/}
-                    {/*</TouchableRipple>*/}
-                    <TouchableRipple onPress={() => setVisible(true)}>
-                        <View style={styles.preference}>
-                            <Text>Datenschutz</Text>
-                        </View>
-                    </TouchableRipple>
-                </Drawer.Section>
-                <Drawer.Section title="Feedback">
-                    <TouchableRipple onPress={() => navigation.navigate('Feedback')}>
-                        <View style={styles.preference}>
-                            <Text>Schreib eine Nachricht</Text>
-                        </View>
-                    </TouchableRipple>
-                </Drawer.Section>
-            </View>
-            {authStatus
-                ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
-                : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID' onPress={() => navigation.navigate('Auth')}/>}
-        </View>
+                        </TouchableRipple>
+                    </Drawer.Section>
+                    <Drawer.Section title="Rechtlich">
+                        {/*<TouchableRipple onPress={() => {*/}
+                        {/*}}>*/}
+                        {/*    <View style={styles.preference}>*/}
+                        {/*        <Text>Impressum</Text>*/}
+                        {/*    </View>*/}
+                        {/*</TouchableRipple>*/}
+                        <TouchableRipple onPress={() => setVisible(true)}>
+                            <View style={styles.preference}>
+                                <Text>Datenschutz</Text>
+                            </View>
+                        </TouchableRipple>
+                    </Drawer.Section>
+                    <Drawer.Section title="Feedback">
+                        <TouchableRipple onPress={() => navigation.navigate('Feedback')}>
+                            <View style={styles.preference}>
+                                <Text>Schreib eine Nachricht</Text>
+                            </View>
+                        </TouchableRipple>
+                    </Drawer.Section>
+                </View>
+                {authStatus
+                    ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
+                    : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID' onPress={() => navigation.navigate('Auth')}/>}
+            </SafeAreaView>
     );
 };
 
