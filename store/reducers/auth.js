@@ -4,6 +4,7 @@ const initialState = {
     token: null,
     userId: null,
     group: null,
+    repeatCount: null,
     didTryAutoLogin: false,
     isFirstLaunch: undefined,
     pushToken: ''
@@ -17,7 +18,8 @@ export default (state = initialState, action) => {
                 ...state,
                 token: action.token,
                 userId: action.userId,
-                group: action.group
+                group: action.group,
+                repeatCount: action.repeats
             }
         case SET_DID_TRY_AL:
             return {

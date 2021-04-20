@@ -89,7 +89,8 @@ export const authenticate = (user) => {
             type: AUTHENTICATE,
             token: user.token,
             userId: user.userId,
-            group: user.group
+            group: user.group,
+            repeats: user.repeatCount
         })
     }
 }
@@ -107,9 +108,9 @@ export const tryLogin = () => {
             return
         }
 
-        const {token, userId, group} = userData
+        const {token, userId, group, repeatCount} = userData
 
-        dispatch(authenticate({token, userId, group}))
+        dispatch(authenticate({token, userId, group, repeatCount}))
     }
 }
 
@@ -137,16 +138,18 @@ export const login = (userId, password) => {
             const user = {
                 token: resData.token,
                 userId: [resData.data.user.userId, resData.data.user.id],
-                group: resData.data.user.group
+                group: resData.data.user.group,
+                repeatCount: resData.data.user.assessmentRepeats
             }
 
             // specific key for async storage ?? -- find way to reuse it for later actions
             // USER = USER.concat(user.userId[0])
 
-            const userAssessmentCount = resData.data.user.assessmentCount
+            const userProgress= resData.data.user.userProgress
+            console.log(userProgress)
 
             dispatch(authenticate(user))
-            dispatch(assessmentActions.setAssessmentCount(userAssessmentCount))
+            dispatch(assessmentActions.setUserProgress(userProgress))
 
             // old:  await saveUserToStorage(userToken, userId, userGroup)
             await storeFac.saveItemAsyncStore(USER, user, true)
