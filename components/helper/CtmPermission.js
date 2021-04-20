@@ -9,6 +9,7 @@ import {View} from "react-native";
 
 const CtmPermission = () => {
 
+
     useEffect(() => {
         const checkMultiplePermissions = async () => {
             const {status, permissions} = await Permissions.getAsync(
