@@ -17,10 +17,14 @@ import AppNavigator from "./navigation/AppNavigator";
 
 import PreferencesContext from "./navigation/PreferencesContext";
 import * as Theme from './constants/CtmThemes'
+import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "./helpers/asyncStoreFactories";
 
 
 const PREFERENCES_KEY = 'APP_PREFERENCES';
 
+
+import { LogBox } from 'react-native'
+LogBox.ignoreLogs(['ReactNative.NativeModules.LottieAnimationView'])
 
 
 const rootReducer = combineReducers({
@@ -40,13 +44,10 @@ export default function App() {
     const [theme, setTheme] = useState(Theme.CustomDefaultTheme);
 
 
-
     useEffect(() => {
         const restorePrefs = async () => {
             try {
-                const prefString = await AsyncStorage.getItem(PREFERENCES_KEY);
-                const preferences = JSON.parse(prefString || '');
-
+                const preferences = await getItemAsyncStore(PREFERENCES_KEY, undefined, true);
                 if (preferences) {setTheme(preferences.theme === 'dark' ? Theme.CustomDarkTheme : Theme.CustomDefaultTheme)}
             } catch (e) {
                 // ignore error
@@ -58,8 +59,7 @@ export default function App() {
     useEffect(() => {
         const savePrefs = async () => {
             try {
-                await AsyncStorage.setItem(PREFERENCES_KEY,
-                    JSON.stringify({theme: theme === Theme.CustomDarkTheme ? 'dark' : 'light'}));
+                await saveItemAsyncStore(PREFERENCES_KEY, {theme: theme === Theme.CustomDarkTheme ? 'dark' : 'light'});
             } catch (e) {
                 // ignore error
             }
