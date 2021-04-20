@@ -4,19 +4,19 @@ import {AnimatedCircularProgress} from "react-native-circular-progress";
 import {Headline, Text} from "react-native-paper";
 
 
-const StudyOverview = ({count, colors}) => {
+const StudyOverview = ({count, colors, repeats, style}) => {
     const [fill, setFill] = useState(0)
     const [text, setText] = useState('Willkommen bei der Studie!')
 
     useEffect(() => {
-        setFill(count / 30 * 100)
-        if (count > 0 && count < 25) setText('Dein Fortschritt')
-        else if (count >= 25) setText('Du hast es fast geschafft!')
-        else setText('Du hast es geschaft!')
+        setFill(count / repeats * 100)
+        if (count > 0 && count < repeats - 5) setText('Dein Fortschritt')
+        else if (count >= repeats - 5) setText('Du hast es fast geschafft!')
+        else if (count === repeats) setText('Du hast es geschaft!')
     }, [count])
 
     return (
-        <View style={{backgroundColor: colors.background, marginBottom: 130}}>
+        <View style={{backgroundColor: colors.background, ...style}}>
             <Headline style={{fontSize: 18,textAlign: 'center', marginBottom: 30}}>{text}</Headline>
             <AnimatedCircularProgress
                 size={260}
@@ -37,10 +37,6 @@ const StudyOverview = ({count, colors}) => {
                     ), [count])
                 }
             </AnimatedCircularProgress>
-            {/*<View style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 40, marginTop: -20}}>*/}
-            {/*    <Text>0</Text>*/}
-            {/*    <Text>30</Text>*/}
-            {/*</View>*/}
         </View>
     )
 }
