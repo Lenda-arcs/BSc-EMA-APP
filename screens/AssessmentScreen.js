@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {View, StyleSheet, ScrollView} from "react-native";
 import {withTheme} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
@@ -23,8 +23,10 @@ const AssessmentScreen = props => {
 
     // state to show modal
     const [visible, setVisible] = useState(false);
+
     // wizard
-    const wizard = useRef()
+    const wizard = useRef(null)
+    const [slides, setSlides] = useState([])
     const [isFirstStep, setIsFirstStep] = useState(true)
     const [isLastStep, setIsLastStep] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
@@ -45,8 +47,6 @@ const AssessmentScreen = props => {
     const [selection, setSelection] = useState([])
 
 
-    //
-
     // destructure color prop form withTheme wrapper
     const {colors} = props.theme
 
@@ -65,7 +65,7 @@ const AssessmentScreen = props => {
 
 
     // storing slide selections in total selection state
-    const onSlideChangeHandler = useCallback((slideSelection) => {
+    const onSlideChangeHandler = (slideSelection) => {
         let objIndex = selection.findIndex(el => (el.slideName === slideSelection.slideName))
 
         if (objIndex < 0) setSelection(selection.concat(slideSelection))
@@ -74,7 +74,7 @@ const AssessmentScreen = props => {
             arrCopy[objIndex] = slideSelection
             setSelection(arrCopy)
         }
-    }, [])
+    }
 
 
     const pictureSlide = {
@@ -82,12 +82,16 @@ const AssessmentScreen = props => {
                                savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage, loc: userLoc}}/>
     }
 
-
     // current user progress and assessment slides
     const {userProgress, availableSlides} = useSelector(state => state.assessment)
+    useEffect(() => {
+        setSlides(availableSlides)
+        console.log('render slides')
+    },[props.navigation.isFocused()])
+
     // creating stepList for wizard with fetched slides
     const stepList =
-        availableSlides?.map((slide) => ({
+        slides?.map((slide) => ({
             content:
                 <QuestionSlide isLastStep={isLastStep} isComplete={isSlideCompleteHandler}
                                onSlideChange={onSlideChangeHandler}
@@ -97,14 +101,13 @@ const AssessmentScreen = props => {
                                savedSelection={selection?.find(sl => sl.slideName === slide.name)?.answers}/>
         }))
 
-    // Dismiss demographic data slide
-    if (userProgress > 0) stepList.shift()
-    // Dismiss effect question slide
-    if (userProgress > 0 && userProgress !== 29) stepList.pop()
 
-    // Append PictureSlide to assessment
-    const { group } = useSelector(state => state.auth)
-    group === 'B' ? stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
+
+    // // Append PictureSlide to assessment
+    const {group} = useSelector(state => state.auth)
+    group !== 'B' ? stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
+
+
 
 
     const dispatch = useDispatch()
@@ -134,8 +137,6 @@ const AssessmentScreen = props => {
             <ScrollView style={{flex: 1, width: '100%', backgroundColor: colors.background}}>
                 {/* Wizard component that takes question and picture slide - stepList */}
                 <Wizard useNativeDriver={true} prevStepAnimation='fade' nextStepAnimation='fade'
-                        onPrev={() => {
-                        }}
                         isFirstStep={val => setIsFirstStep(val)}
                         isLastStep={val => setIsLastStep(val)} ref={wizard} steps={stepList}
                         currentStep={({currentStep, isLastStep, isFirstStep}) => {
@@ -146,10 +147,10 @@ const AssessmentScreen = props => {
                 {/* USE FOR PRODUCTION */}
                 <CtmButton disabled={isFirstStep}
                            icon='arrow-left' mode='text'
-                           onPress={() => wizard.current.prev()}>Zurück
+                           onPress={() => wizard.current.prev()}>
+                    Zurück
                 </CtmButton>
-                <Stepper currentStep={currentStep}
-                         stepList={stepList}/>
+                <Stepper currentStep={currentStep} stepList={stepList}/>
                 {isLastStep
                     ? (<CtmButton iconRight={true}
                                   icon='check' disabled={!slideComplete} mode='text'
