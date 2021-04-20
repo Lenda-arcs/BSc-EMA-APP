@@ -21,6 +21,8 @@ const FeedbackScreen = (props) => {
         inputValidities: {feedback: false},
         formIsValid: false
     });
+    const [value, setValue] = useState('feedback');
+    const [placeholder, setPlaceHolder] = useState('')
 
     const inputChangeHandler = useCallback((inputIdentifier, inputValue, inputValidity) => {
         dispatchFormState({
@@ -48,8 +50,7 @@ const FeedbackScreen = (props) => {
 
     }
 
-    const [value, setValue] = useState();
-    const [placeholder, setPlaceHolder] = useState('')
+
 
     useEffect(() => {
         if (value === 'bug') setPlaceHolder('Was hat nicht funktioniert?')
