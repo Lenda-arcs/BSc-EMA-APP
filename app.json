@@ -22,7 +22,7 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "de.uni-hamburg.mci-emaStudySky",
+      "package": "de.uni_hamburg.mci_emaStudySky",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
