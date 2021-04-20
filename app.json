@@ -17,7 +17,7 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "de.uni-hamburg.mci.emaStudySky",
+      "bundleIdentifier": "de.uni-hamburg.mci.*",
       "buildNumber": "1.0.0",
       "supportsTablet": false
     },
