@@ -62,7 +62,6 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
         <View style={{flex: 1}}>
             <CtmSubheading>{description}</CtmSubheading>
             <List.AccordionGroup onAccordionPress={onAccordionPressHandler} expandedId={expandedId}>
-                <View>
                     {questions.map((question) =>
                         <QuestionItem
                             key={question._id}
@@ -72,7 +71,6 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
                             items={question.selectionItems}
                             onChange={onChangeHandler}
                             selection={savedSelection?.find(q => q.questionId === question.id && q.domain === question.domain)}/>)}
-                </View>
             </List.AccordionGroup>
         </View>
     )

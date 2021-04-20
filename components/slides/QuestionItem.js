@@ -1,11 +1,10 @@
 import React, {useState} from 'react'
-import {StyleSheet, Platform, TouchableOpacity, TouchableNativeFeedback} from "react-native";
-import {RadioButton, Divider, List} from 'react-native-paper'
+import {StyleSheet, View, TouchableOpacity, TouchableNativeFeedback} from "react-native";
+import {RadioButton, Divider, List, withTheme} from 'react-native-paper'
 
 
 const QuestionItem = props => {
-
-
+    const {colors, dark} = props.theme
 
     let preSelection = props?.selection
     if (preSelection === undefined) preSelection = null
@@ -36,14 +35,17 @@ const QuestionItem = props => {
     return (
 
 
-        <List.Accordion id={props.question._id} title={props.text} titleNumberOfLines={2}
+        <List.Accordion id={props.question._id} title={props.text} titleNumberOfLines={3}
                         left={props => <List.Icon {...props} icon={icon}/>}
                         expanded={expanded} onPress={handlePress}>
-            <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
-                {props.items.map((item, index) => <RadioButton.Item key={index} label={item} value={index}
-                                                                    labelStyle={styles.label} mode='android'
-                                                                    style={styles.item} uncheckedColor='#ccc'/>)}
-            </RadioButton.Group>
+                <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
+                    <View style={{minHeight: 200, backgroundColor: dark ? '#252525' : '#fff' , justifyContent: 'flex-start'}}>
+                        {props.items.map((item, index) => <RadioButton.Item key={index} label={item} value={index}
+                                                                            labelStyle={styles.label} mode='android'
+                                                                            style={styles.item} />)}
+                    </View>
+                </RadioButton.Group>
+
             <Divider/>
         </List.Accordion>
     )
@@ -59,4 +61,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default QuestionItem
+export default withTheme(QuestionItem)

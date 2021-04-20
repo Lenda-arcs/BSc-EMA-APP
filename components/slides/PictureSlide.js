@@ -72,7 +72,7 @@ const PictureSlide = ({isComplete, savedData}) => {
     return (
         <ScrollView>
             <View style={{flex: 1}}>
-                <CtmSubheading>Bitte mache nun Fotos vom Himmel.</CtmSubheading>
+                <CtmSubheading>Bitte mache Fotos von dem Himmel.</CtmSubheading>
                 <List.AccordionGroup>
                     <List.Accordion id='0'  title='Mach ein Foto vom Himmel' titleNumberOfLines={2}
                                     left={props => <List.Icon {...props} icon={iconSkyImg}/>}
