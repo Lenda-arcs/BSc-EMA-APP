@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, StyleSheet, Easing} from 'react-native';
+import {Animated, StyleSheet, Easing, View} from 'react-native';
 import {ActivityIndicator, Modal, Portal, withTheme} from "react-native-paper";
 import LottieView from 'lottie-react-native';
 import CtmDialog from "./CtmDialog";
@@ -54,7 +54,7 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
             <Modal visible={visible} onDismiss={onDismiss}
                    contentContainerStyle={styles.animationContainer}>
                 {success
-                    ? <><LottieView
+                    ? <View><LottieView
                         progress={animationConfetti}
                         speed={1}
                         style={{
@@ -63,7 +63,7 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
                         }} source={require('../../assets/animations/4963-confetti-dark-theme.json')} autoPlay={true} resizeMode='cover'/>
                         <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog}
                                    helpText='Deine Antworten sind bei uns angekommen, danke für Deine Teilnahme '
-                                   title='Erfolgreich!'/></>
+                                   title='Erfolgreich!'/></View>
                     : <><ActivityIndicator animating={true} size='large' color={colors.accent}/></>}
             </Modal>
         </Portal>

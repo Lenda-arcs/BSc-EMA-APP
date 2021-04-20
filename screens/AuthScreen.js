@@ -34,7 +34,6 @@ const AuthScreen = props => {
     // Transition when Screen visible
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const fadeIn = () => {
-        console.log('called')
         // Will change fadeAnim value to 0 in 3 seconds
         Animated.timing(fadeAnim, {
             toValue: 1,
@@ -119,7 +118,6 @@ const AuthScreen = props => {
                         </Animated.View>
                     </TouchableWithoutFeedback>
                 </TextInputAvoidingView>
-
         </Screen>
 
     )

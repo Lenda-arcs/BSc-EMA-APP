@@ -9,8 +9,7 @@ let CtmView
 
 
 const Screen = props => {
-    const {colors} = props.theme
-    const {dark} = props.theme
+    const {colors, dark} = props.theme
     const { darkContent, noSaveArea } = props
 
     noSaveArea ? CtmView = View : CtmView = SafeAreaView
