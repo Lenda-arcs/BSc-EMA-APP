@@ -10,10 +10,10 @@ import CtmButton from "../components/wrapper/CtmButton";
 import CtmPermission from "../components/helper/CtmPermission";
 import StudyOverview from "../components/helper/StudyOverview";
 
-
 import {checkPushToken} from "../store/actions/auth";
-import {getAssessmentCount, setAssessmentData, setNotifications} from '../store/actions/assessment'
-
+import {getUserProgress, setAssessmentData, setNotifications} from '../store/actions/assessment'
+import {calcResTime} from '../helpers/notificationHandler'
+import CtmDialog from "../components/helper/CtmDialog";
 
 
 Notifications.setNotificationHandler({
@@ -21,26 +21,30 @@ Notifications.setNotificationHandler({
         return {
             shouldShowAlert: true,
             shouldSetBadge: true,
-            shouldPlaySound: false
+            shouldPlaySound: true
         }
     }
 })
 
 const HomeScreen = props => {
     const {colors} = props.theme
-    const isAuth = useSelector(state => state.auth.token)
+    const {token, repeatCount} = useSelector(state => state.auth)
+    const {userProgress} = useSelector(state => state.assessment)
 
-    const {userProgress, notificationScheduled} = useSelector(state => state.assessment)
-    const [notification, setNotification] = useState() //todo: handle notifications
 
+    const [notificationState, setNotificationState] = useState({not: {}, res: {}}) //todo: handle notifications
+    const [access, setAccess] = useState(false)
+    const [visible, setVisible] = useState(false)
+    const [errText, setErrText] = useState('')
+    const [noAccessText, setNoAccessText] = useState('Warte auf Deine nächste Benachrichtigung.')
+    const [slidesFetched, setSlidesFetched] = useState(false)
 
     const dispatch = useDispatch()
+    const isAuth = token
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
-
     const fadeIn = () => {
-        console.log('called')
         // Will change fadeAnim value to 0 in 3 seconds
         Animated.timing(fadeAnim, {
             toValue: 1,
@@ -51,15 +55,30 @@ const HomeScreen = props => {
 
     useEffect(() => {
         fadeIn()
-    },[isAuth])
+        userProgress === 0 && setNoAccessText('Die erste Benachrichtigung kommt morgen.')
+    }, [isAuth])
+
+    useEffect(() => {
+        const checkAssessmentCount = async () => {
+            try {
+                await dispatch(getUserProgress())
+            } catch (err) {
+                console.log()
+            }
+        }
+        checkAssessmentCount()
+    }, [])
+
 
     //  Slides!
     useEffect(() => {
         const fetchAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
+                setSlidesFetched(true)
             } catch (err) {
-                console.log(err.message)
+                setErrText(err.message)
+                setVisible(true)
             }
         }
         isAuth && fetchAssessmentData()
@@ -69,43 +88,56 @@ const HomeScreen = props => {
         const scheduleNotification = async () => {
             try {
                 await dispatch(setNotifications())
-                //await Notifications.cancelAllScheduledNotificationsAsync() // cancel all //todo: do cancellation when user is finished
-                const nextDate = await Notifications.getAllScheduledNotificationsAsync()
-
-              //  console.log(nextDate) //todo: testing
+                // Cancel all upcoming notifications when user is finished
+                userProgress === repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
+                // const nextDate = await Notifications.getAllScheduledNotificationsAsync()
 
             } catch (err) {
                 console.log(err.message)
+                setErrText(err.message)
+                setVisible(true)
             }
         }
-        !notificationScheduled && scheduleNotification()
-    }, [])
+        slidesFetched && scheduleNotification()
+    }, [slidesFetched])
 
     const _handleNotification = notification => {
         Vibration.vibrate();
-        setNotification({notification});
+        setNotificationState({...notificationState, not: {...notification}});
     };
 
+    const _handleNotificationRes = response => {
+        setNotificationState({...notificationState, res: {...response}})
+    }
 
 
-
-    // todo: track incoming notification
     useEffect(() => {
-        const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log(response)
-        })
+        if (isAuth) {
+            if (notificationState.not.date || notificationState.res.notification) {
 
+                const timePassedAfterTriggered = notificationState.not.date
+                    ? calcResTime(notificationState.not.date)
+                    : calcResTime(notificationState.res.notification.date)
+                // grand access to assessment only within 20min after notification.date
+                if (timePassedAfterTriggered < 60 * 15 && userProgress <= repeatCount) setAccess(true) // todo: check if interval too short
+            }
+        }
+    }, [isAuth, notificationState])
+
+
+    // todo: refactor into own component
+    useEffect(() => {
+        const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => _handleNotificationRes(response))
         const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => _handleNotification(notification))
-
         // Clear-out function
         return () => {
             foregroundSubscription.remove()
             backgroundSubscription.remove()
         }
-    },[])
+    }, [])
 
 
-    // P
+    // todo: pushToken not needed?
     useEffect(() => {
         const getPushToken = async () => {
             await dispatch((checkPushToken()))
@@ -115,36 +147,21 @@ const HomeScreen = props => {
     }, [isAuth])
 
 
-    useEffect(() => {
-        const checkAssessmentCount = async () => {
-            try {
-                await dispatch(getAssessmentCount())
-            } catch (err) {
-                console.log()
-            }
-        }
-        checkAssessmentCount()
-    }, [])
-
-
     return (
 
         <Screen>
-            <Animated.View style={{flex: 1, justifyContent: 'center', alignItems: 'center', opacity: fadeAnim}}>
+            <Animated.View style={{flex: 1, justifyContent: 'space-around', alignItems: 'center', opacity: fadeAnim}}>
                 <CtmPermission/>
-                {/* todo: show initial welcomeScreen if !isAuth */}
-                {isAuth && <StudyOverview colors={colors} count={userProgress}/>}
+                {isAuth && <StudyOverview style={{flex: .6, marginTop: 40}} colors={colors} count={userProgress} repeats={repeatCount}/>}
 
-                {isAuth && userProgress < 30  && (
-                    <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                        {!notification ? <CtmButton mode={Platform.OS === 'ios' ? 'outline' : 'contained'} onPress={() => {
-                                props.navigation.replace('Assessment')
-                            }}>Start</CtmButton>
-                            : <Paragraph>Hier geht es weiter wenn wir Dich Benachrichtigen</Paragraph>}
-                    </View>
-                )
-                }
+                <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
+                    {access ? <CtmButton mode={Platform.OS === 'ios' ? 'outline' : 'text'} onPress={() => {
+                            props.navigation.replace('Assessment')
+                        }}>Start</CtmButton>
+                        : <Paragraph style={{fontSize: 16}}>{noAccessText}</Paragraph>}
+                </View>
             </Animated.View>
+            <CtmDialog title='Fehler!' visible={visible} hideDialog={() => setVisible(false)} helpText={errText}/>
         </Screen>
 
 
@@ -156,16 +173,10 @@ const styles = StyleSheet.create({
     btnCtn: {
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 15,
-        marginBottom: 30,
+        marginTop: 50,
+        marginBottom: 60,
 
-    },
-    image: {
-        width: '60%',
-        height: '60%',
     }
 })
-
-// HomeScreen.whyDidYouRender = true
 
 export default withTheme(HomeScreen)

@@ -5,14 +5,16 @@ import { scheduleNotificationHandler } from '../../helpers/notificationHandler'
 import * as Notifications from "expo-notifications";
 import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
 
+import {Buffer} from "buffer";
+
 export const ADD_ASSESSMENT = 'ADD_ASSESSMENT'
-export const SET_ASSESSMENT_COUNT = 'SET_ASSESSMENT_COUNT'
+export const SET_USER_PROGRESS = 'SET_USER_PROGRESS'
 export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA'
 export const SET_NOTIFICATION_SCHEDULED = 'SET_NOTIFICATION_SCHEDULED'
 export const ASSESSMENT_PENDING = 'ASSESSMENT_PENDING'
 
 
-export const ASSESSMENT_COUNT = 'ASSESSMENT_COUNT'
+export const USER_PROGRESS = 'USER_PROGRESS'
 export const ASSESSMENT_DATA = 'ASSESSMENT_DATA'
 export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 
@@ -20,27 +22,29 @@ export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 
 export const setAssessmentData = () => {
     return async (dispatch, getState) => {
-        const userToken = getState().auth.token
+        const {token , repeatCount} = getState().auth
+
         let slideData
         let notificationTimes = []
 
         const asyncStoreSlides = await storeFac.getItemAsyncStore(ASSESSMENT_DATA, false, true)
 
         if (!asyncStoreSlides) {
-            slideData = await fetchData(`${ENV.TempOwnApi}/slides`, 'GET', null, userToken)
+            slideData = await fetchData(`${ENV.TempOwnApi}/slides`, 'GET', null, token)
             notificationTimes = slideData.attachment
             slideData = slideData.data.data
 
             await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
             await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes)
-            console.log(notificationTimes)
+
 
         } else {
             slideData = asyncStoreSlides
         }
         dispatch({
             type: SET_ASSESSMENT_DATA,
-            slides: slideData
+            slides: slideData,
+            repeats: repeatCount
         })
     }
 }
@@ -63,27 +67,26 @@ export const setNotifications = () => {
 
             await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
 
-            // // for testing
 
-            // await scheduleNotificationHandler((new Date().getTime() + 1000))  // just for testing
         }
+        //await scheduleNotificationHandler((new Date().getTime() + 3000))  // just for testing
 
 
     }
 }
 
-export const setAssessmentCount = (newCount) => {
+export const setUserProgress = (newCount) => {
     return async (dispatch) => {
-        await storeFac.saveItemAsyncStore(ASSESSMENT_COUNT, newCount)
-        dispatch({type: SET_ASSESSMENT_COUNT, val: newCount})
+        await storeFac.saveItemAsyncStore(USER_PROGRESS, newCount)
+        dispatch({type: SET_USER_PROGRESS, val: newCount})
     }
 }
 
-export const getAssessmentCount = () => {
+export const getUserProgress = () => {
     return async (dispatch) => {
-        const asyncCount = await storeFac.getItemAsyncStore(ASSESSMENT_COUNT)
-        if (!asyncCount) await dispatch(setAssessmentCount(0))  // CHANGED FOR GOOD? dispatch()
-        else dispatch({type: SET_ASSESSMENT_COUNT, val: parseInt(asyncCount)})
+        const asyncCount = await storeFac.getItemAsyncStore(USER_PROGRESS)
+        if (!asyncCount) await dispatch(setUserProgress(0))  // CHANGED FOR GOOD? dispatch()
+        else dispatch({type: SET_USER_PROGRESS, val: parseInt(asyncCount)})
     }
 }
 
@@ -95,36 +98,35 @@ const getWeatherData = async (userLoc) => {
     return nearestStationData
 }
 
-const createAssessmentObj = (userId, weatherData, userLoc, selection, time, skyImage, horizonImage) => (
-    {
-        user: userId[1],
-        weather: weatherData,
-        location: {
-            coordinates: [userLoc.lng, userLoc.lat]
-        },
-        selection: selection,
-        images: [
-            {
-                description: "sky",
-                base64: skyImage
-            },
-            {
-                description: "horizon",
-                base64: horizonImage
-            }
-        ],
-        timeStamp: {
-            assessmentStart: time.start,
-            assessmentEnd: time.end
-        }
-    }
-)
+const createAssessmentObj = (userId, weatherData, userLoc, selection, time, skyImage, horizonImage) => {
+    const skyImgBuffer = new Buffer(skyImage, 'base64')
+    const horizonImgBuffer = new Buffer(horizonImage, 'base64')
+    return (
+       {
+           user: userId[1],
+           weather: weatherData,
+           location: {
+               coordinates: [userLoc.lng, userLoc.lat]
+           },
+           selection: selection,
+           images: [
+               {
+                   description: "sky",
+                   data: skyImgBuffer
+               },
+               {
+                   description: "horizon",
+                   data: horizonImgBuffer
+               }
+           ],
+           timeStamp: {
+               assessmentStart: time.start,
+               assessmentEnd: time.end
+           }
+       }
+   )
+}
 //
-// const saveAssessmentToStorage = async (assessment) => {
-//
-// }
-//
-
 
 const fetchRestoredAssessment = async (token) => {
     const restoredAssessmentArr = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING, undefined, true)
@@ -163,7 +165,7 @@ export const saveAssessment = (skyImage, horizonImage, time, selection, userLoc)
             }
         }
 
-        await dispatch(setAssessmentCount(userProgress + 1))
+        await dispatch(setUserProgress(userProgress + 1))
     }
 }
 
