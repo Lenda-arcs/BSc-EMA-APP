@@ -23,9 +23,6 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
             : setExpandedId(newExpandedId);
 
 
-
-
-
     // Checking as complete if user goes to prev slide
     useEffect(() => {
         if (savedSelection?.length) setState({slideName: slideName, answers: savedSelection})
@@ -41,8 +38,6 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
         }
 
     }, [state])
-
-
 
     //update picks obj with each item selection
     const onChangeHandler = (pickObj) => {

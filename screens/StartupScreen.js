@@ -12,27 +12,19 @@ import {isFirstLaunch, tryLogin} from '../store/actions/auth'
 
 const StartupScreen = props => {
     const dispatch = useDispatch()
-    const firstLaunch = useSelector(state => state.auth.isFirstLaunch)
 
     // destruct color prop from withTheme
     const {colors} = props.theme
 
 
-
-    // checking if first launch for onboarding sequence
     useEffect(() => {
-        const checkFirstLaunch = async () => await dispatch(isFirstLaunch())
-        firstLaunch === undefined && checkFirstLaunch()
-    }, [])
-
-
-    useEffect(() => {
-        const checkLogin = async () => {
+        const checkState= async () => {
+            await dispatch(isFirstLaunch())
             await dispatch(tryLogin())
         }
-        checkLogin()
+        checkState()
 
-    },[dispatch])
+    },[])
 
 
     return (

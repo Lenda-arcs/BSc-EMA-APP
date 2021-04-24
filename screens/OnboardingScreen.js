@@ -1,10 +1,7 @@
-import {Alert, StatusBar} from 'react-native';
+import {StatusBar} from 'react-native';
 import React from 'react';
 
 import {withTheme} from "react-native-paper";
-
-import {useDispatch} from "react-redux";
-import * as authActions from '../store/actions/auth'
 
 import {Icon} from 'react-native-elements';
 import Onboarding from 'react-native-onboarding-swiper';
@@ -16,7 +13,7 @@ const Next = ({...props}) => (
 )
 
 const Skip = ({...props}) => (
-    <CtmButton mode='text' {...props}>Skip</CtmButton>
+    <CtmButton mode='text' {...props}>Überspringen</CtmButton>
 )
 
 const Done = ({...props}) => (
@@ -24,12 +21,11 @@ const Done = ({...props}) => (
 )
 
 const OnboardingScreen = (props) => {
-    const dispatch = useDispatch()
     const {colors} = props.theme
 
 
     const succeedHandler = () => {
-        dispatch(authActions.finishBoarding())
+        props.navigation.navigate('Auth')
     }
 
     return (
@@ -38,13 +34,14 @@ const OnboardingScreen = (props) => {
             SkipButtonComponent={Skip}
             NextButtonComponent={Next}
             DoneButtonComponent={Done}
+            subTitleStyles={{fontSize: 18, marginHorizontal: 20}}
             onSkip={succeedHandler}
             onDone={succeedHandler}
             pages={[
                 {
                     title: 'Hey!',
-                    subtitle: 'Willkommen bei der Studie #Name',
-                    backgroundColor: colors.background,
+                    subtitle: 'Willkommen bei der iViewSky Studie!',
+                    backgroundColor: colors.accent,
                     image: (
                         <Icon
                             name="hand-peace-o"
@@ -55,12 +52,41 @@ const OnboardingScreen = (props) => {
                     ),
                 },
                 {
-                    title: 'Danke!',
-                    subtitle: 'Schön das du dabei bist.',
+                    title: 'Benachrichtigung',
+                    subtitle: 'Du erhälst eine Benachrichtigung, sobald die nächste Befragung für Dich ansteht',
+                    backgroundColor: colors.background,
+                    image: (
+                        <Icon name="bell-o" type="font-awesome" size={100} color={colors.primary}/>
+                    ),
+                },
+                {
+                    title: 'Zugang',
+                    subtitle: 'Die Teilnahme an der Befragung ist ab dem Zeitpunkt der Benachrichtigung für 30 Minuten möglich. Solltest Du es mal nicht rechtzeitig schaffen, kannst Du auf die nächste Benachrichtigung warten.',
+                    backgroundColor: colors.background,
+                    image: (
+                        <Icon name="hourglass-start" type="font-awesome" size={100} color={colors.accent}/>
+                    ),
+                },
+                {
+                    title: 'Befragung',
+                    subtitle: 'Bitte beantworte alle Fragen Wahrheitsgemäß und lass Dir bei der Beantwortung Zeit ',
                     backgroundColor: colors.background,
                     image: (
                         <Icon
-                            name="paper-plane-o"
+                            name="tasks"
+                            type="font-awesome"
+                            size={100}
+                            color={colors.accent}
+                        />
+                    ),
+                },
+                {
+                    title: 'Fotos',
+                    subtitle: 'Während der Befragung sollst Du Fotos vom Himmel machen. Ein Foto in vertikaler und ein Foto in horizontaler Blickrichtung',
+                    backgroundColor: colors.background,
+                    image: (
+                        <Icon
+                            name="camera"
                             type="font-awesome"
                             size={100}
                             color={colors.primary}
@@ -68,13 +94,32 @@ const OnboardingScreen = (props) => {
                     ),
                 },
                 {
-                    title: 'Benachrichtigung',
-                    subtitle: 'Du erhälst eine Benachrichtigung sobald es wieder an der Zeit ist die Befragung durchzuführen',
-                    backgroundColor: colors.primary,
+                    title: 'Fotos: Geschlossener Raum',
+                    subtitle: 'Befindest Du dich während der Befragung in einem geschlossenen Raum, machst Du bitte die Fotos wenn möglich aus einem geöffneten Fenster in Deiner Nähe',
+                    backgroundColor: colors.background,
                     image: (
-                        <Icon name="bell-o" type="font-awesome" size={100} color={colors.accent}/>
+                        <Icon
+                            name="camera"
+                            type="font-awesome"
+                            size={100}
+                            color={colors.primary}
+                        />
                     ),
                 },
+                {
+                    title: 'Fotos: Freier Himmel',
+                    subtitle: 'Befindest Du dich während der Befragung draußen unter freiem Himmel, machst Du bitte ein Foto von dem Himmel direkt über Dir und ein Foto vom Horizont in Blickrichtung. ',
+                    backgroundColor: colors.background,
+                    image: (
+                        <Icon
+                            name="camera"
+                            type="font-awesome"
+                            size={100}
+                            color={colors.primary}
+                        />
+                    ),
+                },
+
                 {
                     title: "Lass uns starten!",
                     subtitle: (
@@ -90,11 +135,11 @@ const OnboardingScreen = (props) => {
                     image: (
                         <Icon name="rocket" type="font-awesome" size={100} color="white"/>
                     ),
-                },
+                }
             ]}
         />
 
     )
-};
+}
 
 export default withTheme(OnboardingScreen)

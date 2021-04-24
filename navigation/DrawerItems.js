@@ -8,7 +8,7 @@ import CtmDialog from "../components/helper/CtmDialog";
 
 
 //todo: get  text from server?
-const text = 'LLorem ipsum dolor sit t, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore etLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
+const text = ' diam nonumy eirmod tempor invidunt ut . Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
 
 const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
@@ -20,7 +20,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
 
     return (
-            <SafeAreaView style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
+            <View style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
                 <View>
                     <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
                     <Drawer.Section title="Einstellungen">
@@ -46,18 +46,16 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                             </View>
                         </TouchableRipple>
                     </Drawer.Section>
-                    <Drawer.Section title="Feedback">
-                        <TouchableRipple onPress={() => navigation.navigate('Feedback')}>
-                            <View style={styles.preference}>
-                                <Text>Schreib eine Nachricht</Text>
-                            </View>
-                        </TouchableRipple>
-                    </Drawer.Section>
+                    {/*<Drawer.Section title="Feedback">*/}
+                    {/*    <TouchableRipple onPress={() => navigation.navigate('Feedback')}>*/}
+                    {/*        <View style={styles.preference}>*/}
+                    {/*            <Text>Schreib eine Nachricht</Text>*/}
+                    {/*        </View>*/}
+                    {/*    </TouchableRipple>*/}
+                    {/*</Drawer.Section>*/}
                 </View>
-                {authStatus
-                    ? <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
-                    : <Drawer.Item style={{backgroundColor: colors.surface}} icon='login' label='Teilnehmer ID' onPress={() => navigation.navigate('Auth')}/>}
-            </SafeAreaView>
+               {/*<Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>*/}
+            </View>
     );
 };
 

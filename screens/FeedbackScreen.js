@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useReducer, useState} from 'react'
-import {View, StyleSheet, ScrollView} from 'react-native'
+import {View, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard} from 'react-native'
 import {useDispatch} from "react-redux";
 
 import {Headline, ToggleButton} from "react-native-paper";
@@ -51,27 +51,26 @@ const FeedbackScreen = (props) => {
     }
 
 
-
     useEffect(() => {
         if (value === 'bug') setPlaceHolder('Was hat nicht funktioniert?')
-        else if (value === 'feedback') setPlaceHolder('Schreibe uns ein Feedback..')
+        else if (value === 'feedback') setPlaceHolder('Schreibe ein Feedback..')
     }, [value])
     // toDo: find solution for limited feedback
 
 
     return (
         <Screen>
-            <TextInputAvoidingView>
+            {/*<TextInputAvoidingView style={{flex: 1}}>*/}
+                <TouchableWithoutFeedback  onPress={Keyboard.dismiss} accessible={false}>
                 <ScrollView contentContainerStyle={styles.inner}>
-
-
                     <View style={styles.header}>
                         <Headline>Feedback</Headline>
 
                     </View>
 
                     <View style={styles.actions}>
-                        <ToggleButton.Row style={{marginVertical: 10, alignSelf: 'flex-start', marginLeft: 43}} onValueChange={value => setValue(value)}
+                        <ToggleButton.Row style={{marginVertical: 10, alignSelf: 'flex-start'}}
+                                          onValueChange={value => setValue(value)}
                                           value={value}>
                             <ToggleButton icon="bug" value="bug"/>
                             <ToggleButton icon="star" value="feedback"/>
@@ -80,7 +79,9 @@ const FeedbackScreen = (props) => {
                                keyboardType='default' required minLength={4}
                                autocapitalize='none' errorText='' icon='comment-quote'
                                helpText='Du kannst insgesamt drei Mal ein Feedback geben'
-                               onInputChange={inputChangeHandler} initialValue=''/>
+                               onInputChange={inputChangeHandler} initialValue='' style={{width: '100%'}}/>
+
+
                         {/*<Input id='password' label='Password' keyboardType='default' required minLength={5}*/}
                         {/*       autocapitalize='none' secureTextEntry errorText='Bitte gebe Dein Passwort ein.'*/}
                         {/*       onInputChange={inputChangeHandler} initialValue=''/>*/}
@@ -92,7 +93,8 @@ const FeedbackScreen = (props) => {
                                    onPress={sendFeedbackHandler}>Senden</CtmButton>
                     </View>
                 </ScrollView>
-            </TextInputAvoidingView>
+                </TouchableWithoutFeedback>
+            {/*</TextInputAvoidingView>*/}
         </Screen>
     )
 }
@@ -110,10 +112,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
         paddingBottom: 30
     },
-    action: {
-        marginTop: 10,
-        width: '100%'
-    },
+
     btnCtn: {
         width: '70%',
         marginTop: 25

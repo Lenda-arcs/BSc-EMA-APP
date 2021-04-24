@@ -72,7 +72,7 @@ const Input = props => {
             {/* for validation maybe works also with text-input-mask */}
 
             <TextInput {...props} mode={props.mode ? props.mode : 'flat'}
-                       style={{backgroundColor: colors.background, width: '80%', ...props.style}}
+                       style={{backgroundColor: colors.background, width: '90%', ...props.style}}
                        label={props.label}
                        value={inputState.value}
                        onChangeText={textChangeHandler}
@@ -88,7 +88,7 @@ const Input = props => {
                        }/>
             {
                 !inputState.isValid && inputState.touched &&
-                (<HelperText type='error'>{props.errorText}</HelperText>)
+                (<HelperText style={{alignSelf: 'flex-start', marginLeft: 12}} type='error'>{props.errorText}</HelperText>)
             }
             <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog} helpText={props.helpText}
                        title='Eingabehilfe'/>
@@ -98,7 +98,7 @@ const Input = props => {
 const screenWidth = Dimensions.get('window').width
 const styles = StyleSheet.create({
     formControl: {
-        width: screenWidth,
+        width: screenWidth / 100 * 70 ,
         marginBottom: 10,
         justifyContent: 'center',
         alignItems: 'center'

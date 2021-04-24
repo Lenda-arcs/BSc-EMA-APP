@@ -94,39 +94,37 @@ const Home = () => {
     )
 }
 
-const AssessmentNavigator = () => {
-
-    const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
-    const isAuth = useSelector(state => !!state.auth.token)
-
+const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
     return (
         <AssessStack.Navigator screenOptions={defaultNavOptions}>
 
-            {!isFirstLaunch
-                ? isAuth
-                    ? <AssessStack.Screen name='Home' component={Home}
-                                          options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
-                    : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>
-                : <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/> }
-           <AssessStack.Screen name='Assessment' component={AssessmentScreen} options={{headerTitle: `Befragung`}}/>
-            <AssessStack.Screen name='Feedback' component={FeedbackScreen}/>
+            {isFirstLaunch && !isAuth &&
+            <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/>}
+            {isAuth
+                ? <>
+                    <AssessStack.Screen name='Home' component={Home}
+                                        options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
+                    <AssessStack.Screen name='Assessment' component={AssessmentScreen}
+                                        options={{headerTitle: `Befragung`}}/>
+                    <AssessStack.Screen name='Feedback' component={FeedbackScreen}/>
+                </>
+                : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>}
 
         </AssessStack.Navigator>
     )
 }
 
 
-const AppNavigator = () => {
+const AppNavigator = () =>
+{
     const isAuth = useSelector(state => !!state.auth.token)
-    const didTryAutoLogin = useSelector(state => !!state.auth.didTryAutoLogin);
-
-
-
+    const didTryAutoLogin = useSelector(state => !!state.auth.didTryAutoLogin)
+    const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
     return (
         <NavigationContainer>
-            {!isAuth && !didTryAutoLogin
+            {!didTryAutoLogin && !isAuth
                 ? <StartupScreen/>
-                : <AssessmentNavigator/>}
+                : <AssessmentNavigator isFirstLaunch={isFirstLaunch} isAuth={isAuth}/>}
 
         </NavigationContainer>
 

@@ -1,13 +1,8 @@
-import ENV from "../../ENV";
-import * as Notifications from 'expo-notifications'
-import * as Permissions from "expo-permissions";
-
-import {Alert} from "react-native";
+import ENV from "../../env";
 
 import * as assessmentActions from './assessment'
 import * as storeFac from '../../helpers/asyncStoreFactories'
 import {fetchData} from '../../helpers/fetchFactories'
-import {getUserPushToken} from '../../helpers/permissonFactories'
 import {saveItemAsyncStore, getItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
 
 
@@ -15,25 +10,12 @@ export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
 export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
-export const SET_PUSH_TOKEN = 'SET_PUSH_TOKEN'
-export const SET_FINISHED_BOARDING = 'SET_FINISHED_BOARDING'
 export const SET_FEEDBACK = 'SET_FEEDBACK'
 
 let USER = 'USER_DATA'
 const LAUNCHED = 'LAUNCHED'
-const PUSH_TOKEN = 'PUSH_TOKEN'
 
 
-export const checkPushToken = () => {
-    return async () => {
-        const asyncRes = await storeFac.getItemAsyncStore(PUSH_TOKEN)
-        if (!asyncRes) {
-            const pushToken = await getUserPushToken()
-            await storeFac.saveItemAsyncStore(PUSH_TOKEN, true)
-            await sendPushToken(pushToken)
-        }
-    }
-}
 export const sendFeedback = (message, topic) => {
     return async (dispatch, getState) => {
 
@@ -51,27 +33,11 @@ export const sendFeedback = (message, topic) => {
         if (token) {
             try {
                 if (!feedbackCount || feedbackCount <= 3) {
-                    await fetchData(`${ENV.TempOwnApi}/feedback`, 'POST', newFeedback, token)
+                    await fetchData(`${ENV.OwnApi}/feedback`, 'POST', newFeedback, token)
                     const newFeedbackCount = +feedbackCount + 1
                     await saveItemAsyncStore(SET_FEEDBACK, newFeedbackCount)
                     dispatch({type: SET_FEEDBACK})
                 }
-            } catch (err) {
-                throw new Error(err)
-            }
-        }
-    }
-}
-
-
-const sendPushToken = (pushToken) => {
-    return async (dispatch, getState) => {
-        const {token, userId} = getState().auth
-        if (token) {
-            try {
-                const tokenRes = await fetchData(`${ENV.TempOwnApi}/users/${userId[1]}`,
-                    'PATCH',
-                    {pushToken: pushToken}, token)
             } catch (err) {
                 throw new Error(err)
             }
@@ -102,12 +68,10 @@ export const setDidTryAL = () => {
 export const tryLogin = () => {
     return async (dispatch) => {
         const userData = await storeFac.getItemAsyncStore(USER, true, true)
-
         if (!userData) {
             dispatch(setDidTryAL())
             return
         }
-
         const {token, userId, group, repeatCount} = userData
 
         dispatch(authenticate({token, userId, group, repeatCount}))
@@ -118,22 +82,19 @@ export const isFirstLaunch = () => {
     return async (dispatch) => {
         const isLaunched = await storeFac.getItemAsyncStore(LAUNCHED)
         if (!isLaunched) {
-            await storeFac.saveItemAsyncStore(LAUNCHED, true)
             dispatch({type: SET_IS_FIRST_LAUNCH, val: true})
         } else dispatch({type: SET_IS_FIRST_LAUNCH, val: false})
+
     }
 
 }
-
-export const finishBoarding = () => {
-    return {type: SET_FINISHED_BOARDING}
-}
-
-// user login
-export const login = (userId, password) => {
+// user login and signup
+export const signUser = (userId, password, passwordConfirm = null) => {
+    let type = !passwordConfirm ? 'login' : 'signup'
+    let data = !passwordConfirm ? {userId, password} : {userId, password, passwordConfirm}
     return async (dispatch) => {
         try {
-            const resData = await fetchData(`${ENV.TempOwnApi}/users/login`, 'POST', {userId, password})
+            const resData = await fetchData(`${ENV.OwnApi}/users/${type}`, 'POST', data)
             // for later db patching
             const user = {
                 token: resData.token,
@@ -142,15 +103,13 @@ export const login = (userId, password) => {
                 repeatCount: resData.data.user.assessmentRepeats
             }
 
-            // specific key for async storage ?? -- find way to reuse it for later actions
-            // USER = USER.concat(user.userId[0])
-
             const userProgress= resData.data.user.userProgress
-            console.log(userProgress)
 
             dispatch(authenticate(user))
             dispatch(assessmentActions.setUserProgress(userProgress))
 
+            // only set fistLaunch complete if registration was successful
+            passwordConfirm && await storeFac.saveItemAsyncStore(LAUNCHED, true)
             // old:  await saveUserToStorage(userToken, userId, userGroup)
             await storeFac.saveItemAsyncStore(USER, user, true)
         } catch (err) {

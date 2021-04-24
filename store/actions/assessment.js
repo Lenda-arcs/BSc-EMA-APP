@@ -1,13 +1,15 @@
-import ENV from '../../ENV'
+import * as Network from 'expo-network'
+
+import ENV from '../../env'
+import Assessment from "../../models/assessment";
 import * as storeFac from '../../helpers/asyncStoreFactories'
 import { fetchData } from '../../helpers/fetchFactories'
 import { scheduleNotificationHandler } from '../../helpers/notificationHandler'
-import * as Notifications from "expo-notifications";
+import { getUserLocation } from "../../helpers/permissonFactories";
 import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
 
 import {Buffer} from "buffer";
 
-export const ADD_ASSESSMENT = 'ADD_ASSESSMENT'
 export const SET_USER_PROGRESS = 'SET_USER_PROGRESS'
 export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA'
 export const SET_NOTIFICATION_SCHEDULED = 'SET_NOTIFICATION_SCHEDULED'
@@ -30,7 +32,7 @@ export const setAssessmentData = () => {
         const asyncStoreSlides = await storeFac.getItemAsyncStore(ASSESSMENT_DATA, false, true)
 
         if (!asyncStoreSlides) {
-            slideData = await fetchData(`${ENV.TempOwnApi}/slides`, 'GET', null, token)
+            slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
             notificationTimes = slideData.attachment
             slideData = slideData.data.data
 
@@ -67,10 +69,8 @@ export const setNotifications = () => {
 
             await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
 
-
         }
-        //await scheduleNotificationHandler((new Date().getTime() + 3000))  // just for testing
-
+        //await scheduleNotificationHandler((new Date().getTime() + 6000))  // just for testing
 
     }
 }
@@ -90,79 +90,80 @@ export const getUserProgress = () => {
     }
 }
 
-const getWeatherData = async (userLoc) => {
-    const weatherToken = ENV.WeatherToken
-    const searchRadius = 100
-    const weatherData = await fetchData(`${ENV.WeatherApi}/stations/latest?radius=${userLoc.lat},${userLoc.lng},${searchRadius}&token=${weatherToken}`, 'GET')
-    const nearestStationData = weatherData.STATION[0]
-    return nearestStationData
-}
 
-const createAssessmentObj = (userId, weatherData, userLoc, selection, time, skyImage, horizonImage) => {
+const createAssessmentObj = (userId, weatherData = undefined, userLoc, selection, time, skyImage, horizonImage) => {
     const skyImgBuffer = new Buffer(skyImage, 'base64')
     const horizonImgBuffer = new Buffer(horizonImage, 'base64')
-    return (
-       {
-           user: userId[1],
-           weather: weatherData,
-           location: {
-               coordinates: [userLoc.lng, userLoc.lat]
-           },
-           selection: selection,
-           images: [
-               {
-                   description: "sky",
-                   data: skyImgBuffer
-               },
-               {
-                   description: "horizon",
-                   data: horizonImgBuffer
-               }
-           ],
-           timeStamp: {
-               assessmentStart: time.start,
-               assessmentEnd: time.end
-           }
-       }
-   )
+    const newAssessment = new Assessment(userId, userLoc, selection, time, skyImgBuffer, horizonImgBuffer)
+    console.log(newAssessment)
+    return newAssessment
+       // {
+       //     user: userId[1],
+       //     weather: undefined,
+       //     location: {
+       //         coordinates: [userLoc.lng, userLoc.lat]
+       //     },
+       //     selection: selection,
+       //     images: [
+       //         {
+       //             description: "sky",
+       //             data: skyImgBuffer
+       //         },
+       //         {
+       //             description: "horizon",
+       //             data: horizonImgBuffer
+       //         }
+       //     ],
+       //     timeStamp: {
+       //         assessmentStart: time.start,
+       //         assessmentEnd: time.end
+       //     }
+       // }
+
 }
-//
+
 
 const fetchRestoredAssessment = async (token) => {
     const restoredAssessmentArr = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING, undefined, true)
+    if (restoredAssessmentArr) await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessmentArr, token)
 
-    if (restoredAssessmentArr) {
-        restoredAssessmentArr.reduce(async (memo, assessment) => {
-            await memo
-            await fetchData(`${ENV.TempOwnApi}/assessments`, 'POST', assessment, token)
-        }, undefined)
-    }
 }
 
-export const saveAssessment = (skyImage, horizonImage, time, selection, userLoc) => {
+export const saveAssessment = (skyImage, horizonImage, time, selection) => {
     return async (dispatch, getState) => {
         const { token, userId } = getState().auth
-        const { userProgress } = getState().assessment
+        const { userProgress  } = getState().assessment
 
-        // check if some assessment data is pending in asyncStorage and send it to server
-        // todo: functionality not checked yet
-        const restoredAssessmentRes = await fetchRestoredAssessment(token)
-        if (restoredAssessmentRes) await deleteItemAsyncStore(ASSESSMENT_PENDING)
+        const userCoords = await getUserLocation()
+        const userLoc = {
+            lat: userCoords.coords.latitude,
+            lng: userCoords.coords.longitude
+        }
 
-        const weatherData = await getWeatherData(userLoc)
-        const newAssessment = createAssessmentObj(userId, weatherData, userLoc, selection, time, skyImage, horizonImage)
+        const newAssessment = createAssessmentObj(userId,undefined, userLoc, selection, time, skyImage, horizonImage)
 
-        const sendToServerRes = await fetchData(`${ENV.TempOwnApi}/assessments`, 'POST', newAssessment, token)
+        const networkStateRes = await Network.getNetworkStateAsync()
+        // only send if network available
+        if (networkStateRes.isInternetReachable) {
+            const restoredAssessmentRes = await fetchRestoredAssessment(token)
+            if (restoredAssessmentRes) await deleteItemAsyncStore(ASSESSMENT_PENDING) //todo: not working ...
 
-        // if sending failed -> temp save to async
-        // todo: functionality not checked yet
-        if (!sendToServerRes) {
+            await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
+
+        } else {
+            // not working for multiple missed assessment fetches..
+            // async storage too small for that purpose
+            const newAssessment = createAssessmentObj(userId, undefined, userLoc, selection, time, skyImage, horizonImage)
             const pendingAssessmentArr = await getItemAsyncStore(ASSESSMENT_PENDING,undefined, true)
+
             if (!pendingAssessmentArr) await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
-            else {
-                pendingAssessmentArr.push(newAssessment)
-                await saveItemAsyncStore(ASSESSMENT_PENDING, pendingAssessmentArr)
-            }
+            // else {
+            //     pendingAssessmentArr.push(newAssessment)
+            //     for (let i = 0; i < pendingAssessmentArr.length, i++) {
+            //         await saveItemAsyncStore()
+            //     }
+            //     await saveItemAsyncStore(ASSESSMENT_PENDING, pendingAssessmentArr)
+            // }
         }
 
         await dispatch(setUserProgress(userProgress + 1))

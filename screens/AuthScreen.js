@@ -1,7 +1,17 @@
 import React, {useContext, useState, useReducer, useCallback, useEffect, useRef} from 'react'
 import {Animated, StyleSheet, View, TouchableWithoutFeedback, Keyboard, ScrollView} from "react-native";
-import {Headline} from 'react-native-paper'
-import {useDispatch} from "react-redux";
+import {
+    Headline,
+    Paragraph,
+    Snackbar,
+    Switch,
+    Text,
+    ToggleButton,
+    TouchableRipple,
+    Button,
+    IconButton
+} from 'react-native-paper'
+import {useDispatch, useSelector} from "react-redux";
 
 import Input from "../components/helper/Input";
 import Screen from "../components/wrapper/Screen";
@@ -13,20 +23,22 @@ import * as authActions from '../store/actions/auth'
 import {formReducer, FORM_INPUT_UPDATE} from '../helpers/ctmReducer'
 
 
-
-
 const AuthScreen = props => {
+    const {isFirstLaunch } = useSelector(state => state.auth)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState()
     const [visible, setVisible] = useState(false)
+    const [isSignup, setIsSignup] = useState(!isFirstLaunch ? true : false) //todo: if not setSate -> refactor to normal const
+    const inputValues = isSignup ? {userId: '', password:'', confirmPassword: ''} : {userId: '', password: '' }
+    const inputValities = isSignup ? {userId: false, password:false, confirmPassword: false} : {userId: false, password: false}
 
 
     const showDialog = () => setVisible(true)
     const hideDialog = () => setVisible(false)
 
     const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: {userId: '', password: ''},
-        inputValidities: {userId: false, password: false},
+        inputValues: inputValues,
+        inputValidities: inputValities,
         formIsValid: false
     });
 
@@ -43,7 +55,7 @@ const AuthScreen = props => {
     };
     useEffect(() => {
         fadeIn()
-    },[])
+    }, [])
 
 
     useEffect(() => {
@@ -54,20 +66,31 @@ const AuthScreen = props => {
 
 
     const dispatch = useDispatch()
-    const signInHandler = async () => {
-        let action //
+    const authHandler = async () => {
+        let action
+        if (isSignup) {
+            action = authActions.signUser(
+                formState.inputValues.userId,
+                formState.inputValues.password,
+                formState.inputValues.confirmPassword
+            )
+        } else {
+            action = authActions.signUser(
+                formState.inputValues.userId,
+                formState.inputValues.password
+            )
+        }
 
-        action = authActions.login(
-            formState.inputValues.userId,
-            formState.inputValues.password
-        )
+
         setError(null)
         setIsLoading(true)
         try {
             await dispatch(action)
         } catch (err) {
             let msg = err.message
-            if (err.message === 'Error: Incorrect userId or password') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
+            if (msg === 'Error: Incorrect userId or password') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
+            else if (msg === 'Error: User validation failed: passwordConfirm: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
+            else if (msg.includes('duplicate key')) msg = 'Es existiert bereits ein Nutzer mit diesem Namen.'
             setError(msg)
             setIsLoading(false)
         }
@@ -83,41 +106,54 @@ const AuthScreen = props => {
         });
     }, [dispatchFormState])
 
-
     return (
         <Screen style={{alignItems: 'center', justifyContent: 'center'}} darkContent noSaveArea>
-                <TextInputAvoidingView style={{flex: 1}}>
-                    <TouchableWithoutFeedback  onPress={Keyboard.dismiss} accessible={false}>
-                        <Animated.View style={{opacity: fadeAnim}}>
-                            <ScrollView contentContainerStyle={styles.inner}>
-                                <View style={styles.header}>
-                                    <Headline style={{fontWeight: 'bold'}}>Willkommen!</Headline>
-                                </View>
+            <TextInputAvoidingView style={{flex: 1}}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                    <Animated.View style={{opacity: fadeAnim}}>
+                        <ScrollView contentContainerStyle={styles.inner}>
+                            <View style={styles.header}>
+                                <Headline style={{fontWeight: 'bold'}}>{isSignup ? 'Registieren' : 'Anmelden'}</Headline>
+                            </View>
+                            <View>
+                                <Input id='userId' label='Teilnehmer ID' keyboardType='default' required minLength={4}
+                                       userId style={styles.input} icon='account' placeholder='Pilot-XXXX'
+                                       helpText='Deine Teilnehmer Identifikationsnummer, die wir Dir mitgeteilt haben.'
+                                       autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
+                                       onInputChange={inputChangeHandler} initialValue=''/>
+                                <Input id='password' label='Password' keyboardType='default' required minLength={8}
+                                       style={styles.input} icon='key'
+                                       helpText='Gib ein Passwort mit mindestens 8 Zeichen ein.'
+                                       autocapitalize='none' secureTextEntry errorText='Mindestens 8 Zeichen'
+                                       onInputChange={inputChangeHandler} initialValue=''/>
+                                {isSignup &&
+                                <Input id='confirmPassword' label='Passwort Bestätigen' keyboardType='default' required
+                                       minLength={8}
+                                       style={styles.input} icon='key-outline'
+                                       helpText='Bestätige Dein Passwort'
+                                       autocapitalize='none' secureTextEntry errorText='Die Passwörter müssen übereinstimmen.'
+                                       onInputChange={inputChangeHandler} initialValue=''/>}
 
-                                <View style={styles.actions}>
-                                    <Input  id='userId' label='Teilnehmer ID' keyboardType='number-pad' required minLength={4}
-                                           userId style={styles.input} icon='account' helpText='TEXT'
-                                           autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
-                                           onInputChange={inputChangeHandler} initialValue=''/>
-                                    <Input id='password' label='Password' keyboardType='default' required minLength={5}
-                                           style={styles.input} icon='lock' helpText='TEXT'
-                                           autocapitalize='none' secureTextEntry errorText='Bitte gebe Dein Passwort ein.'
-                                           onInputChange={inputChangeHandler} initialValue=''/>
+                            </View>
+                            <View style={styles.btnCtn}>
+                                <CtmButton loading={isLoading}
+                                           mode='contained'
+                                           disabled={!formState.formIsValid}
+                                           onPress={authHandler}>{isSignup ? 'Sign Up' : 'Login'}</CtmButton>
+                            </View>
 
-                                </View>
-                                <View style={styles.btnCtn}>
-                                    <CtmButton loading={isLoading}
-                                               mode='contained'
-                                               disabled={!formState.formIsValid}
-                                               onPress={signInHandler}>Teilnehmen</CtmButton>
-                                </View>
+                            <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog}
+                                       helpText={error}
+                                       title='Fehlgeschlagen'/>
 
-                                <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog} helpText={error}
-                                           title='Fehlgeschlagen'/>
-                            </ScrollView>
-                        </Animated.View>
-                    </TouchableWithoutFeedback>
-                </TextInputAvoidingView>
+                        </ScrollView>
+                        {/*{isSignup && <IconButton style={{alignSelf: 'flex-end', marginBottom: 40}} size={20} icon="login" animated={true}*/}
+                        {/*                         onPress={() => {*/}
+                        {/*                             setIsSignup(prevState => !prevState)*/}
+                        {/*                         }}/>}*/}
+                    </Animated.View>
+                </TouchableWithoutFeedback>
+            </TextInputAvoidingView>
         </Screen>
 
     )
@@ -135,20 +171,19 @@ const styles = StyleSheet.create({
         flex: .25,
         justifyContent: 'flex-end',
         marginHorizontal: 10,
-        paddingBottom: 50
+        paddingBottom: 50,
     },
-    action: {
-        marginTop: 10,
-        width: '100%'
+    preference: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
     },
     wrapper: {
         flex: 1
     },
-    input:{
-      width: '60%'
-    },
     btnCtn: {
-        width: '70%',
+        width: '100%',
         marginTop: 25
     }
 

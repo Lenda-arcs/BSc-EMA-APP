@@ -3,13 +3,17 @@
     "android": {
       "preview": {
         "distribution": "internal",
-        "workflow": "managed"
+        "workflow": "managed",
+        "env": {
+          "API_URL": "https://api.production.com",
       }
     },
     "ios": {
       "preview": {
         "distribution": "internal",
-        "workflow": "managed"
+        "workflow": "managed",
+        "env": {
+          "API_URL": "https://api.production.com"
       }
     }
   }

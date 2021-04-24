@@ -10,11 +10,11 @@ const checkPermissions = async (Type) => {
     else return true
 }
 
-export const getUserPushToken = async () => {
-    const hasPermissions = checkPermissions(Permissions.NOTIFICATIONS)
-    if (!hasPermissions) throw new Error('Um fortzufahren benötigen wir dein Einverständnis, dass wir dir Benachrichtigungen senden dürfen')
-    else return (await Notifications.getExpoPushTokenAsync()).data
-}
+// export const getUserPushToken = async () => {
+//     const hasPermissions = checkPermissions(Permissions.NOTIFICATIONS)
+//     if (!hasPermissions) throw new Error('Um fortzufahren benötigen wir dein Einverständnis, dass wir dir Benachrichtigungen senden dürfen')
+//     else return (await Notifications.getExpoPushTokenAsync()).data
+// }
 
 export const getUserLocation = async () => {
     const hasPermissions = checkPermissions(Permissions.LOCATION)

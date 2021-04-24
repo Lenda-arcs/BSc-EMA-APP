@@ -6,26 +6,30 @@ import CtmDialog from "./CtmDialog";
 
 //todo: ....see if Invariant Violation: Tried to register two views with the same name LottieAnimationView is   does not appear anymore
 
-// const getAnimation = () => {
-//     const rndNum = Math.floor(Math.random() * 2)
-//
-//     switch (rndNum) {
-//         case 0 :
-//             return require('../../assets/animations/4329-confetti.json')
-//         case 1 :
-//             return require('../../assets/animations/4963-confetti-dark-theme.json')
-//         default:
-//             return null
-//     }
-// }
+const getAnimation = () => {
+    const rndNum = Math.floor(Math.random() * 2)
+
+    switch (rndNum) {
+        case 0 :
+            return require('../../assets/animations/4329-confetti.json')
+        case 1 :
+            return require('../../assets/animations/4963-confetti-dark-theme.json')
+        default:
+            return null
+    }
+}
 
 
-const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
+const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     const {colors} = theme
     const animationConfetti = useRef(new Animated.Value(0)).current
     // const animationCheck = useRef()
     const [animationObj, setAnimationObj] = useState('')
     const [dialogVisible, setDialogVisible] = useState(false)
+    const [dialogContent, setDialogContent] = useState({
+        title: 'Erfolgreich!',
+        text: 'Deine Antworten sind angekommen, danke, dass Du dabei bist!'
+    })
 
     const showDialog = () => setDialogVisible(true)
     const hideDialog = () => {
@@ -33,9 +37,15 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
         close()
 
     }
+    useEffect(() => {
+        err && setDialogContent({
+            title: 'Error!',
+            text: 'Upps!, da ist etwas schief gegangen... =(. Überprüfe Deine Anmeldedaten'
+        })
+    }, [err])
 
     useEffect(() => {
-       // success && setAnimationObj(getAnimation)
+        success && setAnimationObj(getAnimation)
         Animated.timing(animationConfetti, {
             toValue: 1,
             duration: 1,
@@ -49,21 +59,22 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme}) => {
     }, [success])
 
 
+
     return (
         <Portal>
             <Modal visible={visible} onDismiss={onDismiss}
                    contentContainerStyle={styles.animationContainer}>
                 {success
-                    ? <View><LottieView
+                    ? <><LottieView
                         progress={animationConfetti}
                         speed={1}
                         style={{
                             alignSelf: 'center',
                             flexGrow: 1
-                        }} source={require('../../assets/animations/4963-confetti-dark-theme.json')} autoPlay={true} resizeMode='cover'/>
+                        }} source={animationObj} autoPlay={true} resizeMode='cover'/>
                         <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog}
-                                   helpText='Deine Antworten sind bei uns angekommen, danke für Deine Teilnahme '
-                                   title='Erfolgreich!'/></View>
+                                   helpText={dialogContent.text}
+                                   title={dialogContent.title}/></>
                     : <><ActivityIndicator animating={true} size='large' color={colors.accent}/></>}
             </Modal>
         </Portal>

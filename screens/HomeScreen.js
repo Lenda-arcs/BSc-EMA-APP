@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {View, StyleSheet, Vibration, Animated} from 'react-native'
-import {withTheme, Paragraph} from "react-native-paper";
+import {withTheme, Paragraph, Snackbar} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
 
 import * as Notifications from 'expo-notifications'
@@ -10,10 +10,11 @@ import CtmButton from "../components/wrapper/CtmButton";
 import CtmPermission from "../components/helper/CtmPermission";
 import StudyOverview from "../components/helper/StudyOverview";
 
-import {checkPushToken} from "../store/actions/auth";
+import {getItemAsyncStore} from "../helpers/asyncStoreFactories";
 import {getUserProgress, setAssessmentData, setNotifications} from '../store/actions/assessment'
 import {calcResTime} from '../helpers/notificationHandler'
 import CtmDialog from "../components/helper/CtmDialog";
+import CountdownTimer from "../components/helper/CountdownTimer";
 
 
 Notifications.setNotificationHandler({
@@ -27,7 +28,7 @@ Notifications.setNotificationHandler({
 })
 
 const HomeScreen = props => {
-    const {colors} = props.theme
+    const {colors, dark} = props.theme
     const {token, repeatCount} = useSelector(state => state.auth)
     const {userProgress} = useSelector(state => state.assessment)
 
@@ -35,8 +36,9 @@ const HomeScreen = props => {
     const [notificationState, setNotificationState] = useState({not: {}, res: {}}) //todo: handle notifications
     const [access, setAccess] = useState(false)
     const [visible, setVisible] = useState(false)
+    const [snackVisible, setSnackVisible] = useState(false)
     const [errText, setErrText] = useState('')
-    const [noAccessText, setNoAccessText] = useState('Warte auf Deine nächste Benachrichtigung.')
+    const [noAccessText, setNoAccessText] = useState('')
     const [slidesFetched, setSlidesFetched] = useState(false)
 
     const dispatch = useDispatch()
@@ -55,7 +57,16 @@ const HomeScreen = props => {
 
     useEffect(() => {
         fadeIn()
-        userProgress === 0 && setNoAccessText('Die erste Benachrichtigung kommt morgen.')
+        let timeout
+        if (userProgress === 0 ) {
+            setNoAccessText('Die erste Benachrichtigung kommt morgen.')
+            timeout = 8000
+        } else {
+            setNoAccessText('Du wirst Benachrichtigt wenn es weitergeht.')
+            timeout = 2000
+        }
+        const myTimeout = setTimeout(() => setSnackVisible(true), timeout)
+        return () => clearTimeout(myTimeout)
     }, [isAuth])
 
     useEffect(() => {
@@ -119,7 +130,7 @@ const HomeScreen = props => {
                     ? calcResTime(notificationState.not.date)
                     : calcResTime(notificationState.res.notification.date)
                 // grand access to assessment only within 20min after notification.date
-                if (timePassedAfterTriggered < 60 * 15 && userProgress <= repeatCount) setAccess(true) // todo: check if interval too short
+                if (timePassedAfterTriggered < 60 * 20 && userProgress <= repeatCount) setAccess(true) // todo: check if interval too short
             }
         }
     }, [isAuth, notificationState])
@@ -137,15 +148,6 @@ const HomeScreen = props => {
     }, [])
 
 
-    // todo: pushToken not needed?
-    useEffect(() => {
-        const getPushToken = async () => {
-            await dispatch((checkPushToken()))
-        }
-        getPushToken()
-
-    }, [isAuth])
-
 
     return (
 
@@ -155,12 +157,23 @@ const HomeScreen = props => {
                 {isAuth && <StudyOverview style={{flex: .6, marginTop: 40}} colors={colors} count={userProgress} repeats={repeatCount}/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {access ? <CtmButton mode={Platform.OS === 'ios' ? 'outline' : 'text'} onPress={() => {
-                            props.navigation.replace('Assessment')
-                        }}>Start</CtmButton>
-                        : <Paragraph style={{fontSize: 16}}>{noAccessText}</Paragraph>}
+                    <CtmButton disabled={!access}mode={Platform.OS === 'ios' ? 'outline' : 'contained'} onPress={() => {
+                               props.navigation.replace('Assessment')}}>Start</CtmButton>
+
                 </View>
+                {/*<CountdownTimer stopTimer={false}/>*/}
             </Animated.View>
+            <Snackbar
+                style={!dark && {backgroundColor:  colors.accent }}
+                visible={snackVisible}
+                onDismiss={() => setSnackVisible(!snackVisible)}
+                action={{
+                    onPress: () => {
+                        setSnackVisible(!snackVisible)
+                    },
+                }}>
+                {noAccessText}
+            </Snackbar>
             <CtmDialog title='Fehler!' visible={visible} hideDialog={() => setVisible(false)} helpText={errText}/>
         </Screen>
 

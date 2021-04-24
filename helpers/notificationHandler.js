@@ -4,12 +4,12 @@ import {Platform} from "react-native";
 
 exports.scheduleNotificationHandler = async (nextDate) => {
 
-    // Platform.OS === 'ios' && await Notifications.requestPermissionsAsync(
-    //     {ios: {
-    //         allowAlert: true,
-    //             allowSound: true,
-    //             allowAnnouncements: true
-    //         } })
+    Platform.OS === 'ios' && await Notifications.requestPermissionsAsync(
+        {ios: {
+            allowAlert: true,
+                allowSound: true,
+                allowAnnouncements: true
+            } })
 
     // Local Notification
     await Notifications.scheduleNotificationAsync({

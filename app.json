@@ -1,9 +1,13 @@
 {
   "expo": {
-    "name": "EMA Studie - Himmel",
-    "slug": "rn-ema-bsc-app",
+    "name": "iViewSky",
+    "slug": "i-view-sky",
+    "description": "Hallo und Willkommen zu meiner Studie im Rahmen meiner BSc. Abschlussarbeit. Mit dieser Studie soll der Einfluss von dem Himmel auf unsere Stimmung untersucht werden.",
     "version": "1.0.0",
+    "privacy": "public",
+    "sdkVersion": "40.0.0",
     "orientation": "portrait",
+    "platforms": ["ios", "android"],
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",

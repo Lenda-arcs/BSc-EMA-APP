@@ -1,4 +1,4 @@
-import {AUTHENTICATE, LOGOUT, SET_DID_TRY_AL, SET_IS_FIRST_LAUNCH, SET_PUSH_TOKEN,SET_FINISHED_BOARDING} from '../actions/auth'
+import {AUTHENTICATE, LOGOUT, SET_DID_TRY_AL, SET_IS_FIRST_LAUNCH} from '../actions/auth'
 
 const initialState = {
     token: null,
@@ -7,7 +7,6 @@ const initialState = {
     repeatCount: null,
     didTryAutoLogin: false,
     isFirstLaunch: undefined,
-    pushToken: ''
 }
 
 
@@ -26,21 +25,12 @@ export default (state = initialState, action) => {
                 ...state,
                 didTryAutoLogin: true
             }
+
         case SET_IS_FIRST_LAUNCH:
-            return  {
+            return {
                 ...state,
                 isFirstLaunch: action.val,
-            }
-        case SET_FINISHED_BOARDING:
-            return {
-                ...state,
-                isFirstLaunch: false
-            }
-
-        case SET_PUSH_TOKEN:
-            return {
-                ...state,
-                pushToken: action.token
+                didCheckFirstLaunch: true
             }
         case LOGOUT:
             return initialState

@@ -11,14 +11,17 @@ const CtmDialog = (props) => {
             <Portal>
                 <Dialog visible={props.visible} onDismiss={props.hideDialog}>
                     <Dialog.Title>{props.title}</Dialog.Title>
-                    <ScrollView>
+
                         <Dialog.Content>
+                            <ScrollView>
                             <Paragraph style={{textAlign: 'justify'}}>{props.helpText}</Paragraph>
+                            </ScrollView>
                         </Dialog.Content>
+
                         <Dialog.Actions>
                             <Button onPress={props.hideDialog}>OKAY</Button>
                         </Dialog.Actions>
-                    </ScrollView>
+
 
                 </Dialog>
             </Portal>

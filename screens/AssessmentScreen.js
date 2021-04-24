@@ -20,6 +20,7 @@ import {saveAssessment} from '../store/actions/assessment'
 const AssessmentScreen = props => {
     // state to show activity indicator while fetching data
     const [isFetching, setIsFetching] = useState(false)
+    const [error, setError] = useState(false)
 
     // state to show modal
     const [visible, setVisible] = useState(false);
@@ -33,15 +34,12 @@ const AssessmentScreen = props => {
     // Validation
     const [slideComplete, setSlideComplete] = useState(false)
 
-    // state for timestamp (duration of user interaction)
-    const [time, setTime] = useState({
-        start: new Date(),
-        end: null
-    })
+
     // states for picture and location
     const [selectedSkyImage, setSelectedSkyImage] = useState()
     const [selectedHorizonImage, setSelectedHorizonImage] = useState()
-    const [userLoc, setUserLoc] = useState()
+    const [time, setTime] = useState({start: new Date() + 2})
+    //  const [userLoc, setUserLoc] = useState()
 
     // state for user selection
     const [selection, setSelection] = useState([])
@@ -59,7 +57,7 @@ const AssessmentScreen = props => {
     const isPicSlideCompleteHandler = (skyImage, horizonImage, userLoc) => {
         setSelectedSkyImage(skyImage)
         setSelectedHorizonImage(horizonImage)
-        setUserLoc(userLoc)
+        //setUserLoc(userLoc)
         isSlideCompleteHandler()
     }
 
@@ -77,17 +75,17 @@ const AssessmentScreen = props => {
     }
 
 
+
     const pictureSlide = {
         content: <PictureSlide isComplete={isPicSlideCompleteHandler}
-                               savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage, loc: userLoc}}/>
+                               savedData={{sky: selectedSkyImage, horizon: selectedHorizonImage}}/>
     }
 
     // current user progress and assessment slides
     const {userProgress, availableSlides} = useSelector(state => state.assessment)
     useEffect(() => {
         setSlides(availableSlides)
-        console.log('render slides')
-    },[props.navigation.isFocused()])
+    }, [props.navigation.isFocused()])
 
     // creating stepList for wizard with fetched slides
     const stepList =
@@ -102,28 +100,24 @@ const AssessmentScreen = props => {
         }))
 
 
-
     // // Append PictureSlide to assessment
-    const {group} = useSelector(state => state.auth)
-    group !== 'B' ? stepList.unshift(pictureSlide) : stepList.push(pictureSlide)
-
-
+    const {group, repeatCount} = useSelector(state => state.auth)
+    const pos = (userProgress === 0 || userProgress === repeatCount - 1) ? 2 : 1
+    group === 'B' ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - pos, 0, pictureSlide)
 
 
     const dispatch = useDispatch()
     const submitHandler = async () => {
         // creating timeobj to get duration of user interaction
         // calc duration on server
-        const endTime = new Date()
-        setTime(time.end = endTime)
+
         setIsFetching(true)
 
+        setTime(() => time.end = (new Date() + 2))
+
         setVisible(!visible);
-        await dispatch(saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection, userLoc))
-
+        await dispatch(saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection))
         setIsFetching(false)
-
-
     }
 
     const closeModal = () => {
@@ -165,7 +159,7 @@ const AssessmentScreen = props => {
                 }
             </View>
             {/* Will be rendered if data submit is successful */}
-            <SuccessAnimation success={!isFetching} visible={visible} close={closeModal}/>
+            <SuccessAnimation success={!isFetching}  visible={visible} close={closeModal}/>
         </Screen>
 
 

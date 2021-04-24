@@ -16,8 +16,6 @@ const QuestionItem = props => {
     // todo: find better solution for ios unchecked items
     //let platform = Platform.OS === 'android' ? 'android' : 'ios'
 
-
-
     const handlePress = () => {
         setExpanded(!expanded)
     }
@@ -39,7 +37,7 @@ const QuestionItem = props => {
                         left={props => <List.Icon {...props} icon={icon}/>}
                         expanded={expanded} onPress={handlePress}>
                 <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
-                    <View style={{minHeight: 200, backgroundColor: dark ? '#252525' : '#fff' , justifyContent: 'flex-start'}}>
+                    <View style={{ backgroundColor: dark ? '#252525' : '#fff' , justifyContent: 'flex-start'}}>
                         {props.items.map((item, index) => <RadioButton.Item key={index} label={item} value={index}
                                                                             labelStyle={styles.label} mode='android'
                                                                             style={styles.item} />)}

@@ -11,8 +11,10 @@ const StudyOverview = ({count, colors, repeats, style}) => {
     useEffect(() => {
         setFill(count / repeats * 100)
         if (count > 0 && count < repeats - 5) setText('Dein Fortschritt')
+        else if (count >= repeats) setText('Du hast es geschafft!')
         else if (count >= repeats - 5) setText('Du hast es fast geschafft!')
-        else if (count === repeats) setText('Du hast es geschaft!')
+
+
     }, [count])
 
     return (
@@ -30,9 +32,8 @@ const StudyOverview = ({count, colors, repeats, style}) => {
                 {
                     useCallback((fill) => (
 
-                        <Headline>
-                            {count}
-
+                        <Headline style={{fontSize: 24}}>
+                            {count} von {repeats}
                         </Headline>
                     ), [count])
                 }

@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react'
 import {View, StyleSheet, ScrollView, Alert} from 'react-native'
 import {List} from "react-native-paper";
 
-import { getUserLocation } from "../../helpers/permissonFactories";
 import ImagePicker from "./ImagePicker";
 import CtmSubheading from "../wrapper/CtmSubheading";
 import CtmDialog from "../helper/CtmDialog";
@@ -13,7 +12,6 @@ const PictureSlide = ({isComplete, savedData}) => {
 
     const [selectedSkyImage, setSelectedSkyImage] = useState(savedData?.sky)
     const [selectedHorizonImage, setSelectedHorizonImage] = useState(savedData?.horizon)
-    const [userLoc, setUserLoc] = useState(savedData?.loc)
 
     const [iconSkyImg, setIconSkyImg] = useState('camera')
     const [iconHorImg, setIconHorImg] = useState('camera')
@@ -34,28 +32,11 @@ const PictureSlide = ({isComplete, savedData}) => {
     }
 
     useEffect(() => {
-        const userLocation = async () => {
-
-            const userCoords = await getUserLocation()
-
-            const userLoc = {
-                lat: userCoords.coords.latitude,
-                lng: userCoords.coords.longitude
-            }
-            setUserLoc(userLoc)
-        }
-        // prevent from getting second location after coming back to slide
-        !userLoc && userLocation()
-
-    }, [])
-
-    useEffect(() => {
-        if (selectedSkyImage && selectedHorizonImage && userLoc) {
-            isComplete(selectedSkyImage, selectedHorizonImage, userLoc)
+        if (selectedSkyImage && selectedHorizonImage) {
+            isComplete(selectedSkyImage, selectedHorizonImage)
         }
 
     },[selectedSkyImage,selectedHorizonImage])
-
 
 
     const showHelpDialogSkyHandler = () => {
@@ -64,7 +45,7 @@ const PictureSlide = ({isComplete, savedData}) => {
     }
 
     const showHelpDialogHorizonHandler = () => {
-        setHelpText('Mach ein Foto vom Himmel am Horizont (vor Dir).')
+        setHelpText('Mach ein Foto vom Horizont (vor Dir).')
         showDialog()
     }
 
