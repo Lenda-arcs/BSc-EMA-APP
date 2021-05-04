@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {View, StyleSheet, Vibration, Animated} from 'react-native'
-import {withTheme, Paragraph, Snackbar} from "react-native-paper";
+import {withTheme, Paragraph, Snackbar, Text, Headline} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
+import {StackActions, useIsFocused} from '@react-navigation/native'
 
 import * as Notifications from 'expo-notifications'
 
@@ -10,31 +11,26 @@ import CtmButton from "../components/wrapper/CtmButton";
 import CtmPermission from "../components/helper/CtmPermission";
 import StudyOverview from "../components/helper/StudyOverview";
 
-import {getItemAsyncStore} from "../helpers/asyncStoreFactories";
-import {getUserProgress, setAssessmentData, setNotifications} from '../store/actions/assessment'
-import {calcResTime} from '../helpers/notificationHandler'
+import {
+    fetchRestoredAssessment,
+    getUserProgress,
+    setAssessmentData,
+    setNotifications
+} from '../store/actions/assessment'
+import {filterTimeArr} from '../helpers/notificationHandler'
+
 import CtmDialog from "../components/helper/CtmDialog";
-import CountdownTimer from "../components/helper/CountdownTimer";
 
-
-Notifications.setNotificationHandler({
-    handleNotification: async () => {
-        return {
-            shouldShowAlert: true,
-            shouldSetBadge: true,
-            shouldPlaySound: true
-        }
-    }
-})
 
 const HomeScreen = props => {
     const {colors, dark} = props.theme
-    const {token, repeatCount} = useSelector(state => state.auth)
-    const {userProgress} = useSelector(state => state.assessment)
+    const {token, repeatCount, isFirstLaunch, user} = useSelector(state => state.auth)
+    const {userProgress, notificationState} = useSelector(state => state.assessment)
 
 
-    const [notificationState, setNotificationState] = useState({not: {}, res: {}}) //todo: handle notifications
     const [access, setAccess] = useState(false)
+    const [accessTime, setAccessTime] = useState(0)
+    const [scheduledTimeFit, setScheduledTimeFit] = useState(null)
     const [visible, setVisible] = useState(false)
     const [snackVisible, setSnackVisible] = useState(false)
     const [errText, setErrText] = useState('')
@@ -42,32 +38,29 @@ const HomeScreen = props => {
     const [slidesFetched, setSlidesFetched] = useState(false)
 
     const dispatch = useDispatch()
+    const screenIsFocused = useIsFocused()
     const isAuth = token
 
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-
-    const fadeIn = () => {
-        // Will change fadeAnim value to 0 in 3 seconds
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true
-        }).start();
-    };
 
     useEffect(() => {
-        fadeIn()
+        //fadeIn()
         let timeout
-        if (userProgress === 0 ) {
-            setNoAccessText('Die erste Benachrichtigung kommt morgen.')
-            timeout = 8000
-        } else {
-            setNoAccessText('Du wirst Benachrichtigt wenn es weitergeht.')
+        if (userProgress === 0 && isFirstLaunch) {
+            setNoAccessText('Die erste Benachrichtigung kommt bald.')
+            timeout = 4000
+        } else if (access) {
+            setNoAccessText('Du bekommst eine Benachrichtigung wenn es weitergeht.')
             timeout = 2000
+        } else if (userProgress === repeatCount ) {
+            setNoAccessText('Vielen Dank, dass Du dabei warst!')
+            timeout = 2000
+        } else {
+            setNoAccessText('Prüfe Zugangsberechtigung...')
+            timeout = 1000
         }
         const myTimeout = setTimeout(() => setSnackVisible(true), timeout)
         return () => clearTimeout(myTimeout)
-    }, [isAuth])
+    }, [])
 
     useEffect(() => {
         const checkAssessmentCount = async () => {
@@ -86,6 +79,7 @@ const HomeScreen = props => {
         const fetchAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
+                await dispatch(fetchRestoredAssessment(token))
                 setSlidesFetched(true)
             } catch (err) {
                 setErrText(err.message)
@@ -101,70 +95,70 @@ const HomeScreen = props => {
                 await dispatch(setNotifications())
                 // Cancel all upcoming notifications when user is finished
                 userProgress === repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
-                // const nextDate = await Notifications.getAllScheduledNotificationsAsync()
-
             } catch (err) {
-                console.log(err.message)
+                // console.log(err.message)
                 setErrText(err.message)
                 setVisible(true)
             }
         }
-        slidesFetched && scheduleNotification()
+        slidesFetched && scheduleNotification() //todo: refactor when times come with user signIn
     }, [slidesFetched])
 
-    const _handleNotification = notification => {
-        Vibration.vibrate();
-        setNotificationState({...notificationState, not: {...notification}});
-    };
-
-    const _handleNotificationRes = response => {
-        setNotificationState({...notificationState, res: {...response}})
-    }
-
 
     useEffect(() => {
-        if (isAuth) {
-            if (notificationState.not.date || notificationState.res.notification) {
-
-                const timePassedAfterTriggered = notificationState.not.date
-                    ? calcResTime(notificationState.not.date)
-                    : calcResTime(notificationState.res.notification.date)
-                // grand access to assessment only within 20min after notification.date
-                if (timePassedAfterTriggered < 60 * 20 && userProgress <= repeatCount) setAccess(true) // todo: check if interval too short
+        const checkAccess = async () => {
+            const accessInSec = await filterTimeArr()
+            if (accessInSec.timeLeft >= 0) {
+                setAccessTime(accessInSec.timeLeft)
+                setScheduledTimeFit(accessInSec.scheduledTime)
             }
         }
-    }, [isAuth, notificationState])
-
-
-    // todo: refactor into own component
-    useEffect(() => {
-        const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => _handleNotificationRes(response))
-        const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => _handleNotification(notification))
-        // Clear-out function
-        return () => {
-            foregroundSubscription.remove()
-            backgroundSubscription.remove()
+        let timeInterval
+        if (accessTime <= 0) {
+            timeInterval = setInterval(checkAccess, 1000)
         }
-    }, [])
+        if (timeInterval) return () => clearInterval(timeInterval)
+    },[screenIsFocused, notificationState, accessTime])
+
+    useEffect(() => {
+        let myCountdown
+        if (accessTime > 0) {
+            myCountdown =  setTimeout(() => {
+                setAccessTime(prevState => prevState - 1)
+                if (!access) {
+                    setAccess(true)
+                }
+            }, 1000)
+        } else setAccess(false)
+        if (myCountdown) return () => clearTimeout(myCountdown)
+    }, [accessTime, notificationState])
 
 
 
     return (
 
         <Screen>
-            <Animated.View style={{flex: 1, justifyContent: 'space-around', alignItems: 'center', opacity: fadeAnim}}>
+            <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
+
                 <CtmPermission/>
-                {isAuth && <StudyOverview style={{flex: .6, marginTop: 40}} colors={colors} count={userProgress} repeats={repeatCount}/>}
+                {isAuth && <StudyOverview style={{flex: .6, marginTop: 40}} colors={colors} userName={user.name}
+                                          count={userProgress} repeats={repeatCount}/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    <CtmButton disabled={!access}mode={Platform.OS === 'ios' ? 'outline' : 'contained'} onPress={() => {
-                               props.navigation.replace('Assessment')}}>Start</CtmButton>
+                    {userProgress < repeatCount ? <CtmButton disabled={!access} mode={Platform.OS === 'ios' ? 'outline' : 'contained'}
+                                onPress={() => {
+                                    props.navigation.dispatch(StackActions.replace('Assessment', {
+                                        scheduledTime: scheduledTimeFit,
+                                        startTime: new Date().getTime()
+                                    }))
+                                }}>Teilnehmen</CtmButton> : <Headline>Danke!</Headline>}
+
+                    {access ? <Paragraph style={{marginTop: 10}}>Möglich für {(accessTime/60).toFixed(2)} Minuten</Paragraph> : null}
 
                 </View>
-                {/*<CountdownTimer stopTimer={false}/>*/}
-            </Animated.View>
+            </View>
             <Snackbar
-                style={!dark && {backgroundColor:  colors.accent }}
+                style={{backgroundColor: '#35469d'}}
                 visible={snackVisible}
                 onDismiss={() => setSnackVisible(!snackVisible)}
                 action={{
@@ -172,7 +166,7 @@ const HomeScreen = props => {
                         setSnackVisible(!snackVisible)
                     },
                 }}>
-                {noAccessText}
+               <Text style={{color: '#fff'}} >{noAccessText}</Text>
             </Snackbar>
             <CtmDialog title='Fehler!' visible={visible} hideDialog={() => setVisible(false)} helpText={errText}/>
         </Screen>
@@ -187,7 +181,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 50,
-        marginBottom: 60,
+        marginBottom: 70,
 
     }
 })

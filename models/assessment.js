@@ -1,9 +1,9 @@
 class Assessment {
-    constructor(userId, userLoc, selection, time, skyImgBuffer, horizonImgBuffer) {
-        this.user = userId[1]
+    constructor(userId, userLoc, answerArr, time, skyImgBuffer, horizonImgBuffer) {
+        this.user = userId
         this.weather = undefined
         this.location = {coordinates: [userLoc.lng, userLoc.lat]}
-        this.selection = selection
+        this.answers = answerArr
         this.images = [
             {description: "sky", data: skyImgBuffer},
             {description: "horizon", data: horizonImgBuffer}]

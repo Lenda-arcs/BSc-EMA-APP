@@ -2,17 +2,15 @@
   "expo": {
     "name": "iViewSky",
     "slug": "i-view-sky",
-    "description": "Hallo und Willkommen zu meiner Studie im Rahmen meiner BSc. Abschlussarbeit. Mit dieser Studie soll der Einfluss von dem Himmel auf unsere Stimmung untersucht werden.",
     "version": "1.0.0",
-    "privacy": "public",
-    "sdkVersion": "40.0.0",
+    "description": "Hallo und Willkommen zu meiner Studie die im Rahmen meiner BSc. Abschlussarbeit durchgeführt wird. Mit dieser Studie soll der Einfluss vom Himmel auf unsere Stimmung und unser Stresslevel untersucht werden. Es werden während einer Befragung, Daten zum aktuellen Standort des Nutzers, Antworten auf die Fragen sowie Fotos von der Umgebung (aktiv durch Nutzer ausgelöst und ausgewählt) gesammelt.  Dies ist eine Beta Version der App, es werden noch keine Studiendaten erhoben die danach ausgewertet werden. ",
     "orientation": "portrait",
-    "platforms": ["ios", "android"],
+    "owner": "iviewsky-ios",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#c40017"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -21,12 +19,13 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "de.uni-hamburg.mci.test",
-      "buildNumber": "1.0.0",
-      "supportsTablet": false
+      "supportsTablet": true,
+      "bundleIdentifier": "de.uni-hamburg.mci.iViewSky",
+      "buildNumber": "1.0.0"
     },
     "android": {
-      "package": "de.uni_hamburg.mci_emaStudySky",
+      "useNextNotificationsApi": true,
+      "package": "de.uni_hamburg.mci.iViewSky",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

@@ -1,5 +1,5 @@
-import React from 'react'
-import {useSelector} from "react-redux";
+import React, {useEffect} from 'react'
+import {useDispatch, useSelector} from "react-redux";
 
 import {Appbar} from "react-native-paper";
 import {NavigationContainer, DrawerActions, getFocusedRouteNameFromRoute} from "@react-navigation/native";
@@ -17,6 +17,8 @@ import AssessmentScreen from "../screens/AssessmentScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import AuthScreen from "../screens/AuthScreen";
 import DrawerItems from './DrawerItems'
+import {setNotificationState} from "../store/actions/assessment";
+
 
 
 const Drawer = createDrawerNavigator()
@@ -75,7 +77,7 @@ function getHeaderTitle(route) {
 
     switch (routeName) {
         case 'Home':
-            return 'Home'
+            return 'Studie: iViewSky'
         case 'Feedback':
             return 'Feedback'
         default:
@@ -93,6 +95,8 @@ const Home = () => {
         </Drawer.Navigator>
     )
 }
+
+
 
 const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
     return (
@@ -114,12 +118,18 @@ const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
     )
 }
 
-
-const AppNavigator = () =>
+const AppNavigator = (props) =>
 {
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(setNotificationState(props.notification))
+    }, [props])
+
     const isAuth = useSelector(state => !!state.auth.token)
     const didTryAutoLogin = useSelector(state => !!state.auth.didTryAutoLogin)
     const isFirstLaunch = useSelector(state => !!state.auth.isFirstLaunch);
+
     return (
         <NavigationContainer>
             {!didTryAutoLogin && !isAuth

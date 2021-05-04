@@ -13,11 +13,14 @@ import {isFirstLaunch, tryLogin} from '../store/actions/auth'
 const StartupScreen = props => {
     const dispatch = useDispatch()
 
+
+
     // destruct color prop from withTheme
     const {colors} = props.theme
 
 
     useEffect(() => {
+
         const checkState= async () => {
             await dispatch(isFirstLaunch())
             await dispatch(tryLogin())

@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, SafeAreaView, StatusBar} from 'react-native';
 import {withTheme} from "react-native-paper";
-//import {StatusBar} from "expo-status-bar";
 
 
 let CtmView

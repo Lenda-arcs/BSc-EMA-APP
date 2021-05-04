@@ -12,7 +12,7 @@ export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
 export const SET_FEEDBACK = 'SET_FEEDBACK'
 
-let USER = 'USER_DATA'
+const USER = 'USER_DATA'
 const LAUNCHED = 'LAUNCHED'
 
 
@@ -21,9 +21,9 @@ export const sendFeedback = (message, topic) => {
 
 
         const feedbackCount = await getItemAsyncStore(SET_FEEDBACK, undefined, undefined)
-        const {token, userId} = getState().auth
+        const {token, user} = getState().auth
         const newFeedback = {
-            user: userId[1],
+            user: user.id[1],
             feedback: {
                 topic: topic,
                 text: message,
@@ -46,17 +46,16 @@ export const sendFeedback = (message, topic) => {
 }
 
 
-export const authenticate = (user) => {
+export const authenticate = (auth) => {
     return dispatch => {
         //dispatch(setLogoutTimer(expiryTime))
 
         // todo: is token in redux state save?
         dispatch({
             type: AUTHENTICATE,
-            token: user.token,
-            userId: user.userId,
-            group: user.group,
-            repeats: user.repeatCount
+            token: auth.token,
+            user: auth.user,
+            repeats: auth.repeatCount
         })
     }
 }
@@ -68,13 +67,15 @@ export const setDidTryAL = () => {
 export const tryLogin = () => {
     return async (dispatch) => {
         const userData = await storeFac.getItemAsyncStore(USER, true, true)
-        if (!userData) {
+        if (!userData || !userData?.user?.name) {
+            await storeFac.deleteItemAsyncStore(USER, true)
             dispatch(setDidTryAL())
             return
         }
-        const {token, userId, group, repeatCount} = userData
+        const {token, user, repeatCount} = userData
 
-        dispatch(authenticate({token, userId, group, repeatCount}))
+
+        dispatch(authenticate({token, user, repeatCount}))
     }
 }
 
@@ -96,22 +97,20 @@ export const signUser = (userId, password, passwordConfirm = null) => {
         try {
             const resData = await fetchData(`${ENV.OwnApi}/users/${type}`, 'POST', data)
             // for later db patching
-            const user = {
+            const auth = {
                 token: resData.token,
-                userId: [resData.data.user.userId, resData.data.user.id],
-                group: resData.data.user.group,
+                user: {name: resData.data.user.userId, id: resData.data.user.id, group:resData.data.user.group},
                 repeatCount: resData.data.user.assessmentRepeats
             }
 
             const userProgress= resData.data.user.userProgress
 
-            dispatch(authenticate(user))
+            dispatch(authenticate(auth))
             dispatch(assessmentActions.setUserProgress(userProgress))
 
             // only set fistLaunch complete if registration was successful
-            passwordConfirm && await storeFac.saveItemAsyncStore(LAUNCHED, true)
-            // old:  await saveUserToStorage(userToken, userId, userGroup)
-            await storeFac.saveItemAsyncStore(USER, user, true)
+            await storeFac.saveItemAsyncStore(LAUNCHED, true)
+            await storeFac.saveItemAsyncStore(USER, auth, true)
         } catch (err) {
 
             throw new Error(err)

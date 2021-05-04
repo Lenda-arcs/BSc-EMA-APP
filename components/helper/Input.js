@@ -1,7 +1,7 @@
 import React, {useReducer, useEffect, useState} from 'react';
-import {View, StyleSheet, Dimensions, ScrollView} from 'react-native';
-import {TextInput, withTheme, Text, HelperText} from 'react-native-paper'
-import {useSelector} from "react-redux";
+import {View, StyleSheet, Dimensions} from 'react-native';
+import {TextInput, withTheme, HelperText} from 'react-native-paper'
+
 import CtmDialog from "./CtmDialog";
 
 const INPUT_CHANGE = 'INPUT_CHANGE';

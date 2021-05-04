@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
-import {ScrollView, View} from 'react-native';
-import { Button, Paragraph, Dialog, Portal } from 'react-native-paper';
+import {Dimensions, ScrollView, View} from 'react-native';
+import { Button, Paragraph, Dialog, Portal, Text } from 'react-native-paper';
 
+const dim = Dimensions.get('window')
 // Custom Dialog component that can be used to show details or explanation to user
 const CtmDialog = (props) => {
 
@@ -12,9 +13,10 @@ const CtmDialog = (props) => {
                 <Dialog visible={props.visible} onDismiss={props.hideDialog}>
                     <Dialog.Title>{props.title}</Dialog.Title>
 
-                        <Dialog.Content>
+                        <Dialog.Content style={{maxHeight: dim.height * .7}} >
                             <ScrollView>
-                            <Paragraph style={{textAlign: 'justify'}}>{props.helpText}</Paragraph>
+                                <Paragraph>{props.helpText}</Paragraph>
+                                {props.content}
                             </ScrollView>
                         </Dialog.Content>
 

@@ -1,14 +1,16 @@
 import * as Network from 'expo-network'
+import {Platform} from "react-native";
 
 import ENV from '../../env'
 import Assessment from "../../models/assessment";
 import * as storeFac from '../../helpers/asyncStoreFactories'
-import { fetchData } from '../../helpers/fetchFactories'
-import { scheduleNotificationHandler } from '../../helpers/notificationHandler'
-import { getUserLocation } from "../../helpers/permissonFactories";
+import {fetchData} from '../../helpers/fetchFactories'
+import {scheduleNotificationHandler, checkNotificationPermission} from '../../helpers/notificationHandler'
+import {getUserLocation} from "../../helpers/permissonFactories";
 import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
 
 import {Buffer} from "buffer";
+
 
 export const SET_USER_PROGRESS = 'SET_USER_PROGRESS'
 export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA'
@@ -19,12 +21,32 @@ export const ASSESSMENT_PENDING = 'ASSESSMENT_PENDING'
 export const USER_PROGRESS = 'USER_PROGRESS'
 export const ASSESSMENT_DATA = 'ASSESSMENT_DATA'
 export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
+export const SET_NOTIFICATION_STATE = 'SET_NOTIFICATION_STATE'
 
 
+export const removeScheduledTime = (time) => {
+    return async () => {
+        const dates = await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)
+        if (dates) {
+            const index = dates.indexOf(time)
+            if (index > -1) {
+                dates.splice(index, 1)
+                const newDates = await saveItemAsyncStore(NOTIFICATION_TIMES, dates)
+
+            }
+        }
+    }
+}
+
+export const setNotificationState = (state) => {
+    return dispatch => {
+        dispatch({type: SET_NOTIFICATION_STATE, val: state})
+    }
+}
 
 export const setAssessmentData = () => {
     return async (dispatch, getState) => {
-        const {token , repeatCount} = getState().auth
+        const {token, repeatCount} = getState().auth
 
         let slideData
         let notificationTimes = []
@@ -32,14 +54,16 @@ export const setAssessmentData = () => {
         const asyncStoreSlides = await storeFac.getItemAsyncStore(ASSESSMENT_DATA, false, true)
 
         if (!asyncStoreSlides) {
-            slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
-            notificationTimes = slideData.attachment
-            slideData = slideData.data.data
+            if ((await Network.getNetworkStateAsync()).isInternetReachable) {
+                slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
+                notificationTimes = slideData.attachment //todo: refactor
+                slideData = slideData.data.data
 
-            await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
-            await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes)
-
-
+                await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
+                await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes)
+            } else {
+                throw new Error('No Internet Connection')
+            }
         } else {
             slideData = asyncStoreSlides
         }
@@ -50,27 +74,57 @@ export const setAssessmentData = () => {
         })
     }
 }
-export const setNotifications = () => {
 
+
+export const setNotifications = () => {
     return async () => {
 
         const isScheduled = await getItemAsyncStore(SET_NOTIFICATION_SCHEDULED)
 
+        //await Notifications.cancelAllScheduledNotificationsAsync()
+        //
         if (!isScheduled) {
-            // get time from timesArr
-            const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true))
-            // todo: loop over entire array and schedule all notifications in one turn!!
-            dates.reduce(async (memo, t) => {
-                await memo
-                const date = (t.split(' G'))[0]
-                const time = (new Date(date)).getTime()
-                await scheduleNotificationHandler(time)
-            }, undefined)
+            //  if (true) {
+            await checkNotificationPermission()
 
-            await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
+
+            // get time from timesArr
+            const currentTime = Date.now()
+            const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)).filter(el => el - currentTime >= 0)
+            let acc = dates.length -1
+            while (acc >= 0) {
+                const res = await scheduleNotificationHandler(dates[acc])
+                if (res) acc--
+            }
+
+
+            // todo: loop over entire array and schedule all notifications in one turn!!
+            try {
+                // const allNotes = await posTimes.reduce(async (memo, time) => {
+                //     const timeRes = await scheduleNotificationHandler(time)
+                //     const memoSum = await memo
+                //
+                //     return memoSum + timeRes
+                // }, 0)
+                await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
+            } catch (err) {
+                throw new Error(err)
+            }
 
         }
-        //await scheduleNotificationHandler((new Date().getTime() + 6000))  // just for testing
+
+        // await checkNotificationPermission()
+        // // testing
+        // const testDates = [(new Date().getTime() + 1000 * 60 * 40 )] // 5min
+        // await testDates.reduce( async (memo, t) => {
+        //     await memo
+        //     const time = t
+        //     await scheduleNotificationHandler(time)
+        //
+        // }, undefined)
+        //
+        // // await scheduleNotificationHandler((testDate.getTime() + 10000))  // just for testing
+        // await saveItemAsyncStore(NOTIFICATION_TIMES, testDates, undefined)
 
     }
 }
@@ -90,87 +144,67 @@ export const getUserProgress = () => {
     }
 }
 
-
 const createAssessmentObj = (userId, weatherData = undefined, userLoc, selection, time, skyImage, horizonImage) => {
     const skyImgBuffer = new Buffer(skyImage, 'base64')
     const horizonImgBuffer = new Buffer(horizonImage, 'base64')
-    const newAssessment = new Assessment(userId, userLoc, selection, time, skyImgBuffer, horizonImgBuffer)
-    console.log(newAssessment)
+
+    let answerArr = []
+    selection.forEach((el) => el.answers.forEach((answer) => answerArr.push(answer)))
+    let newSelectionObj = {}
+    answerArr.forEach(el => newSelectionObj = {
+        ...newSelectionObj,
+        [el.domain]: {...newSelectionObj[el.domain], [el.questionId]: el.answerValue}
+    })
+
+    const newAssessment = new Assessment(userId, userLoc, newSelectionObj, time, skyImgBuffer, horizonImgBuffer)
     return newAssessment
-       // {
-       //     user: userId[1],
-       //     weather: undefined,
-       //     location: {
-       //         coordinates: [userLoc.lng, userLoc.lat]
-       //     },
-       //     selection: selection,
-       //     images: [
-       //         {
-       //             description: "sky",
-       //             data: skyImgBuffer
-       //         },
-       //         {
-       //             description: "horizon",
-       //             data: horizonImgBuffer
-       //         }
-       //     ],
-       //     timeStamp: {
-       //         assessmentStart: time.start,
-       //         assessmentEnd: time.end
-       //     }
-       // }
 
 }
 
 
-const fetchRestoredAssessment = async (token) => {
-    const restoredAssessmentArr = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING, undefined, true)
-    if (restoredAssessmentArr) await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessmentArr, token)
+export const fetchRestoredAssessment = (token) => {
+    return async () => {
+        const restoredAssessmentArr = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING, undefined, true)
+
+        if (restoredAssessmentArr && (await Network.getNetworkStateAsync()).isInternetReachable) {
+            try {
+                await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessmentArr, token)
+                await deleteItemAsyncStore(ASSESSMENT_PENDING) //todo: not working ...
+            } catch (err) {
+                throw new Error(err)
+            }
+        } else {
+            if (restoredAssessmentArr) throw new Error('Could not send Pending Assessment, no Internet Connection Available')
+        }
+    }
 
 }
 
 export const saveAssessment = (skyImage, horizonImage, time, selection) => {
     return async (dispatch, getState) => {
-        const { token, userId } = getState().auth
-        const { userProgress  } = getState().assessment
+        const {token, user} = getState().auth
+        const {userProgress} = getState().assessment
 
         const userCoords = await getUserLocation()
         const userLoc = {
             lat: userCoords.coords.latitude,
             lng: userCoords.coords.longitude
         }
+        const newAssessment = createAssessmentObj(user.id, undefined, userLoc, selection, time, skyImage, horizonImage)
 
-        const newAssessment = createAssessmentObj(userId,undefined, userLoc, selection, time, skyImage, horizonImage)
-
-        const networkStateRes = await Network.getNetworkStateAsync()
         // only send if network available
-        if (networkStateRes.isInternetReachable) {
-            const restoredAssessmentRes = await fetchRestoredAssessment(token)
-            if (restoredAssessmentRes) await deleteItemAsyncStore(ASSESSMENT_PENDING) //todo: not working ...
-
-            await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
-
+        if ((await Network.getNetworkStateAsync()).isInternetReachable) {
+            try {
+                await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
+            } catch (err) {
+                await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
+            }
         } else {
-            // not working for multiple missed assessment fetches..
-            // async storage too small for that purpose
-            const newAssessment = createAssessmentObj(userId, undefined, userLoc, selection, time, skyImage, horizonImage)
-            const pendingAssessmentArr = await getItemAsyncStore(ASSESSMENT_PENDING,undefined, true)
-
-            if (!pendingAssessmentArr) await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
-            // else {
-            //     pendingAssessmentArr.push(newAssessment)
-            //     for (let i = 0; i < pendingAssessmentArr.length, i++) {
-            //         await saveItemAsyncStore()
-            //     }
-            //     await saveItemAsyncStore(ASSESSMENT_PENDING, pendingAssessmentArr)
-            // }
+            await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
         }
-
         await dispatch(setUserProgress(userProgress + 1))
     }
 }
-
-
 
 
 

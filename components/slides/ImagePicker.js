@@ -10,6 +10,15 @@ if (Platform.OS === 'android' && Platform.Version >= 21) {
     TouchableCmp = TouchableNativeFeedback
 }
 
+const checkCameraPermission = async () => {
+    const settingsCam = await ImagePicker.getCameraPermissionsAsync()
+    const settingsMedia = await ImagePicker.getMediaLibraryPermissionsAsync()
+    if (!settingsCam.granted || !settingsMedia.granted) {
+        const requestCam = ImagePicker.requestCameraPermissionsAsync()
+        const requestMedia = ImagePicker.requestMediaLibraryPermissionsAsync()
+    }
+}
+
 
 const ImgPicker = props => {
     const {colors} = props.theme
@@ -18,6 +27,7 @@ const ImgPicker = props => {
 
 
     const pickImage = async () => {
+        await checkCameraPermission()
         if (Platform.OS !== 'web') {
             const resCamPermissions = await ImagePicker.getCameraPermissionsAsync()
 

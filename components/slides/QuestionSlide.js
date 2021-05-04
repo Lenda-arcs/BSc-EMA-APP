@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import {View, StyleSheet} from "react-native";
+import React, { useEffect, useState} from 'react'
+import {ScrollView, View} from "react-native";
 import {List, withTheme} from "react-native-paper";
 
 import CtmSubheading from "../wrapper/CtmSubheading";
@@ -54,7 +54,7 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
 
 
     return (
-        <View style={{flex: 1}}>
+        <ScrollView >
             <CtmSubheading>{description}</CtmSubheading>
             <List.AccordionGroup onAccordionPress={onAccordionPressHandler} expandedId={expandedId}>
                     {questions.map((question) =>
@@ -67,7 +67,7 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
                             onChange={onChangeHandler}
                             selection={savedSelection?.find(q => q.questionId === question.id && q.domain === question.domain)}/>)}
             </List.AccordionGroup>
-        </View>
+        </ScrollView>
     )
 };
 

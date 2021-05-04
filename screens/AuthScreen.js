@@ -1,15 +1,17 @@
 import React, {useContext, useState, useReducer, useCallback, useEffect, useRef} from 'react'
-import {Animated, StyleSheet, View, TouchableWithoutFeedback, Keyboard, ScrollView} from "react-native";
+import {
+    Animated,
+    StyleSheet,
+    View,
+    TouchableWithoutFeedback,
+    Keyboard,
+    ScrollView,
+    TouchableOpacity
+} from "react-native";
 import {
     Headline,
     Paragraph,
-    Snackbar,
-    Switch,
-    Text,
-    ToggleButton,
-    TouchableRipple,
-    Button,
-    IconButton
+    withTheme
 } from 'react-native-paper'
 import {useDispatch, useSelector} from "react-redux";
 
@@ -24,27 +26,22 @@ import {formReducer, FORM_INPUT_UPDATE} from '../helpers/ctmReducer'
 
 
 const AuthScreen = props => {
+    const {colors} = props.theme
+    // Transition when Screen visible
+    const fadeAnim = useRef(new Animated.Value(0)).current;
     const {isFirstLaunch } = useSelector(state => state.auth)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState()
     const [visible, setVisible] = useState(false)
-    const [isSignup, setIsSignup] = useState(!isFirstLaunch ? true : false) //todo: if not setSate -> refactor to normal const
-    const inputValues = isSignup ? {userId: '', password:'', confirmPassword: ''} : {userId: '', password: '' }
-    const inputValities = isSignup ? {userId: false, password:false, confirmPassword: false} : {userId: false, password: false}
+    const [isSignup, setIsSignup] = useState(isFirstLaunch ? true : false) //todo: if not setSate -> refactor to normal const
+    const [inputValues, setInputValues] = useState()
+    const [inputValities, setInputValities] = useState()
 
 
     const showDialog = () => setVisible(true)
     const hideDialog = () => setVisible(false)
 
-    const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: inputValues,
-        inputValidities: inputValities,
-        formIsValid: false
-    });
 
-
-    // Transition when Screen visible
-    const fadeAnim = useRef(new Animated.Value(0)).current;
     const fadeIn = () => {
         // Will change fadeAnim value to 0 in 3 seconds
         Animated.timing(fadeAnim, {
@@ -53,9 +50,26 @@ const AuthScreen = props => {
             useNativeDriver: true
         }).start();
     };
+
+    const [formState, dispatchFormState] = useReducer(formReducer, {
+        inputValues: inputValues,
+        inputValidities: inputValities,
+        formIsValid: false
+    });
+
     useEffect(() => {
         fadeIn()
     }, [])
+
+    useEffect(() => {
+        isSignup
+            ? setInputValues({userId: '', password:'', confirmPassword: ''})
+            : setInputValues({userId: '', password: '' })
+        isSignup
+            ? setInputValities({userId: false, password:false, confirmPassword: false})
+            : setInputValities({userId: false, password: false})
+    } , [isSignup])
+
 
 
     useEffect(() => {
@@ -63,7 +77,6 @@ const AuthScreen = props => {
             showDialog()
         }
     }, [error])
-
 
     const dispatch = useDispatch()
     const authHandler = async () => {
@@ -88,9 +101,11 @@ const AuthScreen = props => {
             await dispatch(action)
         } catch (err) {
             let msg = err.message
-            if (msg === 'Error: Incorrect userId or password') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
-            else if (msg === 'Error: User validation failed: passwordConfirm: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
-            else if (msg.includes('duplicate key')) msg = 'Es existiert bereits ein Nutzer mit diesem Namen.'
+            if (msg === 'Error: Password too short') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
+            else if (msg === 'Error: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
+            else if (msg === 'Error: Incorrect userId or password') msg = 'Falsche ID oder Passwort'
+            else if (msg.includes('Error: Duplicate field value')) msg = 'Es existiert bereits ein Nutzer mit diesem Namen.'
+            else  msg = 'Bitte erneute Eingabe, da ist etwas schiefgegangen!'
             setError(msg)
             setIsLoading(false)
         }
@@ -104,7 +119,7 @@ const AuthScreen = props => {
             isValid: inputValidity,
             input: inputIdentifier
         });
-    }, [dispatchFormState])
+    }, [dispatchFormState, isSignup])
 
     return (
         <Screen style={{alignItems: 'center', justifyContent: 'center'}} darkContent noSaveArea>
@@ -113,7 +128,13 @@ const AuthScreen = props => {
                     <Animated.View style={{opacity: fadeAnim}}>
                         <ScrollView contentContainerStyle={styles.inner}>
                             <View style={styles.header}>
-                                <Headline style={{fontWeight: 'bold'}}>{isSignup ? 'Registieren' : 'Anmelden'}</Headline>
+                                {/*<Headline style={{fontWeight: 'bold'}}>{isSignup ? 'Registieren' : 'Anmelden'}</Headline>*/}
+                                    <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
+                                        <Headline style={!isSignup && {fontSize: 13}}>Sign Up</Headline>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={!isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
+                                        <Headline style={isSignup && {fontSize: 13}}>Login</Headline>
+                                    </TouchableOpacity>
                             </View>
                             <View>
                                 <Input id='userId' label='Teilnehmer ID' keyboardType='default' required minLength={4}
@@ -147,10 +168,6 @@ const AuthScreen = props => {
                                        title='Fehlgeschlagen'/>
 
                         </ScrollView>
-                        {/*{isSignup && <IconButton style={{alignSelf: 'flex-end', marginBottom: 40}} size={20} icon="login" animated={true}*/}
-                        {/*                         onPress={() => {*/}
-                        {/*                             setIsSignup(prevState => !prevState)*/}
-                        {/*                         }}/>}*/}
                     </Animated.View>
                 </TouchableWithoutFeedback>
             </TextInputAvoidingView>
@@ -170,9 +187,11 @@ const styles = StyleSheet.create({
     header: {
         flex: .25,
         justifyContent: 'flex-end',
+        alignItems: 'center',
         marginHorizontal: 10,
         paddingBottom: 50,
     },
+    selected: {fontSize: 5},
     preference: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -189,4 +208,4 @@ const styles = StyleSheet.create({
 
 })
 
-export default AuthScreen
+export default withTheme(AuthScreen)

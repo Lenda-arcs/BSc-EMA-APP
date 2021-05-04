@@ -8,7 +8,7 @@ const Stepper = props => {
     const {colors} = props.theme
 
     return (
-        <View style={{flexDirection: "row", alignSelf: 'center', marginHorizontal: 20}}>
+        <View style={{flexDirection: "row", alignSelf: 'center', marginHorizontal: 20, alignItems: 'center'}}>
             {props.stepList.map((val, index) => (
                 <View
                     key={"step-indicator-" + index}

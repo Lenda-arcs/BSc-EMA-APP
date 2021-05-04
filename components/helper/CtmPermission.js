@@ -1,41 +1,50 @@
 import React, {useEffect} from 'react'
 
-import * as Permissions from "expo-permissions";
-import {ActivityIndicator, Button, Text} from "react-native-paper";
-import {View} from "react-native";
+import * as Notifications from 'expo-notifications'
+import * as Location from 'expo-location'
+import * as ImagePicker from "expo-image-picker";
 
+const checkNotificationPermission = async () => {
+    const settings = await Notifications.getPermissionsAsync()
+    if (!settings.granted || settings.ios?.status !== Notifications.IosAuthorizationStatus.PROVISIONAL) {
+        const request = await Notifications.requestPermissionsAsync({
+            android: {},
+            ios: {
+                allowAnnouncements: true,
+                allowAlert: true,
+                allowSound: true
+            }
+        })
+    }
+}
+const checkLocationPermission = async () => {
+    const settings = await Location.getForegroundPermissionsAsync()
+    if (!settings.granted) {
+        const request = await Location.requestForegroundPermissionsAsync()
+    }
+}
 
-//
+const checkCameraPermission = async () => {
+    const settingsCam = await ImagePicker.getCameraPermissionsAsync()
+    const settingsMedia = await ImagePicker.getMediaLibraryPermissionsAsync()
+    if (!settingsCam.granted || !settingsMedia.granted) {
+        const requestCam = ImagePicker.requestCameraPermissionsAsync()
+        const requestMedia = ImagePicker.requestMediaLibraryPermissionsAsync()
+    }
+}
+
 
 const CtmPermission = () => {
 
 
     useEffect(() => {
-        const checkMultiplePermissions = async () => {
-            const {status, permissions} = await Permissions.getAsync(
-                Permissions.NOTIFICATIONS,
-                Permissions.LOCATION,
-                Permissions.CAMERA,
-                Permissions.MEDIA_LIBRARY
-            )
-
-            if (status !== 'granted') {
-                const response = await Permissions.askAsync(
-                    Permissions.NOTIFICATIONS,
-                    Permissions.LOCATION,
-                    Permissions.CAMERA,
-                    Permissions.MEDIA_LIBRARY
-                )
-                //console.log(response)
-            }
-
-        }
-
-        checkMultiplePermissions()
-    }, [])
+       // checkNotificationPermission()
+        checkLocationPermission()
+      //  checkCameraPermission()
+    })
 
 
-    return <></>
+return <></>
 
 }
 

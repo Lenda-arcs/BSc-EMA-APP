@@ -1,14 +1,16 @@
-import React from 'react';
-import {View, StyleSheet, Platform, SafeAreaView} from 'react-native';
+import React, {useEffect} from 'react';
+import {View, StyleSheet, Platform, SafeAreaView, ScrollView} from 'react-native';
 import {Drawer, Switch, TouchableRipple, Text, useTheme} from 'react-native-paper';
+import * as Notifications from 'expo-notifications'
 import {useDispatch} from "react-redux";
 import {logout} from "../store/actions/auth";
 import {useState} from "react";
 import CtmDialog from "../components/helper/CtmDialog";
+import {getItemAsyncStore} from "./../helpers/asyncStoreFactories";
 
 
 //todo: get  text from server?
-const text = ' diam nonumy eirmod tempor invidunt ut . Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
+const text = 'diam nonumy eirmod tempor invidunt ut . Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
 
 const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
@@ -16,6 +18,37 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
 
     const dispatch = useDispatch()
     const [visible, setVisible] = useState(false)
+    const [times, setTimes] = useState([])
+    const [sTimes, setSTimes] = useState([])
+
+    // todo: delete after testing
+    const showNotificationTimes = async () => {
+        const currentTime = (new Date()).getTime()
+        const times = await getItemAsyncStore('NOTIFICATION_TIMES', false, true)
+        const filtered = times.filter(t => (t - currentTime >= 0)  )
+        const dateArr = filtered.map(el => new Date(el))
+        setTimes(dateArr.slice(0, 6))
+    }
+
+// todo: delete after testing
+    const showScheduledTimes = async () => {
+        setSTimes([])
+        const scheduledTimes = await Notifications.getAllScheduledNotificationsAsync()
+        console.log('scheduledTimes')
+        const newARR = scheduledTimes
+        console.log(newARR)
+        let sTimesArr = []
+        Platform.OS === 'android' ? scheduledTimes.forEach(el => sTimesArr.push(el.trigger.value)) : scheduledTimes.forEach(el => sTimesArr.push(el.trigger.seconds))
+        sTimesArr.sort((a, b) => a - b)
+        const sDatesArr = Platform.OS === 'android' ? sTimesArr.map(el => new Date(el)) : sTimesArr.map(el => el)
+        setSTimes(sDatesArr.slice(0, 6))
+    }
+
+
+    const hideTimes = () => {
+        setTimes([])
+        setSTimes([])
+    }
 
 
 
@@ -34,18 +67,26 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                         </TouchableRipple>
                     </Drawer.Section>
                     <Drawer.Section title="Rechtlich">
-                        {/*<TouchableRipple onPress={() => {*/}
-                        {/*}}>*/}
-                        {/*    <View style={styles.preference}>*/}
-                        {/*        <Text>Impressum</Text>*/}
-                        {/*    </View>*/}
-                        {/*</TouchableRipple>*/}
                         <TouchableRipple onPress={() => setVisible(true)}>
                             <View style={styles.preference}>
                                 <Text>Datenschutz</Text>
                             </View>
                         </TouchableRipple>
                     </Drawer.Section>
+                    <TouchableRipple onPress={showNotificationTimes}>
+                        <View style={styles.preference}>
+                        </View>
+                    </TouchableRipple>
+                    {times.length > 0 && times.map((el, index) => <Text style={{marginLeft: 10}} key={index}>{el.toString()}</Text>)}
+                    <TouchableRipple onPress={hideTimes}>
+                        <View style={styles.preference}>
+                        </View>
+                    </TouchableRipple>
+                    <TouchableRipple onPress={showScheduledTimes}>
+                          <View style={{height: 100}}>
+                              {sTimes.map((el, index) => <Text key={index} style={{marginLeft: 10}}  >{el.toString()}</Text>)}
+                          </View>
+                    </TouchableRipple>
                     {/*<Drawer.Section title="Feedback">*/}
                     {/*    <TouchableRipple onPress={() => navigation.navigate('Feedback')}>*/}
                     {/*        <View style={styles.preference}>*/}
@@ -54,7 +95,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                     {/*    </TouchableRipple>*/}
                     {/*</Drawer.Section>*/}
                 </View>
-               {/*<Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>*/}
+               <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
             </View>
     );
 };
@@ -64,6 +105,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'space-between',
         paddingTop: Platform.OS === 'android' ? 25 : 22,
+        paddingBottom: Platform.OS === 'android' ? 10 : 18,
     },
     preference: {
         flexDirection: 'row',

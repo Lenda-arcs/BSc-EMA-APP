@@ -2,8 +2,7 @@ import {AUTHENTICATE, LOGOUT, SET_DID_TRY_AL, SET_IS_FIRST_LAUNCH} from '../acti
 
 const initialState = {
     token: null,
-    userId: null,
-    group: null,
+    user: null,
     repeatCount: null,
     didTryAutoLogin: false,
     isFirstLaunch: undefined,
@@ -16,8 +15,7 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 token: action.token,
-                userId: action.userId,
-                group: action.group,
+                user: action.user,
                 repeatCount: action.repeats
             }
         case SET_DID_TRY_AL:

@@ -1,34 +1,62 @@
-import * as Notifications from 'expo-notifications'
 import {Platform} from "react-native";
+import * as Notifications from 'expo-notifications'
+import {getItemAsyncStore} from "./asyncStoreFactories";
+const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 
 
-exports.scheduleNotificationHandler = async (nextDate) => {
-
-    Platform.OS === 'ios' && await Notifications.requestPermissionsAsync(
-        {ios: {
-            allowAlert: true,
+exports.checkNotificationPermission = async () => {
+    const settings = await Notifications.getPermissionsAsync()
+    if (!settings.granted || settings.ios?.status !== Notifications.IosAuthorizationStatus.PROVISIONAL) {
+        const request = await Notifications.requestPermissionsAsync({
+            android: {},
+            ios: {
+                allowAnnouncements: true,
+                allowAlert: true,
                 allowSound: true,
-                allowAnnouncements: true
-            } })
+                allowsCriticalAlerts: true,
+                allowBadge: true,
+            }
+        })
+    }
 
-    // Local Notification
-    await Notifications.scheduleNotificationAsync({
-        content: {
-            title: 'Erinnerung: EMA STUDIE',
-            body: 'Hey, es ist wieder Zeit für die Befragung =)',
-            color: '#c01d1d',
-
-        }, trigger: {
-            date: nextDate,
-            repeats: false
-        }
-    });
-    //console.log('wait for it..' + nextDate)
 }
 
 
-exports.calcResTime = (resTime) => {
-    let currentTime = (new Date()).getTime() / 1000 // resTime already in seconds
-    return Math.round(currentTime - resTime)
+exports.scheduleNotificationHandler = async (nextTrigger) => {
+    let trigger = {date: nextTrigger}
+    if (Platform.OS === 'ios') {trigger = nextTrigger}
 
+    // Local Notification
+    return  await Notifications.scheduleNotificationAsync({
+        content: {
+            sound: true,
+            badge: true,
+            title: 'Erinnerung: iViewSky',
+            body: 'Hey, es ist wieder Zeit für die Befragung =). Du kannst ab jetzt für 30 Minuten an der Studie teilnehmen',
+            color: '#c40017',
+
+        }, trigger
+
+    });
+}
+
+const difInSec = (currentTime, timeInPast) => {
+    return (
+        Math.round((currentTime - timeInPast) / 1000)
+    )
+}
+
+
+exports.filterTimeArr = async () => {
+    const timesArr = await getItemAsyncStore(NOTIFICATION_TIMES, false, true)
+    if (timesArr) {
+        const currentTime = new Date().getTime()
+        const time = timesArr.filter(noteTime => {
+            let diffInSec = difInSec(currentTime, noteTime)
+            return (diffInSec <= 60 * 30 && diffInSec >= 0)
+        })
+        if (time.length > 0)  return {timeLeft: 60 * 30 - difInSec(currentTime, time[0]), scheduledTime: time[0]} // return 30 minutes - difference
+
+    }
+    return false
 }

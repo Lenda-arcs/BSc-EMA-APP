@@ -5,7 +5,6 @@ import {useDispatch} from "react-redux";
 import {Headline, ToggleButton} from "react-native-paper";
 
 import Screen from "../components/wrapper/Screen";
-import TextInputAvoidingView from "../components/helper/TextInputAvoidingView";
 import Input from "../components/helper/Input";
 import CtmButton from "../components/wrapper/CtmButton";
 

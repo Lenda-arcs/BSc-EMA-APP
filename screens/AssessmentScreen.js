@@ -1,7 +1,8 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {View, StyleSheet, ScrollView} from "react-native";
-import {withTheme} from "react-native-paper";
+import React, {useEffect, useRef, useState} from 'react'
+import {View, StyleSheet, ScrollView, Platform} from "react-native";
+import {List, withTheme} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
+import {StackActions} from '@react-navigation/native'
 import Wizard from 'react-native-wizard'
 
 
@@ -14,10 +15,18 @@ import CtmButton from "../components/wrapper/CtmButton";
 import SuccessAnimation from "../components/helper/SuccessAnimation";
 
 // Functions
-import {saveAssessment} from '../store/actions/assessment'
+import {saveAssessment, removeScheduledTime} from '../store/actions/assessment'
+import CtmDialog from "../components/helper/CtmDialog";
+import CtmSubheading from "../components/wrapper/CtmSubheading";
+import QuestionItem from "../components/slides/QuestionItem";
 
+const validPassTime = 1000 * 60 * 20 // 20min
 
 const AssessmentScreen = props => {
+    // destructure color prop form withTheme wrapper
+    const {colors} = props.theme
+    const {scheduledTime, startTime} = props.route.params
+
     // state to show activity indicator while fetching data
     const [isFetching, setIsFetching] = useState(false)
     const [error, setError] = useState(false)
@@ -38,15 +47,32 @@ const AssessmentScreen = props => {
     // states for picture and location
     const [selectedSkyImage, setSelectedSkyImage] = useState()
     const [selectedHorizonImage, setSelectedHorizonImage] = useState()
-    const [time, setTime] = useState({start: new Date() + 2})
-    //  const [userLoc, setUserLoc] = useState()
 
     // state for user selection
     const [selection, setSelection] = useState([])
+    const [dialogVisible, setDialogVisible] = useState(false)
 
 
-    // destructure color prop form withTheme wrapper
-    const {colors} = props.theme
+    const goToHome = () => {
+        props.navigation.dispatch(StackActions.replace('Home'))
+    }
+
+
+    const showDialog = () => setDialogVisible(true)
+    const hideDialog = () => {
+        setDialogVisible(false)
+        goToHome()
+    }
+
+    //seems to work =)
+    useEffect(() => {
+        const durationTimer = setInterval(() => {
+            let currentTime = (new Date()).getTime()
+            let diffTime = currentTime - startTime
+            if (diffTime >= validPassTime) showDialog()
+        }, 5000)
+        return () => clearInterval(durationTimer)
+    }, [])
 
 
     // QuestionSlide complete setter
@@ -54,10 +80,9 @@ const AssessmentScreen = props => {
         setSlideComplete(true)
     }
     // PicSlide complete setter
-    const isPicSlideCompleteHandler = (skyImage, horizonImage, userLoc) => {
+    const isPicSlideCompleteHandler = (skyImage, horizonImage) => {
         setSelectedSkyImage(skyImage)
         setSelectedHorizonImage(horizonImage)
-        //setUserLoc(userLoc)
         isSlideCompleteHandler()
     }
 
@@ -65,7 +90,6 @@ const AssessmentScreen = props => {
     // storing slide selections in total selection state
     const onSlideChangeHandler = (slideSelection) => {
         let objIndex = selection.findIndex(el => (el.slideName === slideSelection.slideName))
-
         if (objIndex < 0) setSelection(selection.concat(slideSelection))
         else {
             let arrCopy = [...selection]
@@ -73,7 +97,6 @@ const AssessmentScreen = props => {
             setSelection(arrCopy)
         }
     }
-
 
 
     const pictureSlide = {
@@ -101,55 +124,54 @@ const AssessmentScreen = props => {
 
 
     // // Append PictureSlide to assessment
-    const {group, repeatCount} = useSelector(state => state.auth)
+    const {user, repeatCount} = useSelector(state => state.auth)
     const pos = (userProgress === 0 || userProgress === repeatCount - 1) ? 2 : 1
-    group === 'B' ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - pos, 0, pictureSlide)
+    user.group === 'B' ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - pos, 0, pictureSlide)
 
 
     const dispatch = useDispatch()
     const submitHandler = async () => {
         // creating timeobj to get duration of user interaction
         // calc duration on server
-
+        const endTime = (new Date()).getTime()
+        const timestamp = {start: startTime, end: endTime }
         setIsFetching(true)
-
-        setTime(() => time.end = (new Date() + 2))
-
         setVisible(!visible);
-        await dispatch(saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, time, selection))
+        await dispatch(
+            saveAssessment(selectedSkyImage.base64, selectedHorizonImage.base64, timestamp, selection))
         setIsFetching(false)
     }
 
     const closeModal = () => {
         setVisible(!visible)
-        props.navigation.replace('Home')
+        dispatch(removeScheduledTime(scheduledTime))
+        goToHome()
     }
 
 
     return (
         <Screen>
-            <ScrollView style={{flex: 1, width: '100%', backgroundColor: colors.background}}>
-                {/* Wizard component that takes question and picture slide - stepList */}
-                <Wizard useNativeDriver={true} prevStepAnimation='fade' nextStepAnimation='fade'
-                        isFirstStep={val => setIsFirstStep(val)}
-                        isLastStep={val => setIsLastStep(val)} ref={wizard} steps={stepList}
-                        currentStep={({currentStep, isLastStep, isFirstStep}) => {
-                            setCurrentStep(currentStep)
-                        }}/>
-            </ScrollView>
-            <View style={{backgroundColor: colors.background, ...styles.btnGroup}}>
+
+            <Wizard contentContainerStyle={{height: '92%', justifyContent: 'flex-start'}}
+                    useNativeDriver={true} prevStepAnimation='fade' nextStepAnimation='fade'
+                    isFirstStep={val => setIsFirstStep(val)}
+                    isLastStep={val => setIsLastStep(val)} ref={wizard} steps={stepList}
+                    currentStep={({currentStep, isLastStep, isFirstStep}) => {
+                        setCurrentStep(currentStep)
+                    }}/>
+            <View style={{backgroundColor: colors.background, opacity: .9, ...styles.btnGroup}}>
                 {/* USE FOR PRODUCTION */}
-                <CtmButton disabled={isFirstStep}
+                <CtmButton style={{position: 'absolute', left: 8}} disabled={isFirstStep}
                            icon='arrow-left' mode='text'
                            onPress={() => wizard.current.prev()}>
                     Zurück
                 </CtmButton>
                 <Stepper currentStep={currentStep} stepList={stepList}/>
                 {isLastStep
-                    ? (<CtmButton iconRight={true}
+                    ? (<CtmButton style={{position: 'absolute', right: 8}} iconRight={true}
                                   icon='check' disabled={!slideComplete} mode='text'
                                   onPress={submitHandler}>Senden</CtmButton>)
-                    : (<CtmButton iconRight={true} disabled={!slideComplete}
+                    : (<CtmButton style={{position: 'absolute', right: 8}} iconRight={true} disabled={!slideComplete}
                                   icon='arrow-right' mode='text'
                                   onPress={() => {
                                       setSlideComplete(false)
@@ -159,7 +181,10 @@ const AssessmentScreen = props => {
                 }
             </View>
             {/* Will be rendered if data submit is successful */}
-            <SuccessAnimation success={!isFetching}  visible={visible} close={closeModal}/>
+            <SuccessAnimation success={!isFetching} visible={visible} close={closeModal}/>
+            <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog}
+                       helpText='Du hast die maximal Dauer für die Befragung überschritten, bitte warte auf die nächste Benachrichtigung.'
+                       title='Fehlgeschlagen'/>
         </Screen>
 
 
@@ -169,11 +194,18 @@ const AssessmentScreen = props => {
 const styles = StyleSheet.create({
 
     btnGroup: {
+        alignSelf: 'center',
+        paddingVertical: 25,
+        marginTop: 20,
+        width: '100%',
+        height: '8%',
+        minHeight: 60,
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 10,
-        paddingBottom: 15,
+        position: 'absolute',
+        bottom: Platform.OS === 'ios' && Platform.Version >= 11 ? 15 : 6,
+
 
     },
 })

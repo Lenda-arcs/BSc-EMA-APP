@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {StyleSheet, View, TouchableOpacity, TouchableNativeFeedback} from "react-native";
+import {StyleSheet, View} from "react-native";
 import {RadioButton, Divider, List, withTheme} from 'react-native-paper'
 
 
@@ -33,8 +33,8 @@ const QuestionItem = props => {
     return (
 
 
-        <List.Accordion id={props.question._id} title={props.text} titleNumberOfLines={3}
-                        left={props => <List.Icon {...props} icon={icon}/>}
+        <List.Accordion id={props.question._id} style={ icon !== 'check' && {borderLeftWidth:.6,borderColor: colors.accent}} title={props.text} titleNumberOfLines={3}
+                        left={props => <List.Icon {...props} icon={icon} color={ icon !== 'check' ? colors.accent : colors.primary}/>}
                         expanded={expanded} onPress={handlePress}>
                 <RadioButton.Group onValueChange={newValue => savePick(newValue)} value={checked}>
                     <View style={{ backgroundColor: dark ? '#252525' : '#fff' , justifyContent: 'flex-start'}}>
@@ -52,7 +52,7 @@ const QuestionItem = props => {
 
 const styles = StyleSheet.create({
     item: {
-
+        marginRight: 6
     },
     label: {
         marginLeft: 10,
