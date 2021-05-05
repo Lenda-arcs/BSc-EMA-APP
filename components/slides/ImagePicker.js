@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import {View, StyleSheet, Image, Platform, TouchableNativeFeedback, TouchableOpacity} from 'react-native'
 import {IconButton, Card, TouchableRipple, withTheme} from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker'
+import * as Location from "expo-location";
 
 
 let TouchableCmp = TouchableOpacity
@@ -19,6 +20,13 @@ const checkCameraPermission = async () => {
     }
 }
 
+const checkLocationPermission = async () => {
+    const settings = await Location.getForegroundPermissionsAsync()
+    if (!settings.granted) {
+        const request = await Location.requestForegroundPermissionsAsync()
+    }
+}
+
 
 const ImgPicker = props => {
     const {colors} = props.theme
@@ -28,6 +36,7 @@ const ImgPicker = props => {
 
     const pickImage = async () => {
         await checkCameraPermission()
+        await checkLocationPermission()
         if (Platform.OS !== 'web') {
             const resCamPermissions = await ImagePicker.getCameraPermissionsAsync()
 

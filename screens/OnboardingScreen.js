@@ -69,7 +69,7 @@ const OnboardingScreen = (props) => {
                 },
                 {
                     title: 'Befragung',
-                    subtitle: 'Bitte beantworte alle Fragen Wahrheitsgemäß und lass Dir bei der Beantwortung Zeit ',
+                    subtitle: 'Bitte beantworte alle Fragen wahrheitsgemäß und lass Dir bei der Beantwortung Zeit ',
                     backgroundColor: colors.background,
                     image: (
                         <Icon

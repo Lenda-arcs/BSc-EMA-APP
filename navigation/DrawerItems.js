@@ -7,6 +7,7 @@ import {logout} from "../store/actions/auth";
 import {useState} from "react";
 import CtmDialog from "../components/helper/CtmDialog";
 import {getItemAsyncStore} from "./../helpers/asyncStoreFactories";
+import CtmButton from "../components/wrapper/CtmButton";
 
 
 //todo: get  text from server?
@@ -24,7 +25,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
     const showNotificationTimes = async () => {
         const currentTime = (new Date()).getTime()
         const times = await getItemAsyncStore('NOTIFICATION_TIMES', false, true)
-        const filtered = times.filter(t => (t - currentTime >= 0)  )
+        const filtered = times.filter(t => (t - currentTime >= 0))
         const dateArr = filtered.map(el => new Date(el))
         setTimes(dateArr.slice(0, 6))
     }
@@ -33,9 +34,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
     const showScheduledTimes = async () => {
         setSTimes([])
         const scheduledTimes = await Notifications.getAllScheduledNotificationsAsync()
-        console.log('scheduledTimes')
         const newARR = scheduledTimes
-        console.log(newARR)
         let sTimesArr = []
         Platform.OS === 'android' ? scheduledTimes.forEach(el => sTimesArr.push(el.trigger.value)) : scheduledTimes.forEach(el => sTimesArr.push(el.trigger.seconds))
         sTimesArr.sort((a, b) => a - b)
@@ -50,53 +49,61 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
     }
 
 
-
     return (
-            <View style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
-                <View>
-                    <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
-                    <Drawer.Section title="Einstellungen">
-                        <TouchableRipple onPress={toggleTheme}>
-                            <View style={styles.preference}>
-                                <Text>Dunkle Ansicht</Text>
-                                <View pointerEvents="none">
-                                    <Switch value={isDarkTheme}/>
-                                </View>
+        <View style={[styles.drawerContent, {backgroundColor: colors.surface}]}>
+            <View>
+                <CtmDialog title='Datenschutz' hideDialog={() => setVisible(false)} visible={visible} helpText={text}/>
+                <Drawer.Section title="Einstellungen">
+                    <TouchableRipple onPress={toggleTheme}>
+                        <View style={styles.preference}>
+                            <Text>Dunkle Ansicht</Text>
+                            <View pointerEvents="none">
+                                <Switch value={isDarkTheme}/>
                             </View>
-                        </TouchableRipple>
-                    </Drawer.Section>
-                    <Drawer.Section title="Rechtlich">
-                        <TouchableRipple onPress={() => setVisible(true)}>
-                            <View style={styles.preference}>
-                                <Text>Datenschutz</Text>
-                            </View>
-                        </TouchableRipple>
-                    </Drawer.Section>
+                        </View>
+                    </TouchableRipple>
+                </Drawer.Section>
+                <Drawer.Section title="Rechtlich">
+                    <TouchableRipple onPress={() => setVisible(true)}>
+                        <View style={styles.preference}>
+                            <Text>Datenschutz</Text>
+                        </View>
+                    </TouchableRipple>
+                </Drawer.Section>
+                {userType === 'admin' &&
+                <Drawer.Section title="Admin">
                     <TouchableRipple onPress={showNotificationTimes}>
                         <View style={styles.preference}>
+                            <Text>Times From Server</Text>
+
                         </View>
                     </TouchableRipple>
-                    {times.length > 0 && times.map((el, index) => <Text style={{marginLeft: 10}} key={index}>{el.toString()}</Text>)}
+                    {times.length > 0 && times.map((el, index) => <Text style={{marginLeft: 10}}
+                                                                        key={index}>{el.toString()}</Text>)}
+                    {sTimes.map((el, index) => <Text key={index}
+                                                     style={{marginLeft: 10}}>{el.toString()}</Text>)}
+                    <TouchableRipple onPress={showScheduledTimes}>
+                        <View style={styles.preference}>
+                            <Text>Times scheduled</Text>
+
+                        </View>
+                    </TouchableRipple>
                     <TouchableRipple onPress={hideTimes}>
                         <View style={styles.preference}>
+                            <Text>Hide times</Text>
                         </View>
                     </TouchableRipple>
-                    <TouchableRipple onPress={showScheduledTimes}>
-                          <View style={{height: 100}}>
-                              {sTimes.map((el, index) => <Text key={index} style={{marginLeft: 10}}  >{el.toString()}</Text>)}
-                          </View>
+
+                    <TouchableRipple onPress={() => navigation.navigate('Admin')}>
+                        <View style={styles.preference}>
+                            <Text>User</Text>
+                        </View>
                     </TouchableRipple>
-                    {userType === 'admin' && <Drawer.Section title="Users">
-                        <TouchableRipple onPress={() => navigation.navigate('Admin')}>
-                            <View style={styles.preference}>
-                                <Text>Sieh Dir alle User der Studie an</Text>
-                            </View>
-                        </TouchableRipple>
-                    </Drawer.Section>}
-                </View>
-                {userType === 'admin' && <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
-                              onPress={() => dispatch(logout())}/>}
+                </Drawer.Section>}
             </View>
+            {userType === 'admin' && <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
+                                                  onPress={() => dispatch(logout())}/>}
+        </View>
     );
 };
 

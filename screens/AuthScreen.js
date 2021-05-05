@@ -126,17 +126,16 @@ const AuthScreen = props => {
             <TextInputAvoidingView style={{flex: 1}}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                     <Animated.View style={{opacity: fadeAnim}}>
+
                         <ScrollView contentContainerStyle={styles.inner}>
-                            <View style={styles.header}>
-                                {/*<Headline style={{fontWeight: 'bold'}}>{isSignup ? 'Registieren' : 'Anmelden'}</Headline>*/}
-                                    <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
-                                        <Headline style={!isSignup && {fontSize: 13}}>Sign Up</Headline>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={!isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
-                                        <Headline style={isSignup && {fontSize: 13}}>Login</Headline>
-                                    </TouchableOpacity>
-                            </View>
-                            <View>
+                            <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
+                                <Headline style={!isSignup && {color: colors.primary, fontSize: 13, textDecorationLine: 'underline', textDecorationStyle: 'solid', textDecorationColor: colors.primary}}>{isSignup ? 'Nutzer anlegen' : 'zurück zur Registration'}</Headline>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={!isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
+                                <Headline style={isSignup && {color: colors.primary,fontSize: 13, textDecorationLine: 'underline', textDecorationStyle: 'solid', textDecorationColor: colors.primary}}>{!isSignup ? 'Login' : 'Bereits ein Nutzerkonto?'}</Headline>
+                            </TouchableOpacity>
+
+                            <View style={{marginTop: '20%'}}>
                                 <Input id='userId' label='Teilnehmer ID' keyboardType='default' required minLength={4}
                                        userId style={styles.input} icon='account' placeholder='Pilot-XXXX'
                                        helpText='Deine Teilnehmer Identifikationsnummer, die wir Dir mitgeteilt haben.'
@@ -160,7 +159,7 @@ const AuthScreen = props => {
                                 <CtmButton loading={isLoading}
                                            mode='contained'
                                            disabled={!formState.formIsValid}
-                                           onPress={authHandler}>{isSignup ? 'Sign Up' : 'Login'}</CtmButton>
+                                           onPress={authHandler}>{isSignup ? 'Registrieren' : 'Login'}</CtmButton>
                             </View>
 
                             <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog}
@@ -182,16 +181,9 @@ const styles = StyleSheet.create({
     inner: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
-    },
-    header: {
-        flex: .25,
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        marginHorizontal: 10,
-        paddingBottom: 50,
     },
-    selected: {fontSize: 5},
+    selected: {fontSize: 5, position: 'absolute', bottom: '5%', right: 0 },
     preference: {
         flexDirection: 'row',
         justifyContent: 'space-between',

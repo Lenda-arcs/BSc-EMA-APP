@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-import {View, StyleSheet, Vibration, Animated} from 'react-native'
+import {View, StyleSheet, Vibration, Animated, Platform} from 'react-native'
 import {withTheme, Paragraph, Snackbar, Text, Headline} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
 import {StackActions, useIsFocused} from '@react-navigation/native'
@@ -8,7 +8,6 @@ import * as Notifications from 'expo-notifications'
 
 import Screen from "../components/wrapper/Screen";
 import CtmButton from "../components/wrapper/CtmButton";
-import CtmPermission from "../components/helper/CtmPermission";
 import StudyOverview from "../components/helper/StudyOverview";
 
 import {
@@ -19,7 +18,9 @@ import {
 } from '../store/actions/assessment'
 import {filterTimeArr} from '../helpers/notificationHandler'
 
+
 import CtmDialog from "../components/helper/CtmDialog";
+import * as Location from "expo-location";
 
 
 const HomeScreen = props => {
@@ -40,22 +41,6 @@ const HomeScreen = props => {
     const screenIsFocused = useIsFocused()
     const isAuth = token
 
-
-// todo: make it work better!
-    useEffect(() => {
-        if (userProgress === 0 && isFirstLaunch) {
-            setNoAccessText('Die erste Benachrichtigung kommt bald.')
-        } else if (access) {
-            setNoAccessText('Du bekommst eine Benachrichtigung wenn es weitergeht.')
-        } else if (userProgress === repeatCount ) {
-            setNoAccessText('Vielen Dank, dass Du dabei warst!')
-
-        } else {
-            setNoAccessText('Prüfe Zugangsberechtigung...')
-
-        }
-        setSnackVisible(true)
-    }, [access, userProgress])
 
     useEffect(() => {
         const checkAssessmentCount = async () => {
@@ -113,12 +98,12 @@ const HomeScreen = props => {
             timeInterval = setInterval(checkAccess, 1000)
         }
         if (timeInterval) return () => clearInterval(timeInterval)
-    },[screenIsFocused, notificationState, accessTime])
+    }, [screenIsFocused, notificationState, accessTime])
 
     useEffect(() => {
         let myCountdown
         if (accessTime > 0) {
-            myCountdown =  setTimeout(() => {
+            myCountdown = setTimeout(() => {
                 setAccessTime(prevState => prevState - 1)
                 if (!access) {
                     setAccess(true)
@@ -129,26 +114,40 @@ const HomeScreen = props => {
     }, [accessTime, notificationState])
 
 
+// todo: make it work better!
+    useEffect(() => {
+        if (userProgress === 0 && isFirstLaunch) {
+            setNoAccessText('Du kannst teilnehmen, sobald eine Benachrichtigung kommt.')
+        } else if (userProgress === repeatCount) {
+            setNoAccessText('Vielen Dank, dass Du dabei warst!')
+        } else if (access) {
+            setNoAccessText('Du kannst jetzt an der Befragung teilnehmen.')
+        } else {
+            setNoAccessText('Du bekommst eine Benachrichtigung wenn es weitergeht.')
+        }
+        setSnackVisible(true)
+    }, [access, userProgress])
+
 
     return (
 
         <Screen>
             <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
-
-                <CtmPermission/>
-                {isAuth && <StudyOverview style={{flex: .6, marginTop: 40}} colors={colors} userName={user.name}
+                {isAuth && <StudyOverview style={{marginTop: 40}} colors={colors} userName={user.name}
                                           count={userProgress} repeats={repeatCount}/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {userProgress < repeatCount ? <CtmButton disabled={!access} mode={Platform.OS === 'ios' ? 'outline' : 'contained'}
-                                onPress={() => {
-                                    props.navigation.dispatch(StackActions.replace('Assessment', {
-                                        scheduledTime: scheduledTimeFit,
-                                        startTime: new Date().getTime()
-                                    }))
-                                }}>Teilnehmen</CtmButton> : <Headline>Danke!</Headline>}
+                    {userProgress < repeatCount &&
+                        <CtmButton disabled={!access} mode={Platform.OS === 'ios' ? 'outline' : 'contained'}
+                                   onPress={() => {
+                                       props.navigation.dispatch(StackActions.replace('Assessment', {
+                                           scheduledTime: scheduledTimeFit,
+                                           startTime: new Date().getTime()
+                                       }))
+                                   }}>Teilnehmen</CtmButton>}
 
-                    {access ? <Paragraph style={{marginTop: 10}}>Möglich für {(accessTime/60).toFixed(2)} Minuten</Paragraph> : null}
+                    {access && userProgress !== repeatCount ? <Paragraph style={{marginTop: 10}}>Möglich
+                        für {(accessTime / 60).toFixed(2)} Minuten</Paragraph> : null}
 
                 </View>
             </View>
@@ -156,12 +155,14 @@ const HomeScreen = props => {
                 style={{backgroundColor: '#35469d'}}
                 visible={snackVisible}
                 onDismiss={() => setSnackVisible(!snackVisible)}
+
                 action={{
+                    label: 'Okay',
                     onPress: () => {
                         setSnackVisible(!snackVisible)
                     },
                 }}>
-               <Text style={{color: '#fff'}} >{noAccessText}</Text>
+                <Text style={{color: '#fff'}}>{noAccessText}</Text>
             </Snackbar>
             <CtmDialog title='Fehler!' visible={visible} hideDialog={() => setVisible(false)} helpText={errText}/>
         </Screen>
