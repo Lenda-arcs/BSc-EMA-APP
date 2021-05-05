@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9d3d59e6-d83a-4e84-920d-509c4659a0ff" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+    <list default="true" id="a24e4418-c214-4524-98ac-5d06e317e345" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/screens/AdminScreen.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/store/actions/admin.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/rn-ema-bsc-app.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/[CodeSignOnCopy," beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eas.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/navigation/AppNavigator.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/AppNavigator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/navigation/DrawerItems.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/DrawerItems.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/HomeScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/actions/assessment.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/assessment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/actions/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tunnel/.expo/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tunnel/.expo/settings.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +33,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1q9f5SUb7UbNEolBx36rTB5ExVk" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectId" id="1rhoPP4R3SETyMuX8SRc2Qkissj" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -29,59 +42,36 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/components/helper" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/assets" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="ts.external.directory.path" value="C:\Users\lenna\AppData\Local\JetBrains\Toolbox\apps\WebStorm\ch-0\203.5981.135\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\components\helper" />
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\store\actions" />
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\store\reducers" />
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
+      <recent name="C:\Users\lenna\Desktop\Bs. Baustelle\iViewSky-bsc-project\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\lenna\Desktop\ReactNative - Dev\EMA-BSc-Project\rn-ema-bsc-app\assets\animations" />
+      <recent name="C:\Users\lenna\Desktop\Bs. Baustelle\iViewSky-bsc-project\assets\skyPictures" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="9d3d59e6-d83a-4e84-920d-509c4659a0ff" name="Default Changelist" comment="" />
-      <created>1616496542961</created>
+      <changelist id="a24e4418-c214-4524-98ac-5d06e317e345" name="Default Changelist" comment="" />
+      <created>1619437658022</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1616496542961</updated>
-      <workItem from="1616496544143" duration="12260000" />
-      <workItem from="1616510507605" duration="3304000" />
-      <workItem from="1616514352383" duration="668000" />
-      <workItem from="1616751092444" duration="14823000" />
-      <workItem from="1617006587166" duration="1903000" />
-      <workItem from="1617030328270" duration="5346000" />
-      <workItem from="1617092665157" duration="613000" />
-      <workItem from="1617115259582" duration="352000" />
-      <workItem from="1617123699480" duration="1023000" />
-      <workItem from="1617175396792" duration="1317000" />
-      <workItem from="1617260693770" duration="2100000" />
-      <workItem from="1617277473570" duration="4615000" />
-      <workItem from="1617364573882" duration="2340000" />
-      <workItem from="1617475943267" duration="1324000" />
-      <workItem from="1617521844172" duration="6278000" />
-      <workItem from="1617561574972" duration="2255000" />
-      <workItem from="1617605360315" duration="53583000" />
-      <workItem from="1617779256137" duration="25543000" />
-      <workItem from="1617949685885" duration="7916000" />
-      <workItem from="1618046585877" duration="2202000" />
-      <workItem from="1618070308781" duration="8723000" />
-      <workItem from="1618122820589" duration="29752000" />
-      <workItem from="1618301041399" duration="9024000" />
-      <workItem from="1618434980117" duration="36530000" />
-      <workItem from="1618663659155" duration="11000" />
-      <workItem from="1618663690915" duration="18000" />
-      <workItem from="1618665454453" duration="7042000" />
-      <workItem from="1618729398374" duration="33222000" />
-      <workItem from="1618902555811" duration="8204000" />
+      <updated>1619437658022</updated>
+      <workItem from="1619437660480" duration="6823000" />
+      <workItem from="1619444717656" duration="37104000" />
+      <workItem from="1619590411703" duration="1235000" />
+      <workItem from="1619601977216" duration="593000" />
+      <workItem from="1619603870259" duration="9000000" />
+      <workItem from="1619683378115" duration="72457000" />
+      <workItem from="1619908374624" duration="20839000" />
+      <workItem from="1620052923623" duration="4681000" />
+      <workItem from="1620140674072" duration="7621000" />
     </task>
     <servers />
   </component>
@@ -93,28 +83,10 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="CUSTOM_BOOLEAN_PROPERTIES">
-                <map>
-                  <entry key="Show.Git.Branches" value="true" />
-                </map>
-              </option>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="bsc-project/master" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

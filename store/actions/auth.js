@@ -99,11 +99,16 @@ export const signUser = (userId, password, passwordConfirm = null) => {
             // for later db patching
             const auth = {
                 token: resData.token,
-                user: {name: resData.data.user.userId, id: resData.data.user.id, group:resData.data.user.group},
+                user: {
+                    name: resData.data.user.userId,
+                    id: resData.data.user.id,
+                    group: resData.data.user.group,
+                    role: resData.data.user.role
+                },
                 repeatCount: resData.data.user.assessmentRepeats
             }
 
-            const userProgress= resData.data.user.userProgress
+            const userProgress = resData.data.user.userProgress
 
             dispatch(authenticate(auth))
             dispatch(assessmentActions.setUserProgress(userProgress))

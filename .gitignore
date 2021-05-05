@@ -1,5 +1,6 @@
-node_modules/**/*
-.expo/*
+i-view-sky.jks
+node_modules/
+.expo/
 npm-debug.*
 *.jks
 *.p8

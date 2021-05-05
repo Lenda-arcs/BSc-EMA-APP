@@ -56,11 +56,11 @@ export const setAssessmentData = () => {
         if (!asyncStoreSlides) {
             if ((await Network.getNetworkStateAsync()).isInternetReachable) {
                 slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
-                notificationTimes = slideData.attachment //todo: refactor
+                notificationTimes = slideData.attachment //todo: delete after pilot, now in signup fetch
                 slideData = slideData.data.data
 
                 await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
-                await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes)
+                await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes) //todo: delete after pilot, now in signup fetch
             } else {
                 throw new Error('No Internet Connection')
             }
@@ -86,45 +86,21 @@ export const setNotifications = () => {
         if (!isScheduled) {
             //  if (true) {
             await checkNotificationPermission()
-
-
             // get time from timesArr
             const currentTime = Date.now()
             const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)).filter(el => el - currentTime >= 0)
-            let acc = dates.length -1
-            while (acc >= 0) {
-                const res = await scheduleNotificationHandler(dates[acc])
-                if (res) acc--
-            }
-
-
-            // todo: loop over entire array and schedule all notifications in one turn!!
             try {
-                // const allNotes = await posTimes.reduce(async (memo, time) => {
-                //     const timeRes = await scheduleNotificationHandler(time)
-                //     const memoSum = await memo
-                //
-                //     return memoSum + timeRes
-                // }, 0)
+                let acc = dates.length -1
+                while (acc >= 0) {
+                    const res = await scheduleNotificationHandler(dates[acc])
+                    if (res) acc--
+                }
                 await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
             } catch (err) {
                 throw new Error(err)
             }
 
         }
-
-        // await checkNotificationPermission()
-        // // testing
-        // const testDates = [(new Date().getTime() + 1000 * 60 * 40 )] // 5min
-        // await testDates.reduce( async (memo, t) => {
-        //     await memo
-        //     const time = t
-        //     await scheduleNotificationHandler(time)
-        //
-        // }, undefined)
-        //
-        // // await scheduleNotificationHandler((testDate.getTime() + 10000))  // just for testing
-        // await saveItemAsyncStore(NOTIFICATION_TIMES, testDates, undefined)
 
     }
 }
@@ -198,9 +174,11 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
                 await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
             } catch (err) {
                 await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
+                throw new Error('Could not reach server, saved data for next try')
             }
         } else {
             await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
+            throw new Error('Could not establish network connection, saved data for next try')
         }
         await dispatch(setUserProgress(userProgress + 1))
     }

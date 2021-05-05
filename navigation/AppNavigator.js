@@ -13,6 +13,7 @@ import * as Theme from '../constants/CtmThemes'
 import StartupScreen from "../screens/StartupScreen";
 import HomeScreen from "../screens/HomeScreen";
 import FeedbackScreen from "../screens/FeedbackScreen";
+import AdminScreen from "../screens/AdminScreen";
 import AssessmentScreen from "../screens/AssessmentScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import AuthScreen from "../screens/AuthScreen";
@@ -26,14 +27,15 @@ const AssessStack = createStackNavigator()
 
 
 const DrawerContent = ({navigation}) => {
-    const isAuth = useSelector(state => !!state.auth.token)
+    const {token, user} = useSelector(state => state.auth)
     return (
         <PreferencesContext.Consumer>
             {preferences => (
                 <DrawerItems
                     toggleTheme={preferences.toggleTheme}
                     isDarkTheme={preferences.theme === Theme.CustomDarkTheme}
-                    authStatus={isAuth}
+                    authStatus={token}
+                    userType={user.role}
                     navigation={navigation}
                 />
             )}
@@ -80,6 +82,8 @@ function getHeaderTitle(route) {
             return 'Studie: iViewSky'
         case 'Feedback':
             return 'Feedback'
+        case 'Admin':
+            return 'Admin'
         default:
             return 'default'
     }
@@ -110,7 +114,8 @@ const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
                                         options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
                     <AssessStack.Screen name='Assessment' component={AssessmentScreen}
                                         options={{headerTitle: `Befragung`}}/>
-                    <AssessStack.Screen name='Feedback' component={FeedbackScreen}/>
+                    {/*<AssessStack.Screen name='Feedback' component={FeedbackScreen}/>*/}
+                    <AssessStack.Screen name='Admin' component={AdminScreen}/>
                 </>
                 : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>}
 

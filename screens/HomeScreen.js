@@ -27,7 +27,6 @@ const HomeScreen = props => {
     const {token, repeatCount, isFirstLaunch, user} = useSelector(state => state.auth)
     const {userProgress, notificationState} = useSelector(state => state.assessment)
 
-
     const [access, setAccess] = useState(false)
     const [accessTime, setAccessTime] = useState(0)
     const [scheduledTimeFit, setScheduledTimeFit] = useState(null)
@@ -42,25 +41,21 @@ const HomeScreen = props => {
     const isAuth = token
 
 
+// todo: make it work better!
     useEffect(() => {
-        //fadeIn()
-        let timeout
         if (userProgress === 0 && isFirstLaunch) {
             setNoAccessText('Die erste Benachrichtigung kommt bald.')
-            timeout = 4000
         } else if (access) {
             setNoAccessText('Du bekommst eine Benachrichtigung wenn es weitergeht.')
-            timeout = 2000
         } else if (userProgress === repeatCount ) {
             setNoAccessText('Vielen Dank, dass Du dabei warst!')
-            timeout = 2000
+
         } else {
             setNoAccessText('Prüfe Zugangsberechtigung...')
-            timeout = 1000
+
         }
-        const myTimeout = setTimeout(() => setSnackVisible(true), timeout)
-        return () => clearTimeout(myTimeout)
-    }, [])
+        setSnackVisible(true)
+    }, [access, userProgress])
 
     useEffect(() => {
         const checkAssessmentCount = async () => {

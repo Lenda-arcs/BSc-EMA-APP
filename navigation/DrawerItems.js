@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {View, StyleSheet, Platform, SafeAreaView, ScrollView} from 'react-native';
 import {Drawer, Switch, TouchableRipple, Text, useTheme} from 'react-native-paper';
 import * as Notifications from 'expo-notifications'
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {logout} from "../store/actions/auth";
 import {useState} from "react";
 import CtmDialog from "../components/helper/CtmDialog";
@@ -12,10 +12,9 @@ import {getItemAsyncStore} from "./../helpers/asyncStoreFactories";
 //todo: get  text from server?
 const text = 'diam nonumy eirmod tempor invidunt ut . Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
 
-const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
+const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
 
     const {colors} = useTheme();
-
     const dispatch = useDispatch()
     const [visible, setVisible] = useState(false)
     const [times, setTimes] = useState([])
@@ -87,15 +86,16 @@ const DrawerItems = ({toggleTheme, isDarkTheme, authStatus, navigation}) => {
                               {sTimes.map((el, index) => <Text key={index} style={{marginLeft: 10}}  >{el.toString()}</Text>)}
                           </View>
                     </TouchableRipple>
-                    {/*<Drawer.Section title="Feedback">*/}
-                    {/*    <TouchableRipple onPress={() => navigation.navigate('Feedback')}>*/}
-                    {/*        <View style={styles.preference}>*/}
-                    {/*            <Text>Schreib eine Nachricht</Text>*/}
-                    {/*        </View>*/}
-                    {/*    </TouchableRipple>*/}
-                    {/*</Drawer.Section>*/}
+                    {userType === 'admin' && <Drawer.Section title="Users">
+                        <TouchableRipple onPress={() => navigation.navigate('Admin')}>
+                            <View style={styles.preference}>
+                                <Text>Sieh Dir alle User der Studie an</Text>
+                            </View>
+                        </TouchableRipple>
+                    </Drawer.Section>}
                 </View>
-               <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout' onPress={() => dispatch(logout())}/>
+                {userType === 'admin' && <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
+                              onPress={() => dispatch(logout())}/>}
             </View>
     );
 };
