@@ -20,13 +20,6 @@ const checkCameraPermission = async () => {
     }
 }
 
-const checkLocationPermission = async () => {
-    const settings = await Location.getForegroundPermissionsAsync()
-    if (!settings.granted) {
-        const request = await Location.requestForegroundPermissionsAsync()
-    }
-}
-
 
 const ImgPicker = props => {
     const {colors} = props.theme
@@ -35,17 +28,16 @@ const ImgPicker = props => {
 
 
     const pickImage = async () => {
-        await checkCameraPermission()
-        await checkLocationPermission()
         if (Platform.OS !== 'web') {
-            const resCamPermissions = await ImagePicker.getCameraPermissionsAsync()
-
-            const resMediaLibraryPermissions = await ImagePicker.getMediaLibraryPermissionsAsync()
-
-            if (resCamPermissions.status !== 'granted' || resMediaLibraryPermissions.status !== 'granted') {
-                alert('Sorry, we need camera and MediaLibrary permissions to make this work!');
-                return
-            }
+            // const resCamPermissions = await ImagePicker.getCameraPermissionsAsync()
+            //
+            // const resMediaLibraryPermissions = await ImagePicker.getMediaLibraryPermissionsAsync()
+            //
+            // if (resCamPermissions.status !== 'granted' || resMediaLibraryPermissions.status !== 'granted') {
+            //     alert('Sorry, we need camera and MediaLibrary permissions to make this work!');
+            //     return
+            // }
+            checkCameraPermission()
         }
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,

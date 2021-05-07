@@ -6,6 +6,7 @@ import ImagePicker from "./ImagePicker";
 import CtmSubheading from "../wrapper/CtmSubheading";
 import CtmDialog from "../helper/CtmDialog";
 import FABPicture from "../helper/FABPictureHelp";
+import * as Location from "expo-location";
 
 const dim = Dimensions.get('window')
 const imgH = Math.round(dim.width * 4 / 3) *.5
@@ -13,6 +14,15 @@ const imgW = dim.width * .75
 
 const resizeMode = 'cover'
 
+
+
+
+const checkLocationPermission = async () => {
+    const settings = await Location.getForegroundPermissionsAsync()
+    if (!settings.granted) {
+        const request = await Location.requestForegroundPermissionsAsync()
+    }
+}
 
 const PictureSlide = ({isComplete, savedData, theme}) => {
     const {colors} = theme
@@ -57,6 +67,10 @@ const PictureSlide = ({isComplete, savedData, theme}) => {
         setSelectedHorizonImage(imgObj)
         setIconHorImg('check')
     }
+
+    useEffect(() => {
+        checkLocationPermission()
+    } ,[])
 
     useEffect(() => {
         if (selectedSkyImage && selectedHorizonImage) {

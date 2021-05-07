@@ -1,6 +1,7 @@
 import * as Network from 'expo-network'
-import {Platform} from "react-native";
 
+
+import * as Notifications from 'expo-notifications'
 import ENV from '../../env'
 import Assessment from "../../models/assessment";
 import * as storeFac from '../../helpers/asyncStoreFactories'
@@ -20,7 +21,7 @@ export const ASSESSMENT_PENDING = 'ASSESSMENT_PENDING'
 
 export const USER_PROGRESS = 'USER_PROGRESS'
 export const ASSESSMENT_DATA = 'ASSESSMENT_DATA'
-export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
+export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES' //todo: delete after pilot
 export const SET_NOTIFICATION_STATE = 'SET_NOTIFICATION_STATE'
 
 
@@ -60,7 +61,10 @@ export const setAssessmentData = () => {
                 slideData = slideData.data.data
 
                 await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
-                await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes) //todo: delete after pilot, now in signup fetch
+
+                const timesStored = !!(await storeFac.getItemAsyncStore(NOTIFICATION_TIMES, false)) //todo: not need after deletion
+                if (!timesStored) await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes) //todo: delete after pilot, now in signup fetch
+
             } else {
                 throw new Error('No Internet Connection')
             }
@@ -80,8 +84,6 @@ export const setNotifications = () => {
     return async () => {
 
         const isScheduled = await getItemAsyncStore(SET_NOTIFICATION_SCHEDULED)
-
-        //await Notifications.cancelAllScheduledNotificationsAsync()
         //
         if (!isScheduled) {
             //  if (true) {
@@ -90,7 +92,7 @@ export const setNotifications = () => {
             const currentTime = Date.now()
             const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)).filter(el => el - currentTime >= 0)
             try {
-                let acc = dates.length -1
+                let acc = dates.length - 1
                 while (acc >= 0) {
                     const res = await scheduleNotificationHandler(dates[acc])
                     if (res) acc--
@@ -171,7 +173,8 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
         // only send if network available
         if ((await Network.getNetworkStateAsync()).isInternetReachable) {
             try {
-                await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
+                const response = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
+                if (response.data.updateSlides) await deleteItemAsyncStore(ASSESSMENT_DATA) // re-fetch slides after this
             } catch (err) {
                 await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
                 throw new Error('Could not reach server, saved data for next try')

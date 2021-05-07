@@ -20,8 +20,6 @@ import {filterTimeArr} from '../helpers/notificationHandler'
 
 
 import CtmDialog from "../components/helper/CtmDialog";
-import * as Location from "expo-location";
-
 
 const HomeScreen = props => {
     const {colors, dark} = props.theme
@@ -116,14 +114,14 @@ const HomeScreen = props => {
 
 // todo: make it work better!
     useEffect(() => {
-        if (userProgress === 0 && isFirstLaunch) {
+        if ((userProgress === 0) && isFirstLaunch && !access) {
             setNoAccessText('Du kannst teilnehmen, sobald eine Benachrichtigung kommt.')
         } else if (userProgress === repeatCount) {
             setNoAccessText('Vielen Dank, dass Du dabei warst!')
         } else if (access) {
             setNoAccessText('Du kannst jetzt an der Befragung teilnehmen.')
         } else {
-            setNoAccessText('Du bekommst eine Benachrichtigung wenn es weitergeht.')
+            setNoAccessText('Du bekommst eine Benachrichtigung, wenn es weitergeht.')
         }
         setSnackVisible(true)
     }, [access, userProgress])
@@ -137,7 +135,7 @@ const HomeScreen = props => {
                                           count={userProgress} repeats={repeatCount}/>}
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {userProgress < repeatCount &&
+                    {!userProgress < repeatCount &&
                         <CtmButton disabled={!access} mode={Platform.OS === 'ios' ? 'outline' : 'contained'}
                                    onPress={() => {
                                        props.navigation.dispatch(StackActions.replace('Assessment', {

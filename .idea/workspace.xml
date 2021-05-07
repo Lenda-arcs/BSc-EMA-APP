@@ -2,21 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a24e4418-c214-4524-98ac-5d06e317e345" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/screens/AdminScreen.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/actions/admin.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/rn-ema-bsc-app.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/[CodeSignOnCopy," beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/eas.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/navigation/AppNavigator.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/AppNavigator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/slides/ImagePicker.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/slides/ImagePicker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/slides/PictureSlide.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/slides/PictureSlide.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/navigation/DrawerItems.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/DrawerItems.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screens/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/HomeScreen.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/store/actions/assessment.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/assessment.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/store/actions/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tunnel/.expo/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tunnel/.expo/settings.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +65,9 @@
       <workItem from="1619683378115" duration="72457000" />
       <workItem from="1619908374624" duration="20839000" />
       <workItem from="1620052923623" duration="4681000" />
-      <workItem from="1620140674072" duration="7621000" />
+      <workItem from="1620140674072" duration="15892000" />
+      <workItem from="1620302547249" duration="1191000" />
+      <workItem from="1620309188452" duration="4931000" />
     </task>
     <servers />
   </component>
@@ -83,10 +79,17 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="false" />
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
