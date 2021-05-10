@@ -8,6 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 
 import Screen from "../components/wrapper/Screen";
 import {isFirstLaunch, tryLogin} from '../store/actions/auth'
+import {getUserProgress} from "../store/actions/assessment";
 
 
 const StartupScreen = props => {
@@ -24,6 +25,8 @@ const StartupScreen = props => {
         const checkState= async () => {
             await dispatch(isFirstLaunch())
             await dispatch(tryLogin())
+            await dispatch(getUserProgress())
+
         }
         checkState()
 
