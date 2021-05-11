@@ -54,7 +54,7 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
 
 
     return (
-        <ScrollView >
+        <ScrollView contentContainerStyle={{paddingBottom: 30}} >
             <CtmSubheading>{description}</CtmSubheading>
             <List.AccordionGroup onAccordionPress={onAccordionPressHandler} expandedId={expandedId}>
                     {questions.map((question) =>

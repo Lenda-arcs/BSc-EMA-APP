@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {View, StyleSheet, Vibration, Animated, Platform} from 'react-native'
-import {withTheme, Paragraph, Snackbar, Text, Headline} from "react-native-paper";
+import React, {useEffect, useState} from 'react'
+import {View, StyleSheet, Platform} from 'react-native'
+import {withTheme, Paragraph, Snackbar, Text} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
 import {StackActions, useIsFocused} from '@react-navigation/native'
 
@@ -12,7 +12,6 @@ import StudyOverview from "../components/helper/StudyOverview";
 
 import {
     fetchRestoredAssessment,
-    getUserProgress,
     setAssessmentData,
     setNotifications
 } from '../store/actions/assessment'
@@ -38,18 +37,21 @@ const HomeScreen = props => {
     const dispatch = useDispatch()
     const screenIsFocused = useIsFocused()
     const isAuth = token
+    const isAdmin = user.role === 'admin' ? true : false
 
 
-    useEffect(() => {
-        const checkAssessmentCount = async () => {
-            try {
-                await dispatch(getUserProgress())
-            } catch (err) {
-                console.log()
-            }
-        }
-        checkAssessmentCount()
-    }, [])
+    // useEffect(() => {
+    //     const checkAssessmentCount = async () => {
+    //         try {
+    //             await dispatch(getUserProgress())
+    //         } catch (err) {
+    //             console.log()
+    //         }
+    //     }
+    //     checkAssessmentCount()
+    // }, [])
+    //
+    // console.log(userProgress)
 
 
     //  Slides!
@@ -130,22 +132,42 @@ const HomeScreen = props => {
     return (
 
         <Screen>
-            <View style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
-                {isAuth && <StudyOverview style={{marginTop: 40}} colors={colors} userName={user.name}
-                                          count={userProgress} repeats={repeatCount}/>}
+            <View style={styles.container}>
+                {
+                    isAuth
+                    && <StudyOverview style={{marginTop: 40}}
+                                      colors={colors}
+                                      userName={user.name}
+                                      count={userProgress}
+                                      repeats={repeatCount}/>
+                }
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
-                    {!userProgress < repeatCount &&
-                        <CtmButton disabled={!access} mode={Platform.OS === 'ios' ? 'outline' : 'contained'}
-                                   onPress={() => {
-                                       props.navigation.dispatch(StackActions.replace('Assessment', {
-                                           scheduledTime: scheduledTimeFit,
-                                           startTime: new Date().getTime()
-                                       }))
-                                   }}>Teilnehmen</CtmButton>}
+                    {
+                        !isAdmin && userProgress < repeatCount
+                            ? <CtmButton disabled={!access}
+                                         mode={'contained'}
+                                         onPress={
+                                             () => {
+                                                 props.navigation.dispatch(StackActions.replace('Assessment',
+                                                     {
+                                                         scheduledTime: scheduledTimeFit,
+                                                         startTime: new Date().getTime()
+                                                     }))
+                                             }
+                                         }>Teilnehmen</CtmButton>
+                            : <CtmButton
+                                onPress={() => {
+                                    props.navigation.dispatch(StackActions.replace('Assessment',
+                                        {scheduledTime: scheduledTimeFit, startTime: new Date().getTime()}))
+                                }}>TESTEN</CtmButton>
+                    }
 
-                    {access && userProgress !== repeatCount ? <Paragraph style={{marginTop: 10}}>Möglich
-                        für {(accessTime / 60).toFixed(2)} Minuten</Paragraph> : null}
+                    {
+                        access && userProgress < repeatCount
+                            ? <Paragraph style={{marginTop: 10}}>Möglich
+                                für {(accessTime / 60).toFixed(2)} Minuten</Paragraph>
+                            : null}
 
                 </View>
             </View>
@@ -153,7 +175,6 @@ const HomeScreen = props => {
                 style={{backgroundColor: '#35469d'}}
                 visible={snackVisible}
                 onDismiss={() => setSnackVisible(!snackVisible)}
-
                 action={{
                     label: 'Okay',
                     onPress: () => {
@@ -162,7 +183,11 @@ const HomeScreen = props => {
                 }}>
                 <Text style={{color: '#fff'}}>{noAccessText}</Text>
             </Snackbar>
-            <CtmDialog title='Fehler!' visible={visible} hideDialog={() => setVisible(false)} helpText={errText}/>
+            <CtmDialog
+                title='Fehler!'
+                visible={visible}
+                hideDialog={() => setVisible(false)}
+                helpText={errText}/>
         </Screen>
 
 
@@ -171,6 +196,11 @@ const HomeScreen = props => {
 
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
     btnCtn: {
         justifyContent: 'space-between',
         alignItems: 'center',

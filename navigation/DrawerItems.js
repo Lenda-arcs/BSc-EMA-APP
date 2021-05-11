@@ -20,6 +20,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
     const [visible, setVisible] = useState(false)
     const [times, setTimes] = useState([])
     const [sTimes, setSTimes] = useState([])
+    const isAdmin = userType === 'admin' ? true : false
 
     // todo: delete after testing
     const showNotificationTimes = async () => {
@@ -43,6 +44,7 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
     }
 
 
+    // todo: ...
     const hideTimes = () => {
         setTimes([])
         setSTimes([])
@@ -70,38 +72,38 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
                         </View>
                     </TouchableRipple>
                 </Drawer.Section>
-                {userType === 'admin' &&
+                {isAdmin &&
                 <Drawer.Section title="Admin">
-                    <TouchableRipple onPress={showNotificationTimes}>
-                        <View style={styles.preference}>
-                            <Text>Times From Server</Text>
+                    {/*<TouchableRipple onPress={showNotificationTimes}>*/}
+                    {/*    <View style={styles.preference}>*/}
+                    {/*        <Text>Times From Server</Text>*/}
 
-                        </View>
-                    </TouchableRipple>
-                    {times.length > 0 && times.map((el, index) => <Text style={{marginLeft: 10}}
-                                                                        key={index}>{el.toString()}</Text>)}
-                    {sTimes.map((el, index) => <Text key={index}
-                                                     style={{marginLeft: 10}}>{el.toString()}</Text>)}
-                    <TouchableRipple onPress={showScheduledTimes}>
-                        <View style={styles.preference}>
-                            <Text>Times scheduled</Text>
+                    {/*    </View>*/}
+                    {/*</TouchableRipple>*/}
+                    {/*{times.length > 0 && times.map((el, index) => <Text style={{marginLeft: 10}}*/}
+                    {/*                                                    key={index}>{el.toString()}</Text>)}*/}
+                    {/*{sTimes.map((el, index) => <Text key={index}*/}
+                    {/*                                 style={{marginLeft: 10}}>{el.toString()}</Text>)}*/}
+                    {/*<TouchableRipple onPress={showScheduledTimes}>*/}
+                    {/*    <View style={styles.preference}>*/}
+                    {/*        <Text>Times scheduled</Text>*/}
 
-                        </View>
-                    </TouchableRipple>
-                    <TouchableRipple onPress={hideTimes}>
-                        <View style={styles.preference}>
-                            <Text>Hide times</Text>
-                        </View>
-                    </TouchableRipple>
+                    {/*    </View>*/}
+                    {/*</TouchableRipple>*/}
+                    {/*<TouchableRipple onPress={hideTimes}>*/}
+                    {/*    <View style={styles.preference}>*/}
+                    {/*        <Text>Hide times</Text>*/}
+                    {/*    </View>*/}
+                    {/*</TouchableRipple>*/}
 
                     <TouchableRipple onPress={() => navigation.navigate('Admin')}>
                         <View style={styles.preference}>
-                            <Text>User</Text>
+                            <Text>Admin</Text>
                         </View>
                     </TouchableRipple>
                 </Drawer.Section>}
             </View>
-            {userType === 'admin' && <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
+            {isAdmin && <Drawer.Item style={{backgroundColor: colors.surface}} icon='logout' label='logout'
                                                   onPress={() => dispatch(logout())}/>}
         </View>
     );

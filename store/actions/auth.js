@@ -5,7 +5,6 @@ import * as assessmentActions from './assessment'
 import * as storeFac from '../../helpers/asyncStoreFactories'
 import {fetchData} from '../../helpers/fetchFactories'
 import {saveItemAsyncStore, getItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
-import {osName} from "expo-device";
 
 
 export const AUTHENTICATE = 'AUTHENTICATE'

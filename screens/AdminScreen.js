@@ -6,13 +6,13 @@ import {fetchData} from "../helpers/fetchFactories";
 import {useSelector} from "react-redux";
 import ENV from '../env'
 import CtmButton from "../components/wrapper/CtmButton";
-import assessment from "../store/reducers/assessment";
 
 
 const UserRow = ({user, userLookUp}) => {
     const currentTime = new Date().getTime()
     const nextTrigger = user.notificationTimes?.find(t => t >= currentTime)
     const nextTriggerDate = (new Date(nextTrigger)).toLocaleTimeString()
+    const os = user.deviceType?.os ? user.deviceType?.os : 'N/A'
 
 
     return (
@@ -22,6 +22,7 @@ const UserRow = ({user, userLookUp}) => {
             <DataTable.Cell>{user.group}</DataTable.Cell>
             <DataTable.Cell>{user.createdAt.substring(0, 10)}</DataTable.Cell>
             <DataTable.Cell>{nextTriggerDate}</DataTable.Cell>
+            <DataTable.Cell>{os}</DataTable.Cell>
         </DataTable.Row>)
 }
 
@@ -49,6 +50,9 @@ const AssessmentRow = ({data}) => {
         return  Math.round(dateObj.getTime() / 1000 / 60 )
     }
     const reducer = (acc, currentVal) => acc + currentVal
+    const weatherCloudData = data.weather?.OBSERVATIONS.cloud_layer_1_value_1d
+    const skyCondition = weatherCloudData?.value.sky_condition ? weatherCloudData.value.sky_condition : 'N/A'
+    const cloudLayer1Height = weatherCloudData?.value.height_agl ? weatherCloudData.value.height_agl : 'N/A'
 
     return (
         <DataTable.Row>
@@ -57,8 +61,8 @@ const AssessmentRow = ({data}) => {
             <DataTable.Cell>{(Object.values(data.answers?.stress).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
             <DataTable.Cell>{(Object.values(data.answers?.ruminate).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
             <DataTable.Cell>{(Object.values(data.answers?.["pre-assessment"])[3]) === 0 ? 'in' : 'out'}</DataTable.Cell>
-            <DataTable.Cell>{data.weather.OBSERVATIONS.cloud_layer_1_value_1d.value.height_agl}</DataTable.Cell>
-            <DataTable.Cell>{data.weather.OBSERVATIONS.cloud_layer_1_value_1d.value.sky_condition}</DataTable.Cell>
+            <DataTable.Cell>{cloudLayer1Height}</DataTable.Cell>
+            <DataTable.Cell>{skyCondition}</DataTable.Cell>
         </DataTable.Row>
     )
 }
@@ -67,15 +71,17 @@ const AssessmentRow = ({data}) => {
 const AdminScreen = (props) => {
     const {token} = useSelector(state => state.auth)
     const [users, setUsers] = useState([])
-    const [slides, setSlides] = useState([])
+    const [slides, setSlides] = useState(null)
     const [userAssessmentDetails, setUserAssessmentDetails] = useState(null)
 
 
 
     const getUser = async () => {
-        const slideDataRes = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
-        const slideData = slideDataRes.data.data
-        setSlides(slideData)
+        if (!slides) {
+            const slideDataRes = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
+            const slideData = slideDataRes.data.data
+            setSlides(slideData)
+        }
 
         const usersRes = await fetchData(`${ENV.OwnApi}/users`, 'GET', null, token)
         const usersData = usersRes.data.data
@@ -84,8 +90,8 @@ const AdminScreen = (props) => {
 
     const demoPickMapping = (pickId) => {
         const slideId = pickId - 1
-        const demoSlide = slides.findIndex(el => el.name === 'demo')
-        return slides[0].questions[slideId].selectionItems[userAssessmentDetails?.[userAssessmentDetails.length - 1]?.answers?.demo?.[pickId]]
+        const demoSlideIndex = slides.findIndex(el => el.name === 'demo')
+        return slides[demoSlideIndex].questions[slideId].selectionItems[userAssessmentDetails?.[userAssessmentDetails.length - 1]?.answers?.demo?.[pickId]]
     }
 
     const userLookUpHandler = async (id) => {
@@ -98,9 +104,6 @@ const AdminScreen = (props) => {
     return (
         <Screen>
             <View style={{flex: 1}}>
-                {!userAssessmentDetails ?
-                    <CtmButton onPress={getUser}>{users.length > 0 ? 'Refresh' : 'Get User'}</CtmButton> :
-                    <CtmButton onPress={() => setUserAssessmentDetails(null)}>Back</CtmButton>}
                 {!userAssessmentDetails ? <><Paragraph style={{alignSelf: 'center'}}>Total
                         Users: {users.length}</Paragraph><DataTable>
                         <DataTable.Header>
@@ -109,6 +112,7 @@ const AdminScreen = (props) => {
                             <DataTable.Title>Group</DataTable.Title>
                             <DataTable.Title>Created</DataTable.Title>
                             <DataTable.Title>Next Trigger</DataTable.Title>
+                            <DataTable.Title>OS</DataTable.Title>
                         </DataTable.Header>
                         <ScrollView contentContainerStyle={{paddingBottom: 600}}>
                             {users?.map((user, index) => <UserRow key={index} user={user} userLookUp={userLookUpHandler}/>)}
@@ -145,6 +149,9 @@ const AdminScreen = (props) => {
                     </DataTable>}
 
             </View>
+            {!userAssessmentDetails ?
+                <CtmButton onPress={getUser}>{users.length > 0 ? 'Refresh' : 'Get User'}</CtmButton> :
+                <CtmButton onPress={() => setUserAssessmentDetails(null)}>Back</CtmButton>}
         </Screen>
     )
 

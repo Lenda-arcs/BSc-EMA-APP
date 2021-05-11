@@ -21,7 +21,6 @@ import DrawerItems from './DrawerItems'
 import {setNotificationState} from "../store/actions/assessment";
 
 
-
 const Drawer = createDrawerNavigator()
 const AssessStack = createStackNavigator()
 
@@ -101,30 +100,31 @@ const Home = () => {
 }
 
 
-
 const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
+
     return (
         <AssessStack.Navigator screenOptions={defaultNavOptions}>
 
             {isFirstLaunch && !isAuth &&
             <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/>}
             {isAuth
-                ? <>
+                ?
+                <>
                     <AssessStack.Screen name='Home' component={Home}
                                         options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
                     <AssessStack.Screen name='Assessment' component={AssessmentScreen}
                                         options={{headerTitle: `Befragung`}}/>
                     {/*<AssessStack.Screen name='Feedback' component={FeedbackScreen}/>*/}
-                    <AssessStack.Screen name='Admin' component={AdminScreen}/>
+
                 </>
                 : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>}
+            <AssessStack.Screen name='Admin' component={AdminScreen}/>
 
         </AssessStack.Navigator>
     )
 }
 
-const AppNavigator = (props) =>
-{
+const AppNavigator = (props) => {
     const dispatch = useDispatch()
 
     useEffect(() => {
