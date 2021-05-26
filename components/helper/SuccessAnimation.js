@@ -1,10 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, StyleSheet, Easing, View} from 'react-native';
+import {Animated, StyleSheet, Easing} from 'react-native';
 import {ActivityIndicator, Modal, Portal, withTheme} from "react-native-paper";
 import LottieView from 'lottie-react-native';
 import CtmDialog from "./CtmDialog";
-
-//todo: ....see if Invariant Violation: Tried to register two views with the same name LottieAnimationView is   does not appear anymore
 
 const getAnimation = () => {
     const rndNum = Math.floor(Math.random() * 2)
@@ -23,7 +21,7 @@ const getAnimation = () => {
 const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     const {colors} = theme
     const animationConfetti = useRef(new Animated.Value(0)).current
-    // const animationCheck = useRef()
+
     const [animationObj, setAnimationObj] = useState('')
     const [dialogVisible, setDialogVisible] = useState(false)
     const [dialogContent, setDialogContent] = useState({
@@ -59,23 +57,29 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     }, [success])
 
 
-
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onDismiss}
-                   contentContainerStyle={styles.animationContainer}>
+            <Modal
+                visible={visible}
+                onDismiss={onDismiss}
+                contentContainerStyle={styles.animationContainer}>
                 {success
-                    ? <><LottieView
-                        progress={animationConfetti}
-                        speed={1}
-                        style={{
-                            alignSelf: 'center',
-                            flexGrow: 1
-                        }} source={animationObj} autoPlay={true} resizeMode='cover'/>
-                        <CtmDialog visible={dialogVisible} showDialog={showDialog} hideDialog={hideDialog}
-                                   helpText={dialogContent.text}
-                                   title={dialogContent.title}/></>
-                    : <><ActivityIndicator animating={true} size='large' color={colors.accent}/></>}
+                    ? <>
+                        <LottieView
+                            progress={animationConfetti}
+                            speed={1}
+                            style={styles.animation}
+                            source={animationObj}
+                            autoPlay={true}
+                            resizeMode='cover'/>
+                        <CtmDialog
+                            visible={dialogVisible}
+                            showDialog={showDialog}
+                            hideDialog={hideDialog}
+                            helpText={dialogContent.text}
+                            title={dialogContent.title}/>
+                    </>
+                    : <ActivityIndicator animating={true} size='large' color={colors.accent}/>}
             </Modal>
         </Portal>
 
@@ -90,6 +94,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    animation: {
+        alignSelf: 'center',
+        flexGrow: 1
+    }
 
 });
 

@@ -15,11 +15,9 @@ const CtmButton = props => {
 
 
 const styles = StyleSheet.create({
-    //ContentStyle
     btn: {
         marginVertical: 5
     },
-    label: {},
     iconRight: {
         flexDirection: 'row-reverse'
     }

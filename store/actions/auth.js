@@ -11,41 +11,10 @@ export const AUTHENTICATE = 'AUTHENTICATE'
 export const LOGOUT = 'LOGOUT'
 export const SET_DID_TRY_AL = 'SET_DID_TRY_AL'
 export const SET_IS_FIRST_LAUNCH = 'SET_IS_FIRST_LAUNCH'
-export const SET_FEEDBACK = 'SET_FEEDBACK'
 export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 
 const USER = 'USER_DATA'
 const LAUNCHED = 'LAUNCHED'
-
-
-export const sendFeedback = (message, topic) => {
-    return async (dispatch, getState) => {
-
-
-        const feedbackCount = await getItemAsyncStore(SET_FEEDBACK, undefined, undefined)
-        const {token, user} = getState().auth
-        const newFeedback = {
-            user: user.id[1],
-            feedback: {
-                topic: topic,
-                text: message,
-                rating: 0
-            }
-        }
-        if (token) {
-            try {
-                if (!feedbackCount || feedbackCount <= 3) {
-                    await fetchData(`${ENV.OwnApi}/feedback`, 'POST', newFeedback, token)
-                    const newFeedbackCount = +feedbackCount + 1
-                    await saveItemAsyncStore(SET_FEEDBACK, newFeedbackCount)
-                    dispatch({type: SET_FEEDBACK})
-                }
-            } catch (err) {
-                throw new Error(err)
-            }
-        }
-    }
-}
 
 
 export const authenticate = (auth) => {
@@ -97,7 +66,8 @@ export const signUser = (userId, password, passwordConfirm = null) => {
     let data = !passwordConfirm ? {userId, password} : {userId, password, passwordConfirm}
     // get user device data
     if(passwordConfirm) data.device = {type: Device.brand, os: Device.osName, osVersion: Device.osVersion}
-    return async (dispatch) => {
+    return async (dispatch, getSate) => {
+        const {userProgress} = getSate().assessment
         try {
             const resData = await fetchData(`${ENV.OwnApi}/users/${type}`, 'POST', data)
             // for later db patching
@@ -114,10 +84,10 @@ export const signUser = (userId, password, passwordConfirm = null) => {
             const notificationTimes = resData.data.user.notificationTimes
 
 
-            const userProgress = resData.data.user.userProgress
+            const userProgressServer = resData.data.user.userProgress
 
             dispatch(authenticate(auth))
-            dispatch(assessmentActions.setUserProgress(userProgress))
+            if (userProgress < userProgressServer) dispatch(assessmentActions.incrementUserProgress(userProgress))
 
             // only set fistLaunch complete if registration was successful
             await storeFac.saveItemAsyncStore(LAUNCHED, true)
@@ -131,7 +101,6 @@ export const signUser = (userId, password, passwordConfirm = null) => {
     }
 }
 export const logout = () => {
-    //clearLogoutTimer()
     return async (dispatch) => {
         await storeFac.deleteItemAsyncStore(USER, true)
         dispatch({type: LOGOUT})

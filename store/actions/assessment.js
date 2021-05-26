@@ -9,24 +9,25 @@ import {fetchData} from '../../helpers/fetchFactories'
 import {scheduleNotificationHandler, checkNotificationPermission} from '../../helpers/notificationHandler'
 import {getUserLocation} from "../../helpers/permissonFactories";
 import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
+import {fetchAssessmentsFromDB, deleteAssessmentFromDB, insertAssessmentToDB, init} from "../../helpers/db";
 
 import {Buffer} from "buffer";
 
 
 export const SET_USER_PROGRESS = 'SET_USER_PROGRESS'
-export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA'
-export const SET_NOTIFICATION_SCHEDULED = 'SET_NOTIFICATION_SCHEDULED'
+export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA_NEW'
 export const ASSESSMENT_PENDING = 'ASSESSMENT_PENDING'
 
 
 export const USER_PROGRESS = 'USER_PROGRESS'
 export const ASSESSMENT_DATA = 'ASSESSMENT_DATA'
-export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES' //todo: delete after pilot
+export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 export const SET_NOTIFICATION_STATE = 'SET_NOTIFICATION_STATE'
 
 
 export const removeScheduledTime = (time) => {
     return async () => {
+        await Notifications.dismissAllNotificationsAsync() // Removes notification displayed in the notification tray (Notification Center).
         const dates = await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)
         if (dates) {
             const index = dates.indexOf(time)
@@ -48,23 +49,15 @@ export const setNotificationState = (state) => {
 export const setAssessmentData = () => {
     return async (dispatch, getState) => {
         const {token, repeatCount} = getState().auth
-
         let slideData
-        let notificationTimes = []
-
         const asyncStoreSlides = await storeFac.getItemAsyncStore(ASSESSMENT_DATA, false, true)
 
         if (!asyncStoreSlides) {
             if ((await Network.getNetworkStateAsync()).isInternetReachable) {
                 slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
-                notificationTimes = slideData.attachment //todo: delete after pilot, now in signup fetch
                 slideData = slideData.data.data
 
                 await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
-
-                const timesStored = !!(await storeFac.getItemAsyncStore(NOTIFICATION_TIMES, false)) //todo: not need after deletion
-                if (!timesStored) await storeFac.saveItemAsyncStore(NOTIFICATION_TIMES, notificationTimes) //todo: delete after pilot, now in signup fetch
-
             } else {
                 throw new Error('No Internet Connection')
             }
@@ -82,13 +75,12 @@ export const setAssessmentData = () => {
 
 export const setNotifications = () => {
     return async () => {
+        const hasPermission = (await checkNotificationPermission()).granted
+        const isScheduled = !!(await Notifications.getAllScheduledNotificationsAsync())
 
-        const isScheduled = await getItemAsyncStore(SET_NOTIFICATION_SCHEDULED)
-        //
-        if (!isScheduled) {
-            //  if (true) {
-            await checkNotificationPermission()
-            // get time from timesArr
+        await scheduleNotificationHandler(Date.now() + 1000)
+
+        if (!isScheduled && hasPermission) {
             const currentTime = Date.now()
             const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)).filter(el => el - currentTime >= 0)
             try {
@@ -97,28 +89,31 @@ export const setNotifications = () => {
                     const res = await scheduleNotificationHandler(dates[acc])
                     if (res) acc--
                 }
-                await saveItemAsyncStore(SET_NOTIFICATION_SCHEDULED, true, undefined)
             } catch (err) {
                 throw new Error(err)
             }
-
         }
-
     }
 }
 
-export const setUserProgress = (newCount) => {
+export const incrementUserProgress = (progress) => {
     return async (dispatch) => {
-        await storeFac.saveItemAsyncStore(USER_PROGRESS, newCount)
-        dispatch({type: SET_USER_PROGRESS, val: newCount})
+        let newProgress
+        const currentProgress = await storeFac.getItemAsyncStore(USER_PROGRESS, false)
+        if (!currentProgress) newProgress = 0
+        else if (!!progress) {
+            newProgress = progress
+        } else newProgress = +currentProgress + 1
+        await storeFac.saveItemAsyncStore(USER_PROGRESS, newProgress)
+        dispatch(setUserProgressState())
     }
 }
 
-export const getUserProgress = () => {
+export const setUserProgressState = () => {
     return async (dispatch) => {
-        const asyncCount = await storeFac.getItemAsyncStore(USER_PROGRESS)
-        if (!asyncCount) await dispatch(setUserProgress(0))  // CHANGED FOR GOOD? dispatch()
-        else dispatch({type: SET_USER_PROGRESS, val: parseInt(asyncCount)})
+        const asyncCount = await storeFac.getItemAsyncStore(USER_PROGRESS, false, undefined)
+        if (!asyncCount) await dispatch(incrementUserProgress())
+        else await dispatch({type: SET_USER_PROGRESS, val: asyncCount})
     }
 }
 
@@ -139,21 +134,36 @@ const createAssessmentObj = (userId, weatherData = undefined, userLoc, selection
 
 }
 
+export const setAssessmentPendingState = () => {
+    return async (dispatch) => {
+        const isPendingRes = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING)
+        dispatch({type: ASSESSMENT_PENDING, val: isPendingRes})
+    }
+}
+
 
 export const fetchRestoredAssessment = (token) => {
-    return async () => {
-        const restoredAssessmentArr = await storeFac.getItemAsyncStore(ASSESSMENT_PENDING, undefined, true)
+    return async (dispatch) => {
+        await init() // initialize database
+        const restoredAssessmentArr = (await fetchAssessmentsFromDB()).rows._array
 
-        if (restoredAssessmentArr && (await Network.getNetworkStateAsync()).isInternetReachable) {
-            try {
-                await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessmentArr, token)
-                await deleteItemAsyncStore(ASSESSMENT_PENDING) //todo: not working ...
-            } catch (err) {
-                throw new Error(err)
+        if (restoredAssessmentArr.length > 0 && (await Network.getNetworkStateAsync()).isInternetReachable) {
+            let acc = restoredAssessmentArr.length
+            while (acc > 0) {
+                try {
+                    const res = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', JSON.parse(restoredAssessmentArr[acc - 1].assessment), token)
+                    const resdb = await deleteAssessmentFromDB()
+
+                    if (!!res) acc--
+                } catch (err) {
+                    throw new Error('Senden Fehlgeschlagen, Antworten werden fürs nächste Mal gespeichert.')
+                }
             }
-        } else {
-            if (restoredAssessmentArr) throw new Error('Could not send Pending Assessment, no Internet Connection Available')
+        } else if (restoredAssessmentArr.length > 0) {
+            throw new Error('Senden Fehlgeschlagen - Keine Internet Verbindung verfügbar.')
         }
+        await storeFac.deleteItemAsyncStore(ASSESSMENT_PENDING, false)
+        dispatch({type: ASSESSMENT_PENDING, val: false})
     }
 
 }
@@ -161,7 +171,6 @@ export const fetchRestoredAssessment = (token) => {
 export const saveAssessment = (skyImage, horizonImage, time, selection) => {
     return async (dispatch, getState) => {
         const {token, user} = getState().auth
-        const {userProgress} = getState().assessment
 
         const userCoords = await getUserLocation()
         const userLoc = {
@@ -174,18 +183,33 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
         if ((await Network.getNetworkStateAsync()).isInternetReachable) {
             try {
                 const response = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
-                if (response.data.updateSlides) await deleteItemAsyncStore(ASSESSMENT_DATA) // re-fetch slides after this
+                if (response?.data?.updateSlides) await deleteItemAsyncStore(ASSESSMENT_DATA) // re-fetch slides after this
             } catch (err) {
-                await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
-                throw new Error('Could not reach server, saved data for next try')
+                await saveAssessmentToDatabase(newAssessment)
+                await dispatch(incrementUserProgress())
+                throw new Error('Senden Fehlgeschlagen, Antworten werden zwischengespeichert und mit der nächsten Befragung gesendet.')
             }
         } else {
-            await saveItemAsyncStore(ASSESSMENT_PENDING, newAssessment)
-            throw new Error('Could not establish network connection, saved data for next try')
+            await saveAssessmentToDatabase(newAssessment)
+            await dispatch(incrementUserProgress())
+            throw new Error('Senden Fehlgeschlagen - Keine Internet Verbindung verfügbar. Deine Antworten wurden aber gerettet =)')
         }
-        await dispatch(setUserProgress(userProgress + 1))
+        await dispatch(incrementUserProgress())
     }
 }
+
+const saveAssessmentToDatabase = async (assessment) => {
+    const assessmentWithoutImgStr = JSON.stringify(assessment)
+    try {
+        await init() // initialize database
+        await insertAssessmentToDB(assessmentWithoutImgStr)
+        await storeFac.saveItemAsyncStore(ASSESSMENT_PENDING, true, false)
+    } catch (err) {
+        throw new Error('Befragung konnte leider nicht zwischengespeichert werden.')
+    }
+
+}
+
 
 
 

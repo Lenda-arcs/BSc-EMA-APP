@@ -17,7 +17,9 @@ exports.checkNotificationPermission = async () => {
                 allowBadge: true,
             }
         })
+        return request
     }
+
 
 }
 

@@ -1,52 +1,38 @@
 import React, {useEffect} from "react";
-import {StyleSheet} from "react-native";
-
 import {ActivityIndicator, withTheme} from "react-native-paper";
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import * as SecureStore from 'expo-secure-store';
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 
 import Screen from "../components/wrapper/Screen";
 import {isFirstLaunch, tryLogin} from '../store/actions/auth'
-import {getUserProgress} from "../store/actions/assessment";
+import {setUserProgressState, setAssessmentPendingState} from "../store/actions/assessment";
 
 
 const StartupScreen = props => {
-    const dispatch = useDispatch()
-
-
-
-    // destruct color prop from withTheme
     const {colors} = props.theme
-
-
+    const dispatch = useDispatch()
     useEffect(() => {
-
-        const checkState= async () => {
+        const checkState = async () => {
             await dispatch(isFirstLaunch())
             await dispatch(tryLogin())
-            await dispatch(getUserProgress())
-
+            await dispatch(setUserProgressState())
+            await dispatch(setAssessmentPendingState())
         }
         checkState()
-
-    },[])
-
+    }, [])
 
     return (
-        <Screen style={styles.screen}>
-           <ActivityIndicator size='large' color={colors.accent}/>
+        <Screen
+            style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+            <ActivityIndicator
+                size='large'
+                color={colors.accent}/>
         </Screen>
     )
 }
 
-const styles = StyleSheet.create({
-
-    screen: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    }
-})
 
 export default withTheme(StartupScreen)

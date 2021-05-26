@@ -7,17 +7,17 @@ import {createStackNavigator} from "@react-navigation/stack";
 import {createDrawerNavigator} from "@react-navigation/drawer";
 
 import PreferencesContext from "./PreferencesContext";
-import * as Theme from '../constants/CtmThemes'
+import * as Theme from '../constants/ownThemes'
 
 
 import StartupScreen from "../screens/StartupScreen";
 import HomeScreen from "../screens/HomeScreen";
-import FeedbackScreen from "../screens/FeedbackScreen";
 import AdminScreen from "../screens/AdminScreen";
 import AssessmentScreen from "../screens/AssessmentScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import AuthScreen from "../screens/AuthScreen";
 import DrawerItems from './DrawerItems'
+
 import {setNotificationState} from "../store/actions/assessment";
 
 
@@ -91,10 +91,16 @@ function getHeaderTitle(route) {
 
 const Home = () => {
     return (
-        <Drawer.Navigator screenOptions={defaultNavOptions}
-                          drawerContent={({navigation}) => <DrawerContent navigation={navigation}/>}>
-            <Drawer.Screen name='Home' component={HomeScreen}/>
-
+        <Drawer.Navigator
+            screenOptions={defaultNavOptions}
+            drawerContent={({navigation}) =>
+                <DrawerContent
+                    navigation={navigation}/>}
+        >
+            <Drawer.Screen
+                name='Home'
+                component={HomeScreen}
+            />
         </Drawer.Navigator>
     )
 }
@@ -104,22 +110,37 @@ const AssessmentNavigator = ({isAuth, isFirstLaunch}) => {
 
     return (
         <AssessStack.Navigator screenOptions={defaultNavOptions}>
-
-            {isFirstLaunch && !isAuth &&
-            <AssessStack.Screen name='Boarding' component={OnboardingScreen} options={{headerShown: false}}/>}
-            {isAuth
-                ?
-                <>
-                    <AssessStack.Screen name='Home' component={Home}
-                                        options={({route}) => ({headerTitle: getHeaderTitle(route)})}/>
-                    <AssessStack.Screen name='Assessment' component={AssessmentScreen}
-                                        options={{headerTitle: `Befragung`}}/>
-                    {/*<AssessStack.Screen name='Feedback' component={FeedbackScreen}/>*/}
-
-                </>
-                : <AssessStack.Screen name='Auth' component={AuthScreen} options={{headerShown: false}}/>}
-            <AssessStack.Screen name='Admin' component={AdminScreen}/>
-
+            {
+                isFirstLaunch && !isAuth &&
+                <AssessStack.Screen
+                    name='Boarding'
+                    component={OnboardingScreen}
+                    options={{headerShown: false}}
+                />
+            }
+            {
+                isAuth
+                    ?
+                    <>
+                        <AssessStack.Screen name='Home' component={Home}
+                                            options={({route}) =>
+                                                ({headerTitle: getHeaderTitle(route)})}
+                        />
+                        <AssessStack.Screen name='Assessment'
+                                            component={AssessmentScreen}
+                                            options={{headerTitle: `Befragung`}}
+                        />
+                    </>
+                    : <AssessStack.Screen
+                        name='Auth'
+                        component={AuthScreen}
+                        options={{headerShown: false}}
+                    />
+            }
+            <AssessStack.Screen
+                name='Admin'
+                component={AdminScreen}
+            />
         </AssessStack.Navigator>
     )
 }
@@ -139,11 +160,12 @@ const AppNavigator = (props) => {
         <NavigationContainer>
             {!didTryAutoLogin && !isAuth
                 ? <StartupScreen/>
-                : <AssessmentNavigator isFirstLaunch={isFirstLaunch} isAuth={isAuth}/>}
-
+                : <AssessmentNavigator
+                    isFirstLaunch={isFirstLaunch}
+                    isAuth={isAuth}
+                />
+            }
         </NavigationContainer>
-
-
     )
 }
 

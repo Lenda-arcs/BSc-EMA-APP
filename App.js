@@ -1,9 +1,7 @@
-// import './helpers/wdyr'
-
 import React, {useMemo, useState, useEffect, useRef} from 'react';
 import {LogBox, Vibration} from 'react-native'
 import {createStore, combineReducers, applyMiddleware} from "redux";
-import {Provider, useDispatch} from 'react-redux'
+import {Provider} from 'react-redux'
 import ReduxThunk from 'redux-thunk'
 import {Provider as PaperProvider} from 'react-native-paper'
 import * as Notifications  from 'expo-notifications'
@@ -16,10 +14,8 @@ import authReducer from "./store/reducers/auth"
 import AppNavigator from "./navigation/AppNavigator";
 
 import PreferencesContext from "./navigation/PreferencesContext";
-import * as Theme from './constants/CtmThemes'
-import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "./helpers/asyncStoreFactories";
-import {calcResTime} from "./helpers/notificationHandler";
-
+import * as Theme from './constants/ownThemes'
+import {getItemAsyncStore, saveItemAsyncStore} from "./helpers/asyncStoreFactories";
 
 const PREFERENCES_KEY = 'APP_PREFERENCES';
 
@@ -72,8 +68,6 @@ export default function App() {
    }, [])
 
 
-
-
     useEffect(() => {
         const restorePrefs = async () => {
             try {
@@ -107,8 +101,6 @@ export default function App() {
         [theme]
     );
 
-
-
     return (
         <Provider store={store}>
             <PaperProvider theme={theme}>
@@ -119,7 +111,5 @@ export default function App() {
         </Provider>
 
     );
-
-
 }
 

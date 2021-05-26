@@ -25,7 +25,9 @@ export const getItemAsyncStore = async (key, safe = false, parse = undefined) =>
         if (safe) result = await SecureStore.getItemAsync(key)
         else result = await AsyncStorage.getItem(key)
     } catch (err) {
+        await AsyncStorage.removeItem(key) // avoid error loop, if err -> item any is broken
         throw new Error(err.message)
+
     }
     if (parse) return JSON.parse(result)
     return result

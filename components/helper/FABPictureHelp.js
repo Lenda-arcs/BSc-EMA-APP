@@ -1,19 +1,10 @@
 import * as React from 'react';
-import {Button, Dialog, FAB, Paragraph, Portal, Provider, useTheme} from 'react-native-paper';
-import {Image, View, StyleSheet, ScrollView, Dimensions} from "react-native";
+import { FAB, Portal, Provider, useTheme } from 'react-native-paper';
 import {useState} from "react";
-import CtmDialog from "./CtmDialog";
-
 
 const FABPicture = (props) => {
     const [state, setState] = useState({open: false});
-
     const {colors} = useTheme()
-
-
-
-
-
     const onStateChange = ({open}) => setState({open});
 
     const {open} = state;
@@ -21,7 +12,7 @@ const FABPicture = (props) => {
     return (
         <Provider>
             <Portal>
-                <FAB.Group color={colors.background} fabStyle={{backgroundColor: colors.accent}}
+                <FAB.Group color={colors.background} fabStyle={{backgroundColor: '#35469d'}}
                            style={{width: '100%', paddingBottom: '10%', paddingRight: '5%'}}
                            open={open}
                            icon={open ? 'camera-plus' : 'information-outline'}
@@ -38,20 +29,11 @@ const FABPicture = (props) => {
                                }
                            ]}
                            onStateChange={onStateChange}
-                           onPress={() => {
-                               if (open) {
-                                   // do something if the speed dial is open
-                               }
-                               props.collapseAcc()
-                           }}
+                           onPress={() => {props.collapseAcc()}}
                 />
             </Portal>
         </Provider>
     );
 };
-
-const styles = StyleSheet.create({
-
-});
 
 export default FABPicture;

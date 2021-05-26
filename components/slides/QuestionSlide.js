@@ -1,19 +1,18 @@
-import React, { useEffect, useState} from 'react'
-import {ScrollView, View} from "react-native";
+import React, {useEffect, useState} from 'react'
+import {ScrollView} from "react-native";
 import {List, withTheme} from "react-native-paper";
 
 import CtmSubheading from "../wrapper/CtmSubheading";
 import QuestionItem from "./QuestionItem";
 
 
-const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelection, isComplete, description}) => {
-    const {colors} = theme
+const QuestionSlide = props => {
+    const {slideName, questions, onSlideChange, savedSelection, isComplete, description} = props
     const [expandedId, setExpandedId] = useState(undefined);
     const [state, setState] = useState({
         slideName: '',
         answers: []
     })
-    // Get question quantity
     const questionCount =  questions.length
     let pickListCount = state?.answers?.length
 
@@ -22,6 +21,9 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
             ? setExpandedId(undefined)
             : setExpandedId(newExpandedId);
 
+    const resetExpandedHandler = () => {
+        setExpandedId(undefined)
+    }
 
     // Checking as complete if user goes to prev slide
     useEffect(() => {
@@ -33,15 +35,14 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
     useEffect(() => {
         //check if all questions has been answered
         if ( questionCount <= pickListCount ) {
+            // resetExpandedHandler() //todo: needs different approach
             onSlideChange(state)
             isComplete()
         }
-
     }, [state])
 
     //update picks obj with each item selection
     const onChangeHandler = (pickObj) => {
-
         let objIndex = state.answers.findIndex(el => (el.domain === pickObj.domain) && (el.questionId === pickObj.questionId))
 
         if (objIndex < 0) setState({...state, answers: state.answers.concat(pickObj)})
@@ -60,11 +61,10 @@ const QuestionSlide = ({slideName, theme, questions, onSlideChange, savedSelecti
                     {questions.map((question) =>
                         <QuestionItem
                             key={question._id}
-                            domain={question.domain}
+                            expanded={expandedId}
                             question={question}
-                            text={question.text}
-                            items={question.selectionItems}
                             onChange={onChangeHandler}
+                            resetExpanded={resetExpandedHandler}
                             selection={savedSelection?.find(q => q.questionId === question.id && q.domain === question.domain)}/>)}
             </List.AccordionGroup>
         </ScrollView>

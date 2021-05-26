@@ -11,7 +11,7 @@ const Stepper = props => {
         <View style={{flexDirection: "row", alignSelf: 'center', marginHorizontal: 20, alignItems: 'center'}}>
             {props.stepList.map((val, index) => (
                 <View
-                    key={"step-indicator-" + index}
+                    key={`step-indicator-${index}`}
                     style={{
                         width: index === props.currentStep ? 8 : 8,
                         marginHorizontal: 5,

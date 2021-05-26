@@ -29,7 +29,7 @@ const AuthScreen = props => {
     const {colors} = props.theme
     // Transition when Screen visible
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const {isFirstLaunch } = useSelector(state => state.auth)
+    const {isFirstLaunch} = useSelector(state => state.auth)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState()
     const [visible, setVisible] = useState(false)
@@ -51,11 +51,12 @@ const AuthScreen = props => {
         }).start();
     };
 
-    const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: inputValues,
-        inputValidities: inputValities,
-        formIsValid: false
-    });
+    const [formState, dispatchFormState] =
+        useReducer(formReducer, {
+            inputValues: inputValues,
+            inputValidities: inputValities,
+            formIsValid: false
+        });
 
     useEffect(() => {
         fadeIn()
@@ -63,13 +64,12 @@ const AuthScreen = props => {
 
     useEffect(() => {
         isSignup
-            ? setInputValues({userId: '', password:'', confirmPassword: ''})
-            : setInputValues({userId: '', password: '' })
+            ? setInputValues({userId: '', password: '', confirmPassword: ''})
+            : setInputValues({userId: '', password: ''})
         isSignup
-            ? setInputValities({userId: false, password:false, confirmPassword: false})
+            ? setInputValities({userId: false, password: false, confirmPassword: false})
             : setInputValities({userId: false, password: false})
-    } , [isSignup])
-
+    }, [isSignup])
 
 
     useEffect(() => {
@@ -105,75 +105,131 @@ const AuthScreen = props => {
             else if (msg === 'Error: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
             else if (msg === 'Error: Incorrect userId or password') msg = 'Falsche ID oder Passwort'
             else if (msg.includes('Error: Duplicate field value')) msg = 'Es existiert bereits ein Nutzer mit diesem Namen.'
-            else  msg = 'Bitte erneute Eingabe, da ist etwas schiefgegangen!'
+            else msg = 'Bitte erneute Eingabe, da ist etwas schiefgegangen!'
             setError(msg)
             setIsLoading(false)
         }
 
     }
 
-    const inputChangeHandler = useCallback((inputIdentifier, inputValue, inputValidity) => {
-        dispatchFormState({
-            type: FORM_INPUT_UPDATE,
-            value: inputValue,
-            isValid: inputValidity,
-            input: inputIdentifier
-        });
-    }, [dispatchFormState, isSignup])
+    const inputChangeHandler =
+        useCallback((inputIdentifier, inputValue, inputValidity) => {
+            dispatchFormState({
+                type: FORM_INPUT_UPDATE,
+                value: inputValue,
+                isValid: inputValidity,
+                input: inputIdentifier
+            });
+        }, [dispatchFormState, isSignup])
 
     return (
-        <Screen style={{alignItems: 'center', justifyContent: 'center'}} darkContent noSaveArea>
-            <TextInputAvoidingView style={{flex: 1}}>
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                    <Animated.View style={{opacity: fadeAnim}}>
-
-                        <ScrollView contentContainerStyle={styles.inner}>
-                            <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
-                                <Headline style={!isSignup && {color: colors.primary, fontSize: 13, textDecorationLine: 'underline', textDecorationStyle: 'solid', textDecorationColor: colors.primary}}>{isSignup ? 'Nutzer anlegen' : 'zurück zur Registration'}</Headline>
+        <Screen
+            style={{alignItems: 'center', justifyContent: 'center'}}
+            darkContent
+            noSaveArea>
+            <TextInputAvoidingView
+                style={{flex: 1}}>
+                <TouchableWithoutFeedback
+                    onPress={Keyboard.dismiss}
+                    accessible={false}>
+                    <Animated.View
+                        style={{opacity: fadeAnim}}>
+                        <ScrollView
+                            contentContainerStyle={styles.inner}>
+                            <TouchableOpacity
+                                onPress={() => setIsSignup(!isSignup)}
+                                style={isSignup ? {
+                                    borderBottomWidth: 2,
+                                    borderBottomColor: colors.accent
+                                } : styles.selected}>
+                                <Headline
+                                    style={!isSignup && {
+                                        color: colors.primary,
+                                        fontSize: 13,
+                                        textDecorationLine: 'underline',
+                                        textDecorationStyle: 'solid',
+                                        textDecorationColor: colors.primary
+                                    }}>
+                                    {isSignup ? 'Nutzer anlegen' : 'zurück zur Registration'}
+                                </Headline>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={!isSignup ? {borderBottomWidth: 2, borderBottomColor: colors.accent} : styles.selected}>
-                                <Headline style={isSignup && {color: colors.primary,fontSize: 13, textDecorationLine: 'underline', textDecorationStyle: 'solid', textDecorationColor: colors.primary}}>{!isSignup ? 'Login' : 'Bereits ein Nutzerkonto?'}</Headline>
+                            <TouchableOpacity onPress={() => setIsSignup(!isSignup)} style={!isSignup ? {
+                                borderBottomWidth: 2,
+                                borderBottomColor: colors.accent
+                            } : styles.selected}>
+                                <Headline style={isSignup && {
+                                    color: colors.primary,
+                                    fontSize: 13,
+                                    textDecorationLine: 'underline',
+                                    textDecorationStyle: 'solid',
+                                    textDecorationColor: colors.primary
+                                }}>{!isSignup ? 'Login' : 'Bereits ein Nutzerkonto?'}</Headline>
                             </TouchableOpacity>
-
                             <View style={{marginTop: '20%'}}>
-                                <Input id='userId' label='Teilnehmer ID' keyboardType='default' required minLength={4}
-                                       userId style={styles.input} icon='account' placeholder='Pilot-XXXX'
+                                <Input id='userId'
+                                       label='Teilnehmer ID'
+                                       keyboardType='default'
+                                       required minLength={4}
+                                       userId
+                                       style={styles.input}
+                                       icon='account'
+                                       placeholder='Pilot-XXXX'
                                        helpText='Deine Teilnehmer Identifikationsnummer, die wir Dir mitgeteilt haben.'
-                                       autocapitalize='none' errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
-                                       onInputChange={inputChangeHandler} initialValue=''/>
-                                <Input id='password' label='Password' keyboardType='default' required minLength={8}
-                                       style={styles.input} icon='key'
-                                       helpText='Gib ein Passwort mit mindestens 8 Zeichen ein.'
-                                       autocapitalize='none' secureTextEntry errorText='Mindestens 8 Zeichen'
-                                       onInputChange={inputChangeHandler} initialValue=''/>
-                                {isSignup &&
-                                <Input id='confirmPassword' label='Passwort Bestätigen' keyboardType='default' required
+                                       autocapitalize='none'
+                                       errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
+                                       onInputChange={inputChangeHandler}
+                                       initialValue=''/>
+                                <Input id='password'
+                                       label='Password'
+                                       keyboardType='default'
+                                       required
                                        minLength={8}
-                                       style={styles.input} icon='key-outline'
-                                       helpText='Bestätige Dein Passwort'
-                                       autocapitalize='none' secureTextEntry errorText='Die Passwörter müssen übereinstimmen.'
-                                       onInputChange={inputChangeHandler} initialValue=''/>}
-
+                                       style={styles.input}
+                                       icon='key'
+                                       helpText='Gib ein Passwort mit mindestens 8 Zeichen ein.'
+                                       autocapitalize='none'
+                                       secureTextEntry
+                                       errorText='Mindestens 8 Zeichen'
+                                       onInputChange={inputChangeHandler}
+                                       initialValue=''/>
+                                {isSignup &&
+                                <Input
+                                    id='confirmPassword'
+                                    label='Passwort Bestätigen'
+                                    keyboardType='default'
+                                    required
+                                    minLength={8}
+                                    style={styles.input}
+                                    icon='key-outline'
+                                    helpText='Bestätige Dein Passwort'
+                                    autocapitalize='none'
+                                    secureTextEntry
+                                    errorText='Die Passwörter müssen übereinstimmen.'
+                                    onInputChange={inputChangeHandler}
+                                    initialValue=''/>}
                             </View>
-                            <View style={styles.btnCtn}>
-                                <CtmButton loading={isLoading}
-                                           mode='contained'
-                                           disabled={!formState.formIsValid}
-                                           onPress={authHandler}>{isSignup ? 'Registrieren' : 'Login'}</CtmButton>
+                            <View
+                                style={styles.btnCtn}>
+                                <CtmButton
+                                    loading={isLoading}
+                                    mode='contained'
+                                    disabled={!formState.formIsValid}
+                                    onPress={authHandler}>
+                                    {isSignup ? 'Registrieren' : 'Login'}
+                                </CtmButton>
                             </View>
 
-                            <CtmDialog visible={visible} showDialog={showDialog} hideDialog={hideDialog}
+                            <CtmDialog visible={visible}
+                                       showDialog={showDialog}
+                                       hideDialog={hideDialog}
                                        helpText={error}
                                        title='Fehlgeschlagen'/>
-
                         </ScrollView>
                     </Animated.View>
                 </TouchableWithoutFeedback>
             </TextInputAvoidingView>
         </Screen>
-
     )
-
 }
 
 
@@ -183,7 +239,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    selected: {fontSize: 5, position: 'absolute', bottom: '5%', right: 0 },
+    selected: {fontSize: 5, position: 'absolute', bottom: '5%', right: 0},
     preference: {
         flexDirection: 'row',
         justifyContent: 'space-between',

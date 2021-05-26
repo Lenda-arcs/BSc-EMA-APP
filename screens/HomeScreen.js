@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {View, StyleSheet, Platform} from 'react-native'
+import {View, StyleSheet} from 'react-native'
 import {withTheme, Paragraph, Snackbar, Text} from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
 import {StackActions, useIsFocused} from '@react-navigation/native'
@@ -21,53 +21,69 @@ import {filterTimeArr} from '../helpers/notificationHandler'
 import CtmDialog from "../components/helper/CtmDialog";
 
 const HomeScreen = props => {
-    const {colors, dark} = props.theme
-    const {token, repeatCount, isFirstLaunch, user} = useSelector(state => state.auth)
-    const {userProgress, notificationState} = useSelector(state => state.assessment)
-
-    const [access, setAccess] = useState(false)
-    const [accessTime, setAccessTime] = useState(0)
-    const [scheduledTimeFit, setScheduledTimeFit] = useState(null)
-    const [visible, setVisible] = useState(false)
-    const [snackVisible, setSnackVisible] = useState(false)
-    const [errText, setErrText] = useState('')
-    const [noAccessText, setNoAccessText] = useState('')
-    const [slidesFetched, setSlidesFetched] = useState(false)
-
     const dispatch = useDispatch()
     const screenIsFocused = useIsFocused()
+
+    const {colors} = props.theme
+    const {token, repeatCount, isFirstLaunch, user} = useSelector(state => state.auth)
+    const {userProgress, notificationState, pendingAssessment} = useSelector(state => state.assessment)
     const isAuth = token
-    const isAdmin = user.role === 'admin' ? true : false
+    const isAdmin = user.role === 'admin'
 
+    const [accessState, setAccessState] = useState({access: false, timeLeft: 0, scheduledTime: null})
+    const [dialogState, setDialogState] = useState({visible: false, text: '', title: ''})
+    const [snackState, setSnackState] = useState({visible: false, text: ''})
+    const [slidesFetched, setSlidesFetched] = useState(false)
+    const [pendingFetch, setPendingFetch] = useState(false)
 
+    const showDialog = (text) => {
+        setDialogState({visible: true, text: text, title: 'Error'})
+    }
+    const hideDialog = () => {
+        setDialogState({...dialogState, visible: false})
+    }
+    const showSnack = (text) => {
+        setSnackState({visible: true, text: text})
+    }
+    const hideSnack = () => {
+        setSnackState({...snackState, visible: false})
+    }
+
+    // // End of pilot study //todo: delete with reals study
     // useEffect(() => {
-    //     const checkAssessmentCount = async () => {
-    //         try {
-    //             await dispatch(getUserProgress())
-    //         } catch (err) {
-    //             console.log()
-    //         }
-    //     }
-    //     checkAssessmentCount()
+    //     !dialogState.visible && setDialogState({
+    //         title: 'Ende der Pilot Studie',
+    //         visible: true,
+    //         text: 'Danke, dass Du dabei warst! Die Testphase ist jetzt beendet. Bitte teile dein Feedback mit mir! \n\nAlle zukünftigen Benachrichtgungen sind hiermit gelöscht.'
+    //     })
     // }, [])
-    //
-    // console.log(userProgress)
-
 
     //  Slides!
     useEffect(() => {
-        const fetchAssessmentData = async () => {
+        const getAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
-                await dispatch(fetchRestoredAssessment(token))
                 setSlidesFetched(true)
             } catch (err) {
-                setErrText(err.message)
-                setVisible(true)
+                showDialog(err.message)
             }
         }
-        isAuth && fetchAssessmentData()
-    }, [isAuth, dispatch])
+        getAssessmentData()
+    }, [userProgress])
+
+    useEffect(() => {
+        const sendPendingAssessments = async () => {
+            setPendingFetch(true)
+            try {
+                await dispatch(fetchRestoredAssessment(token))
+            } catch (err) {
+                showDialog(err.message)
+            }
+            setPendingFetch(false)
+        }
+        pendingAssessment && sendPendingAssessments()
+    }, [pendingAssessment])
+
 
     useEffect(() => {
         const scheduleNotification = async () => {
@@ -76,9 +92,7 @@ const HomeScreen = props => {
                 // Cancel all upcoming notifications when user is finished
                 userProgress === repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
             } catch (err) {
-                // console.log(err.message)
-                setErrText(err.message)
-                setVisible(true)
+                showDialog(err.message)
             }
         }
         slidesFetched && scheduleNotification() //todo: refactor when times come with user signIn
@@ -89,44 +103,54 @@ const HomeScreen = props => {
         const checkAccess = async () => {
             const accessInSec = await filterTimeArr()
             if (accessInSec.timeLeft >= 0) {
-                setAccessTime(accessInSec.timeLeft)
-                setScheduledTimeFit(accessInSec.scheduledTime)
+                setAccessState(
+                    {
+                        ...accessState,
+                        timeLeft: accessInSec.timeLeft,
+                        scheduledTime: accessInSec.scheduledTime
+                    })
             }
         }
         let timeInterval
-        if (accessTime <= 0) {
+        if (accessState.timeLeft <= 0) {
             timeInterval = setInterval(checkAccess, 1000)
         }
         if (timeInterval) return () => clearInterval(timeInterval)
-    }, [screenIsFocused, notificationState, accessTime])
+    }, [screenIsFocused, notificationState, accessState.timeLeft])
 
     useEffect(() => {
         let myCountdown
-        if (accessTime > 0) {
+        if (accessState.timeLeft > 0) {
             myCountdown = setTimeout(() => {
-                setAccessTime(prevState => prevState - 1)
-                if (!access) {
-                    setAccess(true)
+                setAccessState(
+                    (prevState) => {
+                        return {...accessState, timeLeft: prevState.timeLeft - 1}
+                    })
+                if (!accessState.access) {
+                    setAccessState({...accessState, access: true})
                 }
             }, 1000)
-        } else setAccess(false)
+        } else setAccessState({...accessState, access: false})
         if (myCountdown) return () => clearTimeout(myCountdown)
-    }, [accessTime, notificationState])
+    }, [accessState.timeLeft, notificationState])
 
 
 // todo: make it work better!
     useEffect(() => {
-        if ((userProgress === 0) && isFirstLaunch && !access) {
-            setNoAccessText('Du kannst teilnehmen, sobald eine Benachrichtigung kommt.')
-        } else if (userProgress === repeatCount) {
-            setNoAccessText('Vielen Dank, dass Du dabei warst!')
-        } else if (access) {
-            setNoAccessText('Du kannst jetzt an der Befragung teilnehmen.')
+        let infoText
+        if ((userProgress == 0) && !accessState.access) {
+            infoText = 'Du kannst teilnehmen, sobald eine Benachrichtigung kommt.'
+        } else if (userProgress == repeatCount) {
+            infoText = 'Vielen Dank, dass Du dabei warst!'
+        } else if (pendingAssessment) {
+            infoText = 'Veruche Deine letzte Fehlgeschlagende Befragung abzuschicken'
+        } else if (accessState.access) {
+            infoText = 'Du kannst jetzt an der Befragung teilnehmen.'
         } else {
-            setNoAccessText('Du bekommst eine Benachrichtigung, wenn es weitergeht.')
+            infoText = 'Du bekommst eine Benachrichtigung, wenn es weitergeht.'
         }
-        setSnackVisible(true)
-    }, [access, userProgress])
+        showSnack(infoText)
+    }, [accessState.access, userProgress])
 
 
     return (
@@ -144,14 +168,14 @@ const HomeScreen = props => {
 
                 <View style={{backgroundColor: colors.background, ...styles.btnCtn}}>
                     {
-                        !isAdmin && userProgress < repeatCount
-                            ? <CtmButton disabled={!access}
+                        !isAdmin && userProgress <= repeatCount
+                            ? <CtmButton disabled={!accessState.access || pendingFetch}
                                          mode={'contained'}
                                          onPress={
                                              () => {
                                                  props.navigation.dispatch(StackActions.replace('Assessment',
                                                      {
-                                                         scheduledTime: scheduledTimeFit,
+                                                         scheduledTime: accessState.scheduledTime,
                                                          startTime: new Date().getTime()
                                                      }))
                                              }
@@ -159,35 +183,43 @@ const HomeScreen = props => {
                             : <CtmButton
                                 onPress={() => {
                                     props.navigation.dispatch(StackActions.replace('Assessment',
-                                        {scheduledTime: scheduledTimeFit, startTime: new Date().getTime()}))
+                                        {scheduledTime: accessState.scheduledTime, startTime: new Date().getTime()}))
                                 }}>TESTEN</CtmButton>
                     }
 
                     {
-                        access && userProgress < repeatCount
-                            ? <Paragraph style={{marginTop: 10}}>Möglich
-                                für {(accessTime / 60).toFixed(2)} Minuten</Paragraph>
+                        accessState.access && userProgress < repeatCount
+                            ? <View style={{marginTop: 10}}>
+                                <Paragraph>
+                                    Zugang für {Math.floor(accessState.timeLeft / 60) < 10
+                                    ? '0'.concat(Math.floor(accessState.timeLeft / 60))
+                                    : Math.floor(accessState.timeLeft / 60)}:{
+                                    (accessState.timeLeft % 60) < 10
+                                        ? '0'.concat(accessState.timeLeft % 60)
+                                        : (accessState.timeLeft % 60)} Minuten
+                                </Paragraph>
+                            </View>
                             : null}
 
                 </View>
             </View>
             <Snackbar
                 style={{backgroundColor: '#35469d'}}
-                visible={snackVisible}
-                onDismiss={() => setSnackVisible(!snackVisible)}
+                visible={snackState.visible}
+                duration={3000}
+                onDismiss={hideSnack}
                 action={{
-                    label: 'Okay',
-                    onPress: () => {
-                        setSnackVisible(!snackVisible)
-                    },
+                    label: '   ',
+                    onPress:  hideSnack ,
                 }}>
-                <Text style={{color: '#fff'}}>{noAccessText}</Text>
+                <Text style={{color: '#fff'}}>{snackState.text}</Text>
             </Snackbar>
             <CtmDialog
-                title='Fehler!'
-                visible={visible}
-                hideDialog={() => setVisible(false)}
-                helpText={errText}/>
+                //noHide // non dismissible dialog to end the current study
+                title={dialogState.title}
+                visible={dialogState.visible}
+                hideDialog={hideDialog}
+                helpText={dialogState.text}/>
         </Screen>
 
 
