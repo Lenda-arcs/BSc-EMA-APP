@@ -25,12 +25,12 @@ const checkLocationPermission = async () => {
 const examplePics = {
     inside: {
         title: 'Beispiel Fotos: drinnen',
-        text: 'Öffne das nächstgelegende Fenster und mache zwei Fotos im Hochformat, wie in diesem Beispiel.',
+        text: 'Öffen Sie das nächstgelegende Fenster und machen Sie zwei Fotos im Hochformat, wie es in diesen Beispiel Fotos gezeigt wird.',
         pictureArr: [require('./../../assets/skyPictures/inside_vertical.jpg'), require('./../../assets/skyPictures/inside_horizontal.jpg')]
     },
     outside: {
         title: 'Beispiel Fotos: draußen',
-        text: 'Mache zwei Fotos im Hochformat, und pass auf, dass Dir nichts passiert',
+        text: 'Machen Sie zwei Fotos von Himmel im Hochformat, wie es in diesen Beispiel Fotos gezeigt wird.',
         pictureArr: [require('./../../assets/skyPictures/outside_vertical.jpg'), require('./../../assets/skyPictures/outside_horizontal.jpg')]
     }
 }
@@ -102,13 +102,13 @@ const PictureSlide = ({isComplete, savedData, theme}) => {
     return (
         <ScrollView contentContainerStyle={{height: '100%', justifyContent: 'space-between'}}>
             <View>
-                <CtmSubheading>Bitte mache Fotos vom Himmel.</CtmSubheading>
+                <CtmSubheading>Bitte machen Sie jetzt Fotos vom Himmel.</CtmSubheading>
                 <List.AccordionGroup
                     onAccordionPress={onAccordionPressHandler}
                     expandedId={expandedId}>
                     <List.Accordion
                         id='0'
-                        title='Mach ein Foto vom Himmel'
+                        title='Foto vom Himmel'
                         titleNumberOfLines={2}
                         onLongPress={() => {
                         }}
@@ -127,7 +127,7 @@ const PictureSlide = ({isComplete, savedData, theme}) => {
                     </List.Accordion>
                     <List.Accordion
                         id='1'
-                        title='Mach ein Foto vom Horizont'
+                        title='Foto vom Horizont'
                         titleNumberOfLines={2}
                         onLongPress={() => {
                         }}

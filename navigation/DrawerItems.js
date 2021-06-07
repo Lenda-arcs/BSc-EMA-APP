@@ -1,20 +1,22 @@
 import React from 'react';
-import {View, StyleSheet, Platform} from 'react-native';
-import {Drawer, Switch, TouchableRipple, Text, useTheme} from 'react-native-paper';
+import {View, StyleSheet, Platform, TouchableOpacity} from 'react-native';
+import {
+    Drawer,
+    Switch,
+    TouchableRipple,
+    Text,
+    useTheme,
+    Paragraph,
+    Subheading, Button
+} from 'react-native-paper';
 
 import {useDispatch} from "react-redux";
 import {logout} from "../store/actions/auth";
-import {useState} from "react";
-import CtmDialog from "../components/helper/CtmDialog";
-
-//todo: get  text from server?
-const text = 'diam nonumy eirmod tempor invidunt ut . Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.orem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
 
 const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
 
     const {colors} = useTheme();
     const dispatch = useDispatch()
-    const [visible, setVisible] = useState(false)
     const isAdmin = userType === 'admin'
 
 
@@ -23,11 +25,6 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
             style={[styles.drawerContent, {backgroundColor: colors.surface}]}
         >
             <View>
-                <CtmDialog
-                    title='Datenschutz'
-                    hideDialog={() => setVisible(false)}
-                    visible={visible}
-                    helpText={text}/>
                 <Drawer.Section
                     title="Einstellungen">
                     <TouchableRipple
@@ -43,16 +40,16 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
                         </View>
                     </TouchableRipple>
                 </Drawer.Section>
-                <Drawer.Section
-                    title="Rechtlich">
-                    <TouchableRipple
-                        onPress={() => setVisible(true)}>
-                        <View
-                            style={styles.preference}>
-                            <Text>Datenschutz</Text>
-                        </View>
-                    </TouchableRipple>
-                </Drawer.Section>
+                {/*<Drawer.Section*/}
+                {/*    title="Rechtlich">*/}
+                {/*    <TouchableRipple*/}
+                {/*        onPress={() => setVisible(true)}>*/}
+                {/*        <View*/}
+                {/*            style={styles.preference}>*/}
+                {/*            <Text>Datenschutz</Text>*/}
+                {/*        </View>*/}
+                {/*    </TouchableRipple>*/}
+                {/*</Drawer.Section>*/}
                 {isAdmin &&
                 <Drawer.Section
                     title="Admin">

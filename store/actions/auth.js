@@ -63,6 +63,7 @@ export const isFirstLaunch = () => {
 // user login and signup
 export const signUser = (userId, password, passwordConfirm = null) => {
     let type = !passwordConfirm ? 'login' : 'signup'
+    console.log(passwordConfirm)
     let data = !passwordConfirm ? {userId, password} : {userId, password, passwordConfirm}
     // get user device data
     if(passwordConfirm) data.device = {type: Device.brand, os: Device.osName, osVersion: Device.osVersion}

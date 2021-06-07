@@ -1,5 +1,5 @@
 import * as Network from 'expo-network'
-
+import * as FileSystem from 'expo-file-system'
 
 import * as Notifications from 'expo-notifications'
 import ENV from '../../env'
@@ -76,9 +76,9 @@ export const setAssessmentData = () => {
 export const setNotifications = () => {
     return async () => {
         const hasPermission = (await checkNotificationPermission()).granted
-        const isScheduled = !!(await Notifications.getAllScheduledNotificationsAsync())
+        const isScheduledARR = await Notifications.getAllScheduledNotificationsAsync()
+        const isScheduled = (await Notifications.getAllScheduledNotificationsAsync()).length > 0
 
-        await scheduleNotificationHandler(Date.now() + 1000)
 
         if (!isScheduled && hasPermission) {
             const currentTime = Date.now()
@@ -118,8 +118,8 @@ export const setUserProgressState = () => {
 }
 
 const createAssessmentObj = (userId, weatherData = undefined, userLoc, selection, time, skyImage, horizonImage) => {
-    const skyImgBuffer = new Buffer(skyImage, 'base64')
-    const horizonImgBuffer = new Buffer(horizonImage, 'base64')
+    const skyImgBuffer = new Buffer(skyImage.base64, 'base64')
+    const horizonImgBuffer = new Buffer(horizonImage.base64, 'base64')
 
     let answerArr = []
     selection.forEach((el) => el.answers.forEach((answer) => answerArr.push(answer)))
@@ -151,14 +151,14 @@ export const fetchRestoredAssessment = (token) => {
             let acc = restoredAssessmentArr.length
             while (acc > 0) {
                 try {
-                    const res = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', JSON.parse(restoredAssessmentArr[acc - 1].assessment), token)
-                    const resdb = await deleteAssessmentFromDB()
-
+                    const restoredAssessment = await recreateAssessmentFromDB(restoredAssessmentArr[acc - 1])
+                    const res = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessment, token)
                     if (!!res) acc--
                 } catch (err) {
                     throw new Error('Senden Fehlgeschlagen, Antworten werden fürs nächste Mal gespeichert.')
                 }
             }
+            await deleteAssessmentFromDB()
         } else if (restoredAssessmentArr.length > 0) {
             throw new Error('Senden Fehlgeschlagen - Keine Internet Verbindung verfügbar.')
         }
@@ -171,6 +171,7 @@ export const fetchRestoredAssessment = (token) => {
 export const saveAssessment = (skyImage, horizonImage, time, selection) => {
     return async (dispatch, getState) => {
         const {token, user} = getState().auth
+        const {userProgress} = getState().assessment
 
         const userCoords = await getUserLocation()
         const userLoc = {
@@ -185,12 +186,12 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
                 const response = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
                 if (response?.data?.updateSlides) await deleteItemAsyncStore(ASSESSMENT_DATA) // re-fetch slides after this
             } catch (err) {
-                await saveAssessmentToDatabase(newAssessment)
+                await saveAssessmentToDatabase(newAssessment, skyImage, horizonImage, userProgress)
                 await dispatch(incrementUserProgress())
                 throw new Error('Senden Fehlgeschlagen, Antworten werden zwischengespeichert und mit der nächsten Befragung gesendet.')
             }
         } else {
-            await saveAssessmentToDatabase(newAssessment)
+            await saveAssessmentToDatabase(newAssessment, skyImage, horizonImage, userProgress)
             await dispatch(incrementUserProgress())
             throw new Error('Senden Fehlgeschlagen - Keine Internet Verbindung verfügbar. Deine Antworten wurden aber gerettet =)')
         }
@@ -198,18 +199,64 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
     }
 }
 
-const saveAssessmentToDatabase = async (assessment) => {
+const saveAssessmentToDatabase = async (assessment, skyImage, horizonImage, userProgress) => {
+    const movedImages = await movePicturesToFS(skyImage.uri, horizonImage.uri, userProgress)
+    assessment.images = null
     const assessmentWithoutImgStr = JSON.stringify(assessment)
     try {
         await init() // initialize database
-        await insertAssessmentToDB(assessmentWithoutImgStr)
+        const res = await insertAssessmentToDB(assessmentWithoutImgStr, movedImages.newPathSkyImg, movedImages.newPathHorizonImg)
+        console.log(res)
         await storeFac.saveItemAsyncStore(ASSESSMENT_PENDING, true, false)
     } catch (err) {
+        console.log(err)
         throw new Error('Befragung konnte leider nicht zwischengespeichert werden.')
     }
 
 }
 
+const movePicturesToFS = async (skyImageUri, horizonImageUri, userProgress) => {
+    const imgSkyFilename = skyImageUri.split('/').pop()
+    const imgHorizonFilename = horizonImageUri.split('/').pop()
 
+    const newPathSkyImg = FileSystem.documentDirectory + imgSkyFilename + userProgress
+    const newPathHorizonImg = FileSystem.documentDirectory + imgHorizonFilename + userProgress
 
+    try {
+        const moveResSkyFile = await FileSystem.moveAsync({
+            from: skyImageUri, to: newPathSkyImg
+        })
+        const moveResHorizonFile = await FileSystem.moveAsync({
+            from: horizonImageUri, to: newPathHorizonImg
+        })
+    } catch (err) {
+        console.log(err);
+        throw err
+    }
+
+    return {newPathSkyImg, newPathHorizonImg}
+
+}
+
+const transformUriToBuffer = async (restoredAssessment) => {
+    const skyInBase64 = await FileSystem.readAsStringAsync(restoredAssessment.imageSkyUri, {encoding: "base64"})
+    const horizonInBase64 = await FileSystem.readAsStringAsync(restoredAssessment.imageHorizonUri, {encoding: "base64"})
+
+    const skyImgBuffer = new Buffer(skyInBase64, 'base64')
+    const horizonImgBuffer = new Buffer(horizonInBase64, 'base64')
+
+    return ([
+        {description: "sky", data: skyImgBuffer},
+        {description: "horizon", data: horizonImgBuffer}
+    ])
+
+}
+
+const recreateAssessmentFromDB = async (restoredAssessment) => {
+    const imgBuffArr = await transformUriToBuffer(restoredAssessment)
+    const assessmentObj = JSON.parse(restoredAssessment.assessmentStr)
+    assessmentObj.images = imgBuffArr
+
+    return assessmentObj
+}
 

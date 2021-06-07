@@ -12,13 +12,13 @@ const calcPaddingTop = windowHeight > 800 ? 50 : 0
 
 const StudyOverview = ({count, colors, repeats, style, userName}) => {
     const [fill, setFill] = useState(0)
-    const [text, setText] = useState('Willkommen bei der Studie!')
+    const [text, setText] = useState('Willkommen!')
 
     useEffect(() => {
         setFill(count / repeats * 100)
-        if (count > 0 && count < repeats - (repeats / 6)) setText('Dein Fortschritt')
-        else if (count >= repeats) setText('Du hast es geschafft!')
-        else if (count >= (repeats - (repeats / 6))) setText('Du hast es fast geschafft!')
+        if (count > 0 && count < repeats - (repeats / 6)) setText('Ihr Fortschritt')
+        else if (count >= repeats) setText('Studie beendet.')
+        else if (count >= (repeats - (repeats / 6))) setText('Sie haben es bald geschafft!')
 
 
     }, [count])

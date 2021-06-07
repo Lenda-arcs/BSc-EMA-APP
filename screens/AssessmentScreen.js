@@ -62,7 +62,7 @@ const AssessmentScreen = props => {
             setInterval(() => {
                 let currentTime = (new Date()).getTime()
                 let diffTime = currentTime - startTime
-                if (diffTime >= validPassTime) showDialog('Du hast die maximal Dauer für die Befragung überschritten, bitte warte auf die nächste Benachrichtigung.')
+                if (diffTime >= validPassTime) showDialog('Sie haben die maximale Bearbeitungszeit für diese Befragung überschritten, warten Sie auf die nächste Benachrichtigung.')
             }, 5000)
         return () => clearInterval(durationTimer)
     }, [])
@@ -123,8 +123,8 @@ const AssessmentScreen = props => {
         setVisible(!visible);
         try {
             await dispatch(saveAssessment(
-                selectedSkyImage.base64,
-                selectedHorizonImage.base64,
+                selectedSkyImage,
+                selectedHorizonImage,
                 timestamp,
                 selection
             ))

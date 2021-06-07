@@ -25,8 +25,8 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     const [animationObj, setAnimationObj] = useState('')
     const [dialogVisible, setDialogVisible] = useState(false)
     const [dialogContent, setDialogContent] = useState({
-        title: 'Erfolgreich!',
-        text: 'Deine Antworten sind angekommen, danke, dass Du dabei bist!'
+        title: 'Daten übermittelt!',
+        text: 'Ihre Antworten sind angekommen, danke für Ihre Teilnahme!'
     })
 
     const showDialog = () => setDialogVisible(true)
@@ -38,7 +38,7 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     useEffect(() => {
         err && setDialogContent({
             title: 'Error!',
-            text: 'Upps!, da ist etwas schief gegangen... =(. Überprüfe Deine Anmeldedaten'
+            text: 'Hoppla!, Daten Fehler. Kontaktieren Sie uns über das Prolific Portal'
         })
     }, [err])
 

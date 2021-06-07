@@ -9,8 +9,8 @@ import {
     TouchableOpacity
 } from "react-native";
 import {
-    Headline,
-    Paragraph,
+    Headline, Subheading,
+    Switch,
     withTheme
 } from 'react-native-paper'
 import {useDispatch, useSelector} from "react-redux";
@@ -36,7 +36,6 @@ const AuthScreen = props => {
     const [isSignup, setIsSignup] = useState(isFirstLaunch ? true : false) //todo: if not setSate -> refactor to normal const
     const [inputValues, setInputValues] = useState()
     const [inputValities, setInputValities] = useState()
-
 
     const showDialog = () => setVisible(true)
     const hideDialog = () => setVisible(false)
@@ -67,11 +66,11 @@ const AuthScreen = props => {
             ? setInputValues({userId: '', password: '', confirmPassword: ''})
             : setInputValues({userId: '', password: ''})
         isSignup
-            ? setInputValities({userId: false, password: false, confirmPassword: false})
-            : setInputValities({userId: false, password: false})
-    }, [isSignup])
+            ? setInputValities({userId: false, password: true, confirmPassword: true})
+            : setInputValities({userId: false, password: true})
+    }, [isSignup, formState])
 
-
+console.log(formState)
     useEffect(() => {
         if (error) {
             showDialog()
@@ -84,16 +83,15 @@ const AuthScreen = props => {
         if (isSignup) {
             action = authActions.signUser(
                 formState.inputValues.userId,
-                formState.inputValues.password,
-                formState.inputValues.confirmPassword
+                'casdadlasf213211das',
+                'casdadlasf213211das',
             )
         } else {
             action = authActions.signUser(
                 formState.inputValues.userId,
-                formState.inputValues.password
+               'casdadlasf213211das'
             )
         }
-
 
         setError(null)
         setIsLoading(true)
@@ -101,10 +99,10 @@ const AuthScreen = props => {
             await dispatch(action)
         } catch (err) {
             let msg = err.message
-            if (msg === 'Error: Password too short') msg = 'Bitte gib Deine Identifikationsnummer und Dein Passwort ein'
+            if (msg === 'Error: Password too short') msg = 'Bitte geben Sie Ihre Identifikationsnummer'
             else if (msg === 'Error: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
-            else if (msg === 'Error: Incorrect userId or password') msg = 'Falsche ID oder Passwort'
-            else if (msg.includes('Error: Duplicate field value')) msg = 'Es existiert bereits ein Nutzer mit diesem Namen.'
+            else if (msg === 'Error: Incorrect userId or password') msg = 'Falsche ID'
+            else if (msg.includes('Error: Duplicate field value')) msg = 'Es existiert bereits ein Teilnehmmer mit dieser ID.'
             else msg = 'Bitte erneute Eingabe, da ist etwas schiefgegangen!'
             setError(msg)
             setIsLoading(false)
@@ -165,7 +163,13 @@ const AuthScreen = props => {
                                     textDecorationColor: colors.primary
                                 }}>{!isSignup ? 'Login' : 'Bereits ein Nutzerkonto?'}</Headline>
                             </TouchableOpacity>
-                            <View style={{marginTop: '20%'}}>
+                            {/*<View style={{flexDirection: 'row', marginTop: 30, justifyContent: 'space-between',*/}
+                            {/*    paddingVertical: 12,*/}
+                            {/*    paddingHorizontal: 16,}}>*/}
+                            {/*    <Subheading>Prolific Teilnehmer</Subheading>*/}
+                            {/*    <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />*/}
+                            {/*</View>*/}
+                            <View style={{marginTop: '15%'}}>
                                 <Input id='userId'
                                        label='Teilnehmer ID'
                                        keyboardType='default'
@@ -173,40 +177,40 @@ const AuthScreen = props => {
                                        userId
                                        style={styles.input}
                                        icon='account'
-                                       placeholder='Pilot-XXXX'
-                                       helpText='Deine Teilnehmer Identifikationsnummer, die wir Dir mitgeteilt haben.'
+                                       placeholder='12ab3cd45..'
+                                       helpText={`Geben Sie hier Ihre Identifikationsnummer aus dem Prolific Portal an. \n\nSind Sie ein Student der Universität Hamburg und möchten Versuchspersonenstunden sammeln? Dann erstellen Sie bitte Ihre individuelle Teilnehmer-ID wie es in der Studienbeschreibung beschrieben ist.  `}
                                        autocapitalize='none'
-                                       errorText='Bitte gebe Deine Teilnehmer Nummer ein.'
+                                       errorText='Geben Sie Ihre Teilnehmer-ID ein!'
                                        onInputChange={inputChangeHandler}
                                        initialValue=''/>
-                                <Input id='password'
-                                       label='Password'
-                                       keyboardType='default'
-                                       required
-                                       minLength={8}
-                                       style={styles.input}
-                                       icon='key'
-                                       helpText='Gib ein Passwort mit mindestens 8 Zeichen ein.'
-                                       autocapitalize='none'
-                                       secureTextEntry
-                                       errorText='Mindestens 8 Zeichen'
-                                       onInputChange={inputChangeHandler}
-                                       initialValue=''/>
-                                {isSignup &&
-                                <Input
-                                    id='confirmPassword'
-                                    label='Passwort Bestätigen'
-                                    keyboardType='default'
-                                    required
-                                    minLength={8}
-                                    style={styles.input}
-                                    icon='key-outline'
-                                    helpText='Bestätige Dein Passwort'
-                                    autocapitalize='none'
-                                    secureTextEntry
-                                    errorText='Die Passwörter müssen übereinstimmen.'
-                                    onInputChange={inputChangeHandler}
-                                    initialValue=''/>}
+                                {/*<Input id='password'*/}
+                                {/*       label='Password'*/}
+                                {/*       keyboardType='default'*/}
+                                {/*       required*/}
+                                {/*       minLength={8}*/}
+                                {/*       style={styles.input}*/}
+                                {/*       icon='key'*/}
+                                {/*       helpText='Gib ein Passwort mit mindestens 8 Zeichen ein.'*/}
+                                {/*       autocapitalize='none'*/}
+                                {/*       secureTextEntry*/}
+                                {/*       errorText='Mindestens 8 Zeichen'*/}
+                                {/*       onInputChange={inputChangeHandler}*/}
+                                {/*       initialValue=''/>*/}
+                                {/*{isSignup &&*/}
+                                {/*<Input*/}
+                                {/*    id='confirmPassword'*/}
+                                {/*    label='Passwort Bestätigen'*/}
+                                {/*    keyboardType='default'*/}
+                                {/*    required*/}
+                                {/*    minLength={8}*/}
+                                {/*    style={styles.input}*/}
+                                {/*    icon='key-outline'*/}
+                                {/*    helpText='Bestätige Dein Passwort'*/}
+                                {/*    autocapitalize='none'*/}
+                                {/*    secureTextEntry*/}
+                                {/*    errorText='Die Passwörter müssen übereinstimmen.'*/}
+                                {/*    onInputChange={inputChangeHandler}*/}
+                                {/*    initialValue=''/>}*/}
                             </View>
                             <View
                                 style={styles.btnCtn}>
