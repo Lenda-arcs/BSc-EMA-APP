@@ -36,7 +36,7 @@ const Input = props => {
 
     const {colors} = props.theme
 
-    const [dialogVisible, setDialogVisible] = useState(false)
+    const [dialogVisible, setDialogVisible] = useState(true)
     const showDialog = () => setDialogVisible(true)
     const hideDialog = () => setDialogVisible(false)
 

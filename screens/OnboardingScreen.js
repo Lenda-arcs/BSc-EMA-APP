@@ -124,13 +124,21 @@ const content = (colors, succeedHandler) => [
 const OnboardingScreen = (props) => {
     const {colors} = props.theme
     const [visible, setVisible] = useState(false)
+    const [accepted, setAccepted] = useState(false)
 
     const succeedHandler = () => {
         setVisible(true)
-        props.navigation.navigate('Auth')
+
+    }
+    const checkedHandler = () => {
+        setAccepted(true)
+        setVisible(false)
     }
 
 
+    useEffect(() => {
+        accepted &&  props.navigation.navigate('Auth')
+    }, [accepted])
 
     return (
         <>
@@ -147,7 +155,7 @@ const OnboardingScreen = (props) => {
             <CtmDialog
                 checkBox
                 title='Informationen zur Datenverarbeitung'
-                hideDialog={() => setVisible(false)}
+                hideDialog={checkedHandler}
                 visible={visible}
                 content={[intro, allDetails]}/>
         </>

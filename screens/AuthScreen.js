@@ -58,6 +58,7 @@ const AuthScreen = props => {
 
     useEffect(() => {
         fadeIn()
+
     }, [])
 
     useEffect(() => {
