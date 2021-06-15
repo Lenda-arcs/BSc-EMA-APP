@@ -113,8 +113,15 @@ const AssessmentScreen = props => {
                                savedSelection={selection?.find(sl => sl.slideName === slide.name)?.answers}/>
         }))
 
-    const pos = (userProgress === 0 || userProgress === repeatCount - 1) ? 2 : 1
-    user.group === 'B' ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - pos, 0, pictureSlide)
+
+    const otherGrp = user.group === 'B'
+    if (userProgress == 0) {
+        otherGrp ? stepList.splice(1,0, pictureSlide) : stepList.splice(stepList.length - 1,0, pictureSlide)
+    } else if (userProgress > 0 && userProgress < repeatCount - 1) {
+        otherGrp ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - 1,0, pictureSlide)
+    } else {
+        otherGrp ? stepList.unshift(pictureSlide) : stepList.splice(stepList.length - 2,0, pictureSlide)
+    }
 
     const submitHandler = async () => {
         const endTime = (new Date()).getTime()

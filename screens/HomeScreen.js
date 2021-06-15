@@ -13,14 +13,14 @@ import StudyOverview from "../components/helper/StudyOverview";
 import {
     fetchRestoredAssessment,
     setAssessmentData,
-    setNotifications
+    setNotifications,
+    fetchAssessmentStats
 } from '../store/actions/assessment'
 import {filterTimeArr} from '../helpers/notificationHandler'
 
 
 import CtmDialog from "../components/helper/CtmDialog";
 
-const studyEnd = 30
 
 const HomeScreen = props => {
     const dispatch = useDispatch()
@@ -28,7 +28,7 @@ const HomeScreen = props => {
 
     const {colors} = props.theme
     const {token, repeatCount, user} = useSelector(state => state.auth)
-    const {userProgress, notificationState, pendingAssessment} = useSelector(state => state.assessment)
+    const {userProgress, notificationState, pendingAssessment, validAssessments} = useSelector(state => state.assessment)
     const isAuth = token
     const isAdmin = user.role === 'admin'
 
@@ -37,7 +37,7 @@ const HomeScreen = props => {
     const [snackState, setSnackState] = useState({visible: false, text: ''})
     const [slidesFetched, setSlidesFetched] = useState(false)
     const [pendingFetch, setPendingFetch] = useState(false)
-    const validStudyTime = true
+
 
     const showDialog = (text) => {
         setDialogState({...dialogState, visible: true, text: text, title: 'Error'})
@@ -54,22 +54,29 @@ const HomeScreen = props => {
 
     // End of study
     useEffect(() => {
-        // conditionally show dialog to prolific success/failure probands
-        !dialogState.visible && userProgress == studyEnd && validStudyTime && setDialogState({
-            title: 'Teilnahme abgeschlossen',
-            visible: true,
-            text: <Paragraph style={{lineHeight: 22}}>Der Abschlusscode für Ihre Teilnahme lautet: <Paragraph style={{fontWeight: 'bold', fontSize: 16}}>24E8F247</Paragraph>.{"\n\n"}Alle zukünftigen Benachrichtgungen werden hiermit gelöscht. {"\n\n"}Vielen Dank für Ihre Teilnahme!</Paragraph>,
-            dismissible: false
-        })
+        const checkDataQuality = async () => {
+            await dispatch(fetchAssessmentStats())
+        }
+        if (userProgress >= repeatCount && !isAdmin) {
+            checkDataQuality()
 
-        !dialogState.visible && userProgress == studyEnd && !validStudyTime && setDialogState({
-            title: 'Einreichung fehlgeschlagen',
-            visible: true,
-            text: 'Die durchschnittliche Beantwortungsdauer Ihrer Befragungen ist sehr gering, wir werden die Daten zunächst auf Validität prüfen müssen, bevor Sie den Abschlusscode erhalten können. \n\nSchreiben Sie uns bitte eine Nachricht über das Prolificprotal, um den Abschlusscode bzw. mehr Information zu erhalten. \n\nAlle zukünftigen Benachrichtgungen werden hiermit gelöscht.\n\nVielen Dank für Ihre Teilnahme!',
-            dismissible: false
-        })
-
-    }, [])
+            if (validAssessments == true) {
+                setDialogState({
+                    title: 'Teilnahme abgeschlossen',
+                    visible: true,
+                    text: <Paragraph style={{lineHeight: 22}}>Der Abschlusscode für Ihre Teilnahme lautet: <Text style={{fontWeight: 'bold', fontSize: 16}}>24E8F247</Text>.{"\n\n"}Sind Sie ein Student der UHH und möchten <Text style={{fontWeight: 'bold'}}>VP-Stunden</Text>? Dann schreiben Sie uns eine E-Mail (siehe Studienbeschreibung), mit Betreff "iViewSky_VP-Stunden_24E8F247" und als Anhang das ausgefüllte VP-Stunden Formular. {"\n\n"}Alle zukünftigen Benachrichtgungen werden hiermit gelöscht. {"\n\n"}Vielen Dank für Ihre Teilnahme an dieser Untersuchung!</Paragraph>,
+                    dismissible: false
+                })
+            } else {
+                setDialogState({
+                    title: 'Einreichung fehlgeschlagen',
+                    visible: true,
+                    text: 'Die durchschnittliche Bearbeitungszeit die Sie für die Befragungen benötigt haben unterschreitet den Grenzwert, wir werden die Daten zunächst prüfen müssen, bevor Sie Ihren Abschlusscode erhalten können. \n\nSchreiben Sie uns bitte eine Nachricht über das Prolificprotal, um den Abschlusscode bzw. mehr Information zu erhalten. Als Student der UHH, schreiben Sie uns eine E-Mail (siehe Studienbeschreibung). \n\nAlle zukünftigen Benachrichtgungen sind hiermit gelöscht.\n\nVielen Dank für Ihre Teilnahme an dieser Untersuchung!',
+                    dismissible: false
+                })
+            }
+        }
+    }, [userProgress, validAssessments])
 
     //  Slides!
     useEffect(() => {
@@ -81,7 +88,7 @@ const HomeScreen = props => {
                 showDialog(err.message)
             }
         }
-        getAssessmentData()
+       getAssessmentData()
     }, [userProgress])
 
     useEffect(() => {
@@ -156,9 +163,9 @@ const HomeScreen = props => {
         } else if (userProgress == repeatCount) {
             infoText = 'Vielen Dank für die Teilnahme!'
         } else if (pendingAssessment) {
-            infoText = 'Ihre zwischengespeicherten Daten werden an unseren Server gesendet.'
+            infoText = 'Ihre zwischengespeicherten Daten versendet.'
         } else if (accessState.access) {
-            infoText = 'Sie können nun an der nächsten Befragung teilnehmen.'
+            infoText = 'Sie können nun an der Befragung teilnehmen.'
         } else {
             infoText = 'Sie bekommen eine Benachrichtigung, sobald Sie wieder teilnehmen können.'
         }

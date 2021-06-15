@@ -32,7 +32,10 @@ const DrawerContent = ({navigation}) => {
             {preferences => (
                 <DrawerItems
                     toggleTheme={preferences.toggleTheme}
-                    isDarkTheme={preferences.theme === Theme.CustomDarkTheme}
+                    toggleRTL={preferences.toggleRtl}
+                    // isDarkTheme={preferences.theme === Theme.CustomDarkTheme}
+                    isDarkTheme={preferences.theme.dark}
+                    isRTL={preferences.rtl}
                     authStatus={token}
                     userType={user.role}
                     navigation={navigation}

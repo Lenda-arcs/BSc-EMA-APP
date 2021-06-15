@@ -1,13 +1,16 @@
-import React, {useEffect, useState} from 'react'
-import {View, Text, ScrollView} from "react-native";
-import {Paragraph, Card, DataTable} from "react-native-paper";
+import React, { useState } from 'react'
+import {View, ScrollView, StyleSheet} from "react-native";
+import {Paragraph, DataTable} from "react-native-paper";
 import Screen from "../components/wrapper/Screen";
 import {fetchData} from "../helpers/fetchFactories";
 import {useSelector} from "react-redux";
-import ENV from '../env'
+import vars from '../env'
 import CtmButton from "../components/wrapper/CtmButton";
+import CtmDialog from "../components/helper/CtmDialog";
+import * as storeFac from "../helpers/asyncStoreFactories";
+import {ASSESSMENT_DATA} from "../store/actions/assessment";
 
-
+const {OwnApiUrl} = vars
 const UserRow = ({user, userLookUp}) => {
     const currentTime = new Date().getTime()
     const nextTrigger = user.notificationTimes?.find(t => t >= currentTime)
@@ -26,14 +29,21 @@ const UserRow = ({user, userLookUp}) => {
         </DataTable.Row>)
 }
 
-const AssessmentRow = ({data}) => {
+const AssessmentRow = ({data, fetchAssessment}) => {
+    // const [pics, setPics] = useState()
+    // const [visible, setVisible] = useState(false)
+    // const [dialogContent, setDialogContent] = useState('')
+
+    //
+    // const showDialog = () => setVisible(true);
+    // const hideDialog = () => setVisible(false);
 
     const calcAffectScore = (affectObj) => {
         let score = 0
         const valArr = Object.values(affectObj)
 
         const calcValues = (posIndex, negIndex) => {
-            return valArr[posIndex] - valArr[negIndex]
+            return  valArr[negIndex] -valArr[posIndex]
         }
         score += calcValues(10, 1)
         score += calcValues(4, 11)
@@ -53,37 +63,65 @@ const AssessmentRow = ({data}) => {
     const weatherCloudData = data.weather?.OBSERVATIONS.cloud_layer_1_value_1d
     const skyCondition = weatherCloudData?.value.sky_condition ? weatherCloudData.value.sky_condition : 'N/A'
     const cloudLayer1Height = weatherCloudData?.value.height_agl ? weatherCloudData.value.height_agl : 'N/A'
+    //
+    // const showDialogHandler = (type) => {
+    //     setDialogContent(type)
+    //     showDialog()
+    // }
+    //
+    // const content = <View>
+    //
+    // </View>
+
+    const getPics = async () => {
+       //  const pics = (await fetchAssessment(data.id)).images
+       // setPics(pics)
+    }
+
+    // console.log(pics)
 
     return (
-        <DataTable.Row>
-            <DataTable.Cell>{toTime(data.timestamp.assessmentEnd) - toTime(data.timestamp.assessmentStart)}</DataTable.Cell>
-            <DataTable.Cell>{calcAffectScore(data.answers?.affect)}</DataTable.Cell>
-            <DataTable.Cell>{(Object.values(data.answers?.stress).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
-            <DataTable.Cell>{(Object.values(data.answers?.ruminate).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
-            <DataTable.Cell>{(Object.values(data.answers?.["pre-assessment"])[3]) === 0 ? 'in' : 'out'}</DataTable.Cell>
-            <DataTable.Cell>{cloudLayer1Height}</DataTable.Cell>
-            <DataTable.Cell>{skyCondition}</DataTable.Cell>
+        <>
+        <DataTable.Row onPress={getPics} >
+            <DataTable.Cell style={styles.smallCell} numeric >{toTime(data.timestamp.assessmentEnd) - toTime(data.timestamp.assessmentStart)}</DataTable.Cell>
+            <DataTable.Cell style={styles.smallCell} >{calcAffectScore(data.answers?.["affect"])}</DataTable.Cell>
+            <DataTable.Cell style={styles.smallCell} >{(Object.values(data.answers?.["stress"]).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
+            <DataTable.Cell style={styles.smallCell}>{(Object.values(data.answers?.["ruminate"]).reduce(reducer) / 3).toFixed(1)}</DataTable.Cell>
+            <DataTable.Cell style={styles.smallCell}>{(Object.values(data.answers?.["pre-assessment"])[3]) === 0 ? 'in' : 'out'}</DataTable.Cell>
+            <DataTable.Cell style={styles.midCell}>{cloudLayer1Height}</DataTable.Cell>
+            <DataTable.Cell style={styles.midCell}>{skyCondition}</DataTable.Cell>
         </DataTable.Row>
+            {/*<CtmDialog content={content}*/}
+            {/*           title={'FOTOS'}*/}
+            {/*           visible={visible}*/}
+            {/*           showDialog={showDialogHandler}*/}
+            {/*           hideDialog={hideDialog}/>*/}
+        </>
     )
 }
 
 
-const AdminScreen = (props) => {
+const AdminScreen = () => {
     const {token} = useSelector(state => state.auth)
     const [users, setUsers] = useState([])
     const [slides, setSlides] = useState(null)
     const [userAssessmentDetails, setUserAssessmentDetails] = useState(null)
 
 
+    const getOneAssessment = async (assessmentID) => {
+        const assessmentRes = await fetchData(`${OwnApiUrl}/assessments/${assessmentID}`, 'GET', null, token)
+        const assessmentData = assessmentRes.data.data
+
+        return assessmentData
+    }
 
     const getUser = async () => {
         if (!slides) {
-            const slideDataRes = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
-            const slideData = slideDataRes.data.data
-            setSlides(slideData)
+            const asyncStoreSlides = await storeFac.getItemAsyncStore(ASSESSMENT_DATA, false, true)
+            setSlides(asyncStoreSlides)
         }
 
-        const usersRes = await fetchData(`${ENV.OwnApi}/users`, 'GET', null, token)
+        const usersRes = await fetchData(`${OwnApiUrl}/users`, 'GET', null, token)
         const usersData = usersRes.data.data
         setUsers(usersData)
     }
@@ -91,14 +129,14 @@ const AdminScreen = (props) => {
     const demoPickMapping = (pickId) => {
         const slideId = pickId - 1
         const demoSlideIndex = slides.findIndex(el => el.name === 'demo')
-        return slides[demoSlideIndex].questions[slideId].selectionItems[userAssessmentDetails?.[userAssessmentDetails.length - 1]?.answers?.demo?.[pickId]]
+        const demoAnswers = userAssessmentDetails?.find(ass => ass.answers["demo"])?.answers?.["demo"]
+        if (pickId == 6) return demoAnswers?.[pickId].split('T')[0]
+        return slides[demoSlideIndex].questions[slideId].selectionItems[demoAnswers?.[pickId]]
     }
 
     const userLookUpHandler = async (id) => {
-        const userDetailsRes = await fetchData(`${ENV.OwnApi}/assessments?user=${id}&fields=-images,-user`, 'GET', null, token)
+        const userDetailsRes = await fetchData(`${OwnApiUrl}/assessments?user=${id}&fields=-images,-user`, 'GET', null, token)
         const userDetailsData = userDetailsRes.data.data
-
-
         setUserAssessmentDetails(userDetailsData)
     }
     return (
@@ -124,26 +162,26 @@ const AdminScreen = (props) => {
                             <DataTable.Title>Geschlecht</DataTable.Title>
                             <DataTable.Title>Abschluss</DataTable.Title>
                             <DataTable.Title>Status</DataTable.Title>
-                            <DataTable.Title>AltersRange</DataTable.Title>
+                            <DataTable.Title>Alters</DataTable.Title>
                         </DataTable.Header>
                         <DataTable.Row>
                             <DataTable.Cell>{demoPickMapping(1)}</DataTable.Cell>
                             <DataTable.Cell>{demoPickMapping(2)}</DataTable.Cell>
                             <DataTable.Cell>{demoPickMapping(3)}</DataTable.Cell>
-                            <DataTable.Cell>{demoPickMapping(5)}</DataTable.Cell>
+                            <DataTable.Cell>{demoPickMapping(6)}</DataTable.Cell>
                         </DataTable.Row>
                         <DataTable.Header>
-                            <DataTable.Title>Duration</DataTable.Title>
-                            <DataTable.Title>Affekt</DataTable.Title>
-                            <DataTable.Title>Stress</DataTable.Title>
-                            <DataTable.Title>Grübeln</DataTable.Title>
-                            <DataTable.Title>Ort</DataTable.Title>
-                            <DataTable.Title>Wolkenhöhe</DataTable.Title>
-                            <DataTable.Title>Bedeckung</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Duration</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Affekt</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Stress</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Grübeln</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Ort</DataTable.Title>
+                            <DataTable.Title style={styles.midCell}>Wolkenhöhe</DataTable.Title>
+                            <DataTable.Title style={styles.midCell}>Bedeckung</DataTable.Title>
                         </DataTable.Header>
                         <ScrollView>
-                            {userAssessmentDetails.map((assessment, index) => <AssessmentRow key={index}
-                                                                                             data={assessment}/>)}
+                            {userAssessmentDetails.map((assessment, index) => <AssessmentRow key={index} index={index}
+                                                                                             data={assessment} fetchAssessment={getOneAssessment}/>)}
                         </ScrollView>
 
                     </DataTable>}
@@ -159,3 +197,15 @@ const AdminScreen = (props) => {
 }
 
 export default AdminScreen
+
+
+const styles = StyleSheet.create({
+    smallCell: {
+        maxWidth: '10%',
+        justifyContent: 'center'
+    },
+    midCell: {
+        maxWidth: '25%',
+        justifyContent: 'center'
+    }
+})

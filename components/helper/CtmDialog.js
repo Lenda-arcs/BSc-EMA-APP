@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Dimensions, ScrollView, Text, View} from 'react-native';
+import {Dimensions, ScrollView, Platform, View} from 'react-native';
 import {Button, Paragraph, Dialog, Portal, Checkbox, Subheading} from 'react-native-paper';
 
 const dim = Dimensions.get('window')
@@ -18,7 +18,6 @@ const CtmDialog = (props) => {
     const dismiss = !props.checkBox && !props.noHide
 
 
-
     return (
         <View>
             <Portal>
@@ -27,9 +26,9 @@ const CtmDialog = (props) => {
                     <Dialog.Content style={{maxHeight: dim.height * .7}}>
                         <ScrollView contentContainerStyle={{width: '100%'}}>
                             {props.content
-                                && Array.isArray(props.content)
-                                    ? props.content[index]
-                                    : props.content }
+                            && Array.isArray(props.content)
+                                ? props.content[index]
+                                : props.content}
                             <Paragraph style={{lineHeight: 22}}>{props.helpText}</Paragraph>
 
                         </ScrollView>
@@ -38,12 +37,13 @@ const CtmDialog = (props) => {
                     <Dialog.Actions style={{flexDirection: 'row'}}>
                         {props?.checkBox
                         && <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                            {checked && <Text style={{fontSize: 13, color: '#7c7676'}}>akzeptiert</Text>}
+                            <View style={!checked && Platform.OS === 'ios' && {height: 30, width: 30, borderRadius: 5, opacity: .8, borderWidth: 1.5, borderColor: '#ccc' }}>
                                 <Checkbox
-                                status={checked ? 'checked' : 'unchecked'}
-                                onPress={() => {
-                                    setChecked(!checked)
-                                }}/>
+                                    status={checked ? 'checked' : 'unchecked'}
+                                    onPress={() => {
+                                        setChecked(!checked)
+                                    }}/>
+                            </View>
                             <Button
                                 onPress={detailsHandler}>
                                 {index === 1

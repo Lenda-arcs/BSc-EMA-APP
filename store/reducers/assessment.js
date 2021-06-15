@@ -1,6 +1,9 @@
 import {
     SET_NOTIFICATION_STATE,
-    SET_USER_PROGRESS, SET_ASSESSMENT_DATA, ASSESSMENT_PENDING
+    SET_USER_PROGRESS,
+    SET_ASSESSMENT_DATA,
+    ASSESSMENT_PENDING,
+    VALID_COMPLETION_TIME
 } from "../actions/assessment";
 
 // todo: integrate assessment count
@@ -8,7 +11,8 @@ const initialState = {
     availableSlides: [],
     userProgress: 0,
     notificationState: null,
-    pendingAssessment: false
+    pendingAssessment: false,
+    validAssessments: null
 }
 
 
@@ -17,6 +21,8 @@ export default (state = initialState, action) => {
     switch (action.type) {
         case SET_USER_PROGRESS:
             return {...state, userProgress: action.val}
+        case VALID_COMPLETION_TIME:
+            return {...state, validAssessments: action.val}
         case SET_NOTIFICATION_STATE:
             return {...state, notificationState: action.val}
         case ASSESSMENT_PENDING:
@@ -30,7 +36,7 @@ export default (state = initialState, action) => {
             const middle = state.userProgress == Math.round(assessmentRepeats / 2)
             let newSlides = []
             currentSlides.forEach(slide => {
-                if (slide.displayAt === 'start' &&  start) newSlides.push(slide)
+                if (slide.displayAt === 'start' && start) newSlides.push(slide)
                 else if (slide.displayAt === 'end' && end) newSlides.push(slide)
                 else if (slide.displayAt === 'middle' && middle) newSlides.push(slide)
                 else if (slide.displayAt === 'always') newSlides.push(slide)

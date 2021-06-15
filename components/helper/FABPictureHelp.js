@@ -19,12 +19,12 @@ const FABPicture = (props) => {
                            actions={[
                                {
                                    icon: 'camera-iris',
-                                   label: 'Inside',
+                                   label: 'Drinnen',
                                    onPress: () => props.showDialog('inside'),
                                },
                                {
                                    icon: 'camera-iris',
-                                   label: 'Outside',
+                                   label: 'Draußen',
                                    onPress: () => props.showDialog('outside'),
                                }
                            ]}

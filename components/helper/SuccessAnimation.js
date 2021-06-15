@@ -25,8 +25,8 @@ const SuccessAnimation = ({visible, onDismiss, success, close, theme, err}) => {
     const [animationObj, setAnimationObj] = useState('')
     const [dialogVisible, setDialogVisible] = useState(false)
     const [dialogContent, setDialogContent] = useState({
-        title: 'Daten übermittelt!',
-        text: 'Ihre Antworten sind angekommen, danke für Ihre Teilnahme!'
+        title: 'Daten übermittelt',
+        text: 'Ihre Antworten sind bei uns angekommen! Sie werden benachrichtigt sobald Sie wieder teilnehmen können.'
     })
 
     const showDialog = () => setDialogVisible(true)

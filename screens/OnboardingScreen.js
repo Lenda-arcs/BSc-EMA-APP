@@ -60,7 +60,7 @@ const intro = <Text><Paragraph style={{lineHeight: 22}}>{text}</Paragraph><Parag
 const allDetails =
     <>
         {dataProtectDetails?.map((detail, index) =>
-            <Text style={{lineHeight: 30}} key={index}>
+            <Text style={{marginBottom: 5}} key={index}>
                 <Subheading style={{fontWeight: 'bold'}}>{detail.heading}</Subheading> {'\n'}
                 <Paragraph style={{lineHeight: 22}}>{detail.text}</Paragraph>
             </Text>)
@@ -71,44 +71,44 @@ const allDetails =
 const content = (colors, succeedHandler) => [
     {
         title: 'Hey!',
-        subtitle: 'Willkommen bei der iViewSky Studie!',
+        subtitle: 'Willkommen bei iViewSky!',
         backgroundColor: colors.accent,
         image: (<Icon name="hand-peace-o" type="font-awesome" size={100} color={colors.primary}/>),
     },
     {
         title: 'Benachrichtigung',
-        subtitle: 'Du erhälst eine Benachrichtigung, sobald die nächste Befragung für Dich ansteht',
+        subtitle: 'Sie erhalten eine Benachrichtigung, sobald Sie an einer Befragung teilnehmen können. Achten Sie darauf, dass ihr Smartphone auf "laut" eingestellt ist, bzw. erstellen Sie eine Ausnahme für die ExpoGo App während der gesamten Dauer der Studie.',
         backgroundColor: colors.background,
         image: (<Icon name="bell-o" type="font-awesome" size={100} color={colors.primary}/>),
     },
     {
-        title: 'Zugang',
-        subtitle: 'Die Teilnahme an der Befragung ist ab dem Zeitpunkt der Benachrichtigung für 30 Minuten möglich. Solltest Du es mal nicht rechtzeitig schaffen, kannst Du auf die nächste Benachrichtigung warten.',
+        title: 'Zugang zu einer Befragung',
+        subtitle: 'Die Teilnahme an der Befragung ist ab dem Zeitpunkt der Benachrichtigung für 30 Minuten freigeschaltet. Sollten Sie es mal nicht rechtzeitig schaffen, können Sie auf die nächste Benachrichtigung warten.',
         backgroundColor: colors.background,
         image: (<Icon name="hourglass-start" type="font-awesome" size={100} color={colors.accent}/>),
     },
     {
         title: 'Befragung',
-        subtitle: 'Bitte beantworte alle Fragen wahrheitsgemäß und lass Dir bei der Beantwortung Zeit ',
+        subtitle: 'Bitte beantworten Sie alle Fragen wahrheitsgemäß und lassen Sie sich bei der Beantwortung Zeit. Die maximale Bearbeitungszeit für eine Befragung ist 20 Minuten.',
         backgroundColor: colors.background,
         image: (<Icon name="tasks" type="font-awesome" size={100} color={colors.accent}/>
         ),
     },
     {
         title: 'Fotos',
-        subtitle: 'Während der Befragung sollst Du Fotos vom Himmel machen. Ein Foto in vertikaler und ein Foto in horizontaler Blickrichtung',
+        subtitle: 'Während jeder Befragung werden Sie aufgefordert Fotos vom Himmel zu machen. Ein Foto in vertikaler sowie ein Foto in horizontaler Blickrichtung. Alle Fotos müssen im Hochformat gemacht werden!',
         backgroundColor: colors.background,
         image: (<Icon name="camera" type="font-awesome" size={100} color={colors.primary}/>),
     },
     {
         title: 'Fotos: Geschlossener Raum',
-        subtitle: 'Befindest Du dich während der Befragung in einem geschlossenen Raum, machst Du bitte die Fotos wenn möglich aus einem geöffneten Fenster in Deiner Nähe',
+        subtitle: 'Befinden Sie sich während einer Befragung in einem geschlossenen Raum, machen Sie bitte die Fotos aus einem geöffneten Fenster in Ihrer Nähe heraus. Es sollten keine Teile des Fensters auf dem Foto zu sehen sein.',
         backgroundColor: colors.background,
         image: (<Icon name="camera" type="font-awesome" size={100} color={colors.primary}/>),
     },
     {
         title: 'Fotos: Freier Himmel',
-        subtitle: 'Befindest Du dich während der Befragung draußen unter freiem Himmel, machst Du bitte ein Foto von dem Himmel direkt über Dir und ein Foto vom Horizont in Blickrichtung. ',
+        subtitle: 'Befinden Sie sich während einer Befragung draußen unter freiem Himmel, machen Sie bitte ein Foto vom Himmel direkt über Ihnen sowie ein Foto vom Horizont in Ihrer Blickrichtung. ',
         backgroundColor: colors.background,
         image: (<Icon name="camera" type="font-awesome" size={100} color={colors.primary}/>),
     },

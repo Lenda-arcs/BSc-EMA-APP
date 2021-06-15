@@ -7,6 +7,7 @@ import CtmSubheading from "../wrapper/CtmSubheading";
 import CtmDialog from "../helper/CtmDialog";
 import FABPicture from "../helper/FABPictureHelp";
 import * as Location from "expo-location";
+import * as _ImagePicker from 'expo-image-picker'
 
 const dim = Dimensions.get('window')
 const imgH = Math.round(dim.width * 4 / 3) * .5
@@ -22,15 +23,24 @@ const checkLocationPermission = async () => {
     }
 }
 
+const checkCameraPermission = async () => {
+    const settingsCam =(await _ImagePicker.getCameraPermissionsAsync()).granted
+    const settingsMedia = (await _ImagePicker.getMediaLibraryPermissionsAsync()).granted
+    if (!settingsCam|| !settingsMedia) {
+        await _ImagePicker.requestCameraPermissionsAsync()
+        await _ImagePicker.requestMediaLibraryPermissionsAsync()
+    }
+}
+
 const examplePics = {
     inside: {
         title: 'Beispiel Fotos: drinnen',
-        text: 'Öffen Sie das nächstgelegende Fenster und machen Sie zwei Fotos im Hochformat, wie es in diesen Beispiel Fotos gezeigt wird.',
+        text: 'Öffen Sie das nächstgelegende Fenster und machen Sie zwei Fotos (im Hochformat), wie es in diesen Beispielfotos gezeigt wird.',
         pictureArr: [require('./../../assets/skyPictures/inside_vertical.jpg'), require('./../../assets/skyPictures/inside_horizontal.jpg')]
     },
     outside: {
         title: 'Beispiel Fotos: draußen',
-        text: 'Machen Sie zwei Fotos von Himmel im Hochformat, wie es in diesen Beispiel Fotos gezeigt wird.',
+        text: 'Machen Sie zwei Fotos von Himmel (im Hochformat), wie es in diesen Beispielfotos gezeigt wird.',
         pictureArr: [require('./../../assets/skyPictures/outside_vertical.jpg'), require('./../../assets/skyPictures/outside_horizontal.jpg')]
     }
 }
@@ -81,6 +91,7 @@ const PictureSlide = ({isComplete, savedData, theme}) => {
 
     useEffect(() => {
         checkLocationPermission()
+        checkCameraPermission()
     }, [])
 
     useEffect(() => {

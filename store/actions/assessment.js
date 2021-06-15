@@ -2,7 +2,7 @@ import * as Network from 'expo-network'
 import * as FileSystem from 'expo-file-system'
 
 import * as Notifications from 'expo-notifications'
-import ENV from '../../env'
+import vars from '../../env'
 import Assessment from "../../models/assessment";
 import * as storeFac from '../../helpers/asyncStoreFactories'
 import {fetchData} from '../../helpers/fetchFactories'
@@ -10,13 +10,13 @@ import {scheduleNotificationHandler, checkNotificationPermission} from '../../he
 import {getUserLocation} from "../../helpers/permissonFactories";
 import {getItemAsyncStore, saveItemAsyncStore, deleteItemAsyncStore} from "../../helpers/asyncStoreFactories";
 import {fetchAssessmentsFromDB, deleteAssessmentFromDB, insertAssessmentToDB, init} from "../../helpers/db";
-
 import {Buffer} from "buffer";
 
 
 export const SET_USER_PROGRESS = 'SET_USER_PROGRESS'
 export const SET_ASSESSMENT_DATA = 'SET_ASSESSMENT_DATA_NEW'
 export const ASSESSMENT_PENDING = 'ASSESSMENT_PENDING'
+export const VALID_COMPLETION_TIME = 'VALID_COMPLETION_TIME'
 
 
 export const USER_PROGRESS = 'USER_PROGRESS'
@@ -24,6 +24,7 @@ export const ASSESSMENT_DATA = 'ASSESSMENT_DATA'
 export const NOTIFICATION_TIMES = 'NOTIFICATION_TIMES'
 export const SET_NOTIFICATION_STATE = 'SET_NOTIFICATION_STATE'
 
+const {StudyEnd, OwnApiUrl} = vars
 
 export const removeScheduledTime = (time) => {
     return async () => {
@@ -54,7 +55,7 @@ export const setAssessmentData = () => {
 
         if (!asyncStoreSlides) {
             if ((await Network.getNetworkStateAsync()).isInternetReachable) {
-                slideData = await fetchData(`${ENV.OwnApi}/slides`, 'GET', null, token)
+                slideData = await fetchData(`${OwnApiUrl}/slides`, 'GET', null, token)
                 slideData = slideData.data.data
 
                 await storeFac.saveItemAsyncStore(ASSESSMENT_DATA, slideData)
@@ -74,19 +75,19 @@ export const setAssessmentData = () => {
 
 
 export const setNotifications = () => {
-    return async () => {
+    return async (dispatch) => {
         const hasPermission = (await checkNotificationPermission()).granted
-        const isScheduledARR = await Notifications.getAllScheduledNotificationsAsync()
-        const isScheduled = (await Notifications.getAllScheduledNotificationsAsync()).length > 0
 
+        const isScheduled = (await Notifications.getAllScheduledNotificationsAsync()).length > 0
+        const currentTime = Date.now()
+        const notificationDates = await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)
 
         if (!isScheduled && hasPermission) {
-            const currentTime = Date.now()
-            const dates = (await getItemAsyncStore(NOTIFICATION_TIMES, undefined, true)).filter(el => el - currentTime >= 0)
+            const futureDates = notificationDates.filter(el => el - currentTime >= 0)
             try {
-                let acc = dates.length - 1
+                let acc = futureDates.length - 1
                 while (acc >= 0) {
-                    const res = await scheduleNotificationHandler(dates[acc])
+                    const res = await scheduleNotificationHandler(futureDates[acc])
                     if (res) acc--
                 }
             } catch (err) {
@@ -96,14 +97,12 @@ export const setNotifications = () => {
     }
 }
 
-export const incrementUserProgress = (progress) => {
-    return async (dispatch) => {
+export const incrementUserProgress = (progress = null) => {
+    return async (dispatch, getState) => {
+        const { userProgress } = getState().assessment
         let newProgress
-        const currentProgress = await storeFac.getItemAsyncStore(USER_PROGRESS, false)
-        if (!currentProgress) newProgress = 0
-        else if (!!progress) {
-            newProgress = progress
-        } else newProgress = +currentProgress + 1
+        if (progress !== null) newProgress = progress
+        else newProgress = +userProgress + 1
         await storeFac.saveItemAsyncStore(USER_PROGRESS, newProgress)
         dispatch(setUserProgressState())
     }
@@ -112,8 +111,7 @@ export const incrementUserProgress = (progress) => {
 export const setUserProgressState = () => {
     return async (dispatch) => {
         const asyncCount = await storeFac.getItemAsyncStore(USER_PROGRESS, false, undefined)
-        if (!asyncCount) await dispatch(incrementUserProgress())
-        else await dispatch({type: SET_USER_PROGRESS, val: asyncCount})
+        if (asyncCount) await dispatch({type: SET_USER_PROGRESS, val: asyncCount})
     }
 }
 
@@ -152,7 +150,7 @@ export const fetchRestoredAssessment = (token) => {
             while (acc > 0) {
                 try {
                     const restoredAssessment = await recreateAssessmentFromDB(restoredAssessmentArr[acc - 1])
-                    const res = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', restoredAssessment, token)
+                    const res = await fetchData(`${OwnApiUrl}/assessments`, 'POST', restoredAssessment, token)
                     if (!!res) acc--
                 } catch (err) {
                     throw new Error('Senden Fehlgeschlagen, Antworten werden fürs nächste Mal gespeichert.')
@@ -183,7 +181,7 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
         // only send if network available
         if ((await Network.getNetworkStateAsync()).isInternetReachable) {
             try {
-                const response = await fetchData(`${ENV.OwnApi}/assessments`, 'POST', newAssessment, token)
+                const response = await fetchData(`${OwnApiUrl}/assessments`, 'POST', newAssessment, token)
                 if (response?.data?.updateSlides) await deleteItemAsyncStore(ASSESSMENT_DATA) // re-fetch slides after this
             } catch (err) {
                 await saveAssessmentToDatabase(newAssessment, skyImage, horizonImage, userProgress)
@@ -260,3 +258,25 @@ const recreateAssessmentFromDB = async (restoredAssessment) => {
     return assessmentObj
 }
 
+export const fetchAssessmentStats = () => {
+    return async (dispatch, getState) => {
+        const {token, user, repeatCount} = getState().auth
+        let isValid
+
+        isValid = await storeFac.getItemAsyncStore(VALID_COMPLETION_TIME)
+
+        if (isValid === null) {
+            const statsRes = await fetchData(`${OwnApiUrl}/assessments/${user.id}/assessmentStats`, 'GET', null, token)
+            if (statsRes.status === 'success') {
+                const dateDifference = (new Date(statsRes.stats.lastAssessment) - new Date(statsRes.stats.firstAssessment)) / 1000 / 60 / 60 / 24
+
+                if (statsRes.stats.avgCompletionTime >= 1.5 && statsRes.stats.numAssessments >= repeatCount && dateDifference <= 20) isValid = true
+                else isValid = false
+                await storeFac.saveItemAsyncStore(VALID_COMPLETION_TIME, isValid, false)
+            }
+        }
+
+
+        dispatch({type: VALID_COMPLETION_TIME, val: isValid})
+    }
+}

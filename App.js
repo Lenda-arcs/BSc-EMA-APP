@@ -1,5 +1,6 @@
 import React, {useMemo, useState, useEffect, useRef} from 'react';
-import {LogBox, Vibration} from 'react-native'
+import * as Updates from 'expo-updates'
+import {LogBox, Vibration, I18nManager} from 'react-native'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 import {Provider} from 'react-redux'
 import ReduxThunk from 'redux-thunk'
@@ -25,6 +26,7 @@ Notifications.setNotificationHandler({
             shouldShowAlert: true,
             shouldSetBadge: true,
             shouldPlaySound: true
+
         }
     }
 })
@@ -47,6 +49,7 @@ export default function App() {
     const notificationListener = useRef()
     const responseListener = useRef()
     const [theme, setTheme] = useState(Theme.CustomDefaultTheme);
+    const [rtl, setRtl] = useState(I18nManager.isRTL)
 
     const _handleNotification = notification => {
         Vibration.vibrate();
@@ -72,7 +75,11 @@ export default function App() {
         const restorePrefs = async () => {
             try {
                 const preferences = await getItemAsyncStore(PREFERENCES_KEY, undefined, true);
-                if (preferences) {setTheme(preferences.theme === 'dark' ? Theme.CustomDarkTheme : Theme.CustomDefaultTheme)}
+                if (preferences) {
+                    setTheme(preferences.theme === 'dark' ? Theme.CustomDarkTheme : Theme.CustomDefaultTheme)
+
+                    if (typeof preferences.rtl === 'boolean') setRtl(preferences.rtl)
+                }
             } catch (e) {
                 // ignore error
             }
@@ -83,22 +90,28 @@ export default function App() {
     useEffect(() => {
         const savePrefs = async () => {
             try {
-                await saveItemAsyncStore(PREFERENCES_KEY, {theme: theme === Theme.CustomDarkTheme ? 'dark' : 'light'});
+                await saveItemAsyncStore(PREFERENCES_KEY, {theme: theme === Theme.CustomDarkTheme ? 'dark' : 'light', rtl});
             } catch (e) {
                 // ignore error
+            }
+            if (I18nManager.isRTL !== rtl) {
+                I18nManager.forceRTL(rtl)
+                // Updates.()
             }
         };
 
         savePrefs();
-    }, [theme]);
+    }, [theme, rtl]);
 
     const preferences = useMemo(
         () => ({
             toggleTheme: () =>
-                setTheme(theme => (theme === Theme.CustomDefaultTheme ? Theme.CustomDarkTheme : Theme.CustomDefaultTheme))
+                setTheme(theme => (theme === Theme.CustomDefaultTheme ? Theme.CustomDarkTheme : Theme.CustomDefaultTheme)),
+            toggleRtl: () => setRtl(rtl => !rtl)
             ,theme
+            ,rtl
         }),
-        [theme]
+        [theme, rtl]
     );
 
     return (

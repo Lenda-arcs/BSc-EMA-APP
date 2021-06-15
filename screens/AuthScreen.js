@@ -9,8 +9,7 @@ import {
     TouchableOpacity
 } from "react-native";
 import {
-    Headline, Subheading,
-    Switch,
+    Headline,
     withTheme
 } from 'react-native-paper'
 import {useDispatch, useSelector} from "react-redux";
@@ -66,11 +65,11 @@ const AuthScreen = props => {
             ? setInputValues({userId: '', password: '', confirmPassword: ''})
             : setInputValues({userId: '', password: ''})
         isSignup
-            ? setInputValities({userId: false, password: true, confirmPassword: true})
-            : setInputValities({userId: false, password: true})
+            ? setInputValities({userId: false, password: false, confirmPassword: false})
+            : setInputValities({userId: false, password: false})
     }, [isSignup, formState])
 
-console.log(formState)
+
     useEffect(() => {
         if (error) {
             showDialog()
@@ -89,7 +88,7 @@ console.log(formState)
         } else {
             action = authActions.signUser(
                 formState.inputValues.userId,
-               'casdadlasf213211das'
+               '12345678'
             )
         }
 
@@ -102,6 +101,7 @@ console.log(formState)
             if (msg === 'Error: Password too short') msg = 'Bitte geben Sie Ihre Identifikationsnummer'
             else if (msg === 'Error: Passwords need to be the same') msg = 'Die Passwörter stimmen nicht überein!'
             else if (msg === 'Error: Incorrect userId or password') msg = 'Falsche ID'
+            else if (msg === 'Error: max prolific user') msg = 'Es tut uns leid, die maximale Nutzeranzahl wurde erreicht. Kontaktieren Sie ihre Kontaktperson, für mehr Informationen.'
             else if (msg.includes('Error: Duplicate field value')) msg = 'Es existiert bereits ein Teilnehmmer mit dieser ID.'
             else msg = 'Bitte erneute Eingabe, da ist etwas schiefgegangen!'
             setError(msg)
@@ -173,7 +173,7 @@ console.log(formState)
                                 <Input id='userId'
                                        label='Teilnehmer ID'
                                        keyboardType='default'
-                                       required minLength={4}
+                                       required minLength={8}
                                        userId
                                        style={styles.input}
                                        icon='account'

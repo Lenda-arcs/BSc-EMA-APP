@@ -3,9 +3,9 @@
     "name": "iViewSky",
     "slug": "i-view-sky",
     "version": "1.0.0",
-    "description": "Hallo und Willkommen zu meiner Studie die im Rahmen meiner BSc. Abschlussarbeit durchgeführt wird. Mit dieser Studie soll der Einfluss vom Himmel auf unsere Stimmung und unser Stresslevel untersucht werden. Es werden während einer Befragung, Daten zum aktuellen Standort des Nutzers, Antworten auf die Fragen sowie Fotos von der Umgebung (aktiv durch Nutzer ausgelöst und ausgewählt) gesammelt.  Dies ist eine Beta Version der App, es werden noch keine Studiendaten erhoben die danach ausgewertet werden. ",
+    "description": "Hallo und Willkommen bei iViewSky, eine Untersuchung die im Rahmen einer Abschlussarbeit an der Universität Hamburg durchgeführt wird. Ziel dieses ambulanten Assessment  ist es, die verschiedenen Effekte von Natur auf das menschliche Wohlbefinden zu untersuchen, dies könnte wichtige Hinweise für verschiedene Bereiche, wie z.B. die Umweltpsychologie, liefern. \n\nAll wichtigen Informationen finden Sie in der Studienbeschreibung.",
     "orientation": "portrait",
-    "owner": "iviewsky-ios",
+    "owner": "iviewsky-study",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {Animated, Dimensions, View} from "react-native";
+import {Dimensions, View} from "react-native";
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import {Headline, Paragraph} from "react-native-paper";
 
@@ -18,7 +18,7 @@ const StudyOverview = ({count, colors, repeats, style, userName}) => {
         setFill(count / repeats * 100)
         if (count > 0 && count < repeats - (repeats / 6)) setText('Ihr Fortschritt')
         else if (count >= repeats) setText('Studie beendet.')
-        else if (count >= (repeats - (repeats / 6))) setText('Sie haben es bald geschafft!')
+        else if (count >= (repeats - (repeats / 6))) setText('Sie haben es fast geschafft!')
 
 
     }, [count])

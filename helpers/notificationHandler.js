@@ -32,9 +32,10 @@ exports.scheduleNotificationHandler = async (nextTrigger) => {
     return  await Notifications.scheduleNotificationAsync({
         content: {
             sound: true,
-            badge: true,
+            priority: 'max',
             title: 'Erinnerung: iViewSky',
-            body: 'Hey, es ist wieder Zeit für die Befragung =). Du kannst ab jetzt für 30 Minuten an der Studie teilnehmen',
+            body: 'Sie können an der Befragung teilnehmen. Die Teilnahme ab jetzt für 30 Minuten möglich.',
+            vibrate: true,
             color: '#c40017',
 
         }, trigger

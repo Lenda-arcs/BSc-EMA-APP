@@ -1,23 +1,27 @@
 import React from 'react';
-import {View, StyleSheet, Platform, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, Platform} from 'react-native';
+import * as Updates from 'expo-updates'
 import {
     Drawer,
     Switch,
     TouchableRipple,
     Text,
     useTheme,
-    Paragraph,
-    Subheading, Button
 } from 'react-native-paper';
 
 import {useDispatch} from "react-redux";
 import {logout} from "../store/actions/auth";
 
-const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
+const DrawerItems = ({toggleTheme, toggleRTL, isDarkTheme, isRTL, userType, navigation}) => {
 
     const {colors} = useTheme();
     const dispatch = useDispatch()
     const isAdmin = userType === 'admin'
+
+    const _handleToggleRTL = () => {
+        toggleRTL();
+        Updates.reloadAsync();
+    };
 
 
     return (
@@ -39,6 +43,14 @@ const DrawerItems = ({toggleTheme, isDarkTheme, userType, navigation}) => {
                             </View>
                         </View>
                     </TouchableRipple>
+                    {/*<TouchableRipple onPress={_handleToggleRTL}>*/}
+                    {/*    <View style={styles.preference}>*/}
+                    {/*        <Text>RTL</Text>*/}
+                    {/*        <View pointerEvents="none">*/}
+                    {/*            <Switch value={isRTL} />*/}
+                    {/*        </View>*/}
+                    {/*    </View>*/}
+                    {/*</TouchableRipple>*/}
                 </Drawer.Section>
                 {/*<Drawer.Section*/}
                 {/*    title="Rechtlich">*/}
