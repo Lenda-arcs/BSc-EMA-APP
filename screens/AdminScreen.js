@@ -10,6 +10,23 @@ import CtmDialog from "../components/helper/CtmDialog";
 import * as storeFac from "../helpers/asyncStoreFactories";
 import {ASSESSMENT_DATA} from "../store/actions/assessment";
 
+function getAge(dateString) {
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+function toTime(date) {
+    const dateObj = new Date(date)
+    return  Math.round(dateObj.getTime() / 1000 / 60 )
+}
+
+
+
 const {OwnApiUrl} = vars
 const UserRow = ({user, userLookUp}) => {
     const currentTime = new Date().getTime()
@@ -55,10 +72,7 @@ const AssessmentRow = ({data, fetchAssessment}) => {
         return score
 
     }
-    const toTime = (date) => {
-        const dateObj = new Date(date)
-        return  Math.round(dateObj.getTime() / 1000 / 60 )
-    }
+
     const reducer = (acc, currentVal) => acc + currentVal
     const weatherCloudData = data.weather?.OBSERVATIONS.cloud_layer_1_value_1d
     const skyCondition = weatherCloudData?.value.sky_condition ? weatherCloudData.value.sky_condition : 'N/A'
@@ -121,7 +135,7 @@ const AdminScreen = () => {
             setSlides(asyncStoreSlides)
         }
 
-        const usersRes = await fetchData(`${OwnApiUrl}/users`, 'GET', null, token)
+        const usersRes = await fetchData(`${OwnApiUrl}/users?sort=-userProgress`, 'GET', null, token)
         const usersData = usersRes.data.data
         setUsers(usersData)
     }
@@ -130,7 +144,7 @@ const AdminScreen = () => {
         const slideId = pickId - 1
         const demoSlideIndex = slides.findIndex(el => el.name === 'demo')
         const demoAnswers = userAssessmentDetails?.find(ass => ass.answers["demo"])?.answers?.["demo"]
-        if (pickId == 6) return demoAnswers?.[pickId].split('T')[0]
+        if (pickId == 6) return getAge(demoAnswers?.[pickId].split('T')[0])
         return slides[demoSlideIndex].questions[slideId].selectionItems[demoAnswers?.[pickId]]
     }
 
@@ -159,16 +173,18 @@ const AdminScreen = () => {
                     </DataTable></> :
                     <DataTable>
                         <DataTable.Header>
-                            <DataTable.Title>Geschlecht</DataTable.Title>
-                            <DataTable.Title>Abschluss</DataTable.Title>
-                            <DataTable.Title>Status</DataTable.Title>
-                            <DataTable.Title>Alters</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Geschlecht</DataTable.Title>
+                            <DataTable.Title style={styles.midCell}>Status</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Alters</DataTable.Title>
+                            <DataTable.Title style={styles.bigCell}>Abschluss</DataTable.Title>
+                            <DataTable.Title style={styles.smallCell}>Beziehung</DataTable.Title>
                         </DataTable.Header>
                         <DataTable.Row>
-                            <DataTable.Cell>{demoPickMapping(1)}</DataTable.Cell>
-                            <DataTable.Cell>{demoPickMapping(2)}</DataTable.Cell>
-                            <DataTable.Cell>{demoPickMapping(3)}</DataTable.Cell>
-                            <DataTable.Cell>{demoPickMapping(6)}</DataTable.Cell>
+                            <DataTable.Cell style={styles.smallCell}>{demoPickMapping(1)}</DataTable.Cell>
+                            <DataTable.Cell style={styles.midCell}>{demoPickMapping(3)}</DataTable.Cell>
+                            <DataTable.Cell style={styles.smallCell}>{demoPickMapping(6)}</DataTable.Cell>
+                            <DataTable.Cell style={styles.bigCell}>{demoPickMapping(2)}</DataTable.Cell>
+                            <DataTable.Cell style={styles.smallCell}>{demoPickMapping(5)}</DataTable.Cell>
                         </DataTable.Row>
                         <DataTable.Header>
                             <DataTable.Title style={styles.smallCell}>Duration</DataTable.Title>
@@ -206,6 +222,10 @@ const styles = StyleSheet.create({
     },
     midCell: {
         maxWidth: '25%',
+        justifyContent: 'center'
+    },
+    bigCell: {
+        maxWidth: '35%',
         justifyContent: 'center'
     }
 })
