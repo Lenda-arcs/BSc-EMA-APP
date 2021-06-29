@@ -50,10 +50,14 @@ const difInSec = (currentTime, timeInPast) => {
 }
 
 
-exports.filterTimeArr = async () => {
+exports.filterTimeArr = async (notification) => {
+    const currentTime = new Date().getTime()
     const timesArr = await getItemAsyncStore(NOTIFICATION_TIMES, false, true)
-    if (timesArr) {
-        const currentTime = new Date().getTime()
+    if (notification !== null) {
+        const trigger = notification?.res?.notification?.request?.trigger?.value
+        return {timeLeft: 60 * 30 - difInSec(currentTime, trigger), scheduledTime: trigger}
+    }
+    else if (timesArr) {
         const time = timesArr.filter(noteTime => {
             let diffInSec = difInSec(currentTime, noteTime)
             return (diffInSec <= 60 * 30 && diffInSec >= 0)

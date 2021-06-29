@@ -89,7 +89,7 @@ const AuthScreen = props => {
         } else {
             action = authActions.signUser(
                 formState.inputValues.userId,
-               '12345678'
+               'casdadlasf213211das'
             )
         }
 

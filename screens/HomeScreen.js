@@ -121,7 +121,7 @@ const HomeScreen = props => {
 
     useEffect(() => {
         const checkAccess = async () => {
-            const accessInSec = await filterTimeArr()
+            const accessInSec = await filterTimeArr(notificationState)
             if (accessInSec.timeLeft >= 0) {
                 setAccessState(
                     {

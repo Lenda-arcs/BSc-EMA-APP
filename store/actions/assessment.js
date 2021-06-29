@@ -194,6 +194,7 @@ export const saveAssessment = (skyImage, horizonImage, time, selection) => {
             throw new Error('Senden Fehlgeschlagen - Keine Internet Verbindung verfügbar. Deine Antworten wurden aber gerettet =)')
         }
         await dispatch(incrementUserProgress())
+        dispatch(setNotificationState(null))
     }
 }
 

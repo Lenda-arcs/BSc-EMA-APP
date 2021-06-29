@@ -1,5 +1,4 @@
 import React, {useMemo, useState, useEffect, useRef} from 'react';
-import * as Updates from 'expo-updates'
 import {LogBox, Vibration, I18nManager} from 'react-native'
 import {createStore, combineReducers, applyMiddleware} from "redux";
 import {Provider} from 'react-redux'
