@@ -276,8 +276,6 @@ export const fetchAssessmentStats = () => {
                 await storeFac.saveItemAsyncStore(VALID_COMPLETION_TIME, isValid, false)
             }
         }
-
-
         dispatch({type: VALID_COMPLETION_TIME, val: isValid})
     }
 }

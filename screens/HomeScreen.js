@@ -35,7 +35,6 @@ const HomeScreen = props => {
     const [accessState, setAccessState] = useState({access: false, timeLeft: 0, scheduledTime: null})
     const [dialogState, setDialogState] = useState({visible: false, text: '', title: '', dismissible: true })
     const [snackState, setSnackState] = useState({visible: false, text: ''})
-    const [slidesFetched, setSlidesFetched] = useState(false)
     const [pendingFetch, setPendingFetch] = useState(false)
 
 
@@ -60,18 +59,18 @@ const HomeScreen = props => {
         if (userProgress >= repeatCount && !isAdmin) {
             checkDataQuality()
 
-            if (validAssessments == true) {
+            if (validAssessments) {
                 setDialogState({
                     title: 'Teilnahme abgeschlossen',
                     visible: true,
-                    text: <Paragraph style={{lineHeight: 22}}>Der Abschlusscode für Ihre Teilnahme lautet: <Text style={{fontWeight: 'bold', fontSize: 16}}>24E8F247</Text>. Schreiben Sie uns eine Nachricht inklusive Abschlusscode über das Prolific Portal.{"\n\n"}Sind Sie ein Student der UHH und möchten <Text style={{fontWeight: 'bold'}}>VP-Stunden</Text>? Dann schreiben Sie uns eine E-Mail (siehe Studienbeschreibung), mit Betreff "iViewSky_VP-Stunden_24E8F247" und als Anhang das ausgefüllte VP-Stunden Formular. {"\n\n"}Alle zukünftigen Benachrichtgungen werden hiermit gelöscht. {"\n\n"}Vielen Dank für Ihre Teilnahme an dieser Untersuchung!</Paragraph>,
+                    text: <Paragraph style={{lineHeight: 22}}>Der Abschlusscode für Ihre Teilnahme lautet: <Text style={{fontWeight: 'bold', fontSize: 16}}>24E8F247</Text>. Schreiben Sie uns eine Nachricht inklusive Abschlusscode über das Prolific Portal.{"\n\n"}Sind Sie ein Student der UHH und möchten <Text style={{fontWeight: 'bold'}}>VP-Stunden</Text>? Dann schreiben Sie uns eine E-Mail (siehe Studienbeschreibung), mit Betreff "iViewSky_VP-Stunden_24E8F247" und als Anhang das ausgefüllte VP-Stunden Formular. {"\n\n"}Alle zukünftigen Benachrichtgungen werden hiermit gelöscht. {"\n\n"}Vielen Dank für Ihre Teilnahme an iViewSky!</Paragraph>,
                     dismissible: false
                 })
             } else {
                 setDialogState({
-                    title: 'Einreichung fehlgeschlagen',
+                    title: 'Teilnahme abgeschlossen',
                     visible: true,
-                    text: 'Die durchschnittliche Bearbeitungszeit die Sie für die Befragungen benötigt haben unterschreitet den Grenzwert, wir werden die Daten zunächst prüfen müssen, bevor Sie Ihren Abschlusscode erhalten können. \n\nSchreiben Sie uns bitte eine Nachricht über das Prolific Portal, um den Abschlusscode bzw. mehr Information zu erhalten. Als Student der UHH, schreiben Sie uns eine E-Mail (siehe Studienbeschreibung). \n\nAlle zukünftigen Benachrichtgungen sind hiermit gelöscht.\n\nVielen Dank für Ihre Teilnahme an dieser Untersuchung!',
+                    text: 'Wir prüfen zunächst Ihre Assessmentdaten, bevor Sie Ihren Abschlusscode erhalten können. \n\nSchreiben Sie uns bitte eine Nachricht über das Prolific Portal, um den Abschlusscode bzw. mehr Information zu erhalten. Als Student der UHH, schreiben Sie uns eine E-Mail (siehe Studienbeschreibung). \n\nAlle zukünftigen Benachrichtgungen sind hiermit gelöscht.\n\nVielen Dank für Ihre Teilnahme an iViewSky!',
                     dismissible: false
                 })
             }
@@ -83,7 +82,6 @@ const HomeScreen = props => {
         const getAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
-                setSlidesFetched(true)
             } catch (err) {
                 showDialog(err.message)
             }
@@ -110,13 +108,13 @@ const HomeScreen = props => {
             try {
                 await dispatch(setNotifications())
                 // Cancel all upcoming notifications when user is finished
-                userProgress === repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
+                userProgress >= repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
             } catch (err) {
                 showDialog(err.message)
             }
         }
         scheduleNotification()
-    }, [slidesFetched])
+    }, [])
 
 
     useEffect(() => {
