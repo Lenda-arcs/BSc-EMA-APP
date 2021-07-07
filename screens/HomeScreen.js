@@ -35,7 +35,6 @@ const HomeScreen = props => {
     const [accessState, setAccessState] = useState({access: false, timeLeft: 0, scheduledTime: null})
     const [dialogState, setDialogState] = useState({visible: false, text: '', title: '', dismissible: true })
     const [snackState, setSnackState] = useState({visible: false, text: ''})
-    const [slidesFetched, setSlidesFetched] = useState(false)
     const [pendingFetch, setPendingFetch] = useState(false)
 
 
@@ -91,7 +90,6 @@ const HomeScreen = props => {
         const getAssessmentData = async () => {
             try {
                 await dispatch(setAssessmentData())
-                setSlidesFetched(true)
             } catch (err) {
                 showDialog(err.message)
             }
@@ -118,13 +116,13 @@ const HomeScreen = props => {
             try {
                 await dispatch(setNotifications())
                 // Cancel all upcoming notifications when user is finished
-                userProgress === repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
+                userProgress >= repeatCount && await Notifications.cancelAllScheduledNotificationsAsync()
             } catch (err) {
                 showDialog(err.message)
             }
         }
         scheduleNotification()
-    }, [slidesFetched])
+    }, [])
 
 
     useEffect(() => {

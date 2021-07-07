@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="a24e4418-c214-4524-98ac-5d06e317e345" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/slides/ImagePicker.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/slides/ImagePicker.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/slides/PictureSlide.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/slides/PictureSlide.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/navigation/DrawerItems.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/DrawerItems.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screens/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/HomeScreen.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/store/actions/assessment.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/assessment.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/store/actions/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/store/actions/auth.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +24,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupnpm">
+      <scroll-view-position x="0" y="0" />
+    </layout>
+  </component>
   <component name="ProjectId" id="1rhoPP4R3SETyMuX8SRc2Qkissj" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -36,7 +39,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/assets" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../server-iViewSky-bsc-project" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="ts.external.directory.path" value="C:\Users\lenna\AppData\Local\JetBrains\Toolbox\apps\WebStorm\ch-0\203.5981.135\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
@@ -67,7 +70,39 @@
       <workItem from="1620052923623" duration="4681000" />
       <workItem from="1620140674072" duration="15892000" />
       <workItem from="1620302547249" duration="1191000" />
-      <workItem from="1620309188452" duration="4931000" />
+      <workItem from="1620309188452" duration="5767000" />
+      <workItem from="1620456560946" duration="1837000" />
+      <workItem from="1620547714289" duration="32000" />
+      <workItem from="1620627054613" duration="646000" />
+      <workItem from="1620800786909" duration="7000" />
+      <workItem from="1620895198001" duration="9821000" />
+      <workItem from="1621179421989" duration="25000" />
+      <workItem from="1621236536180" duration="1569000" />
+      <workItem from="1621264510028" duration="6087000" />
+      <workItem from="1621446755058" duration="4779000" />
+      <workItem from="1621492905950" duration="31243000" />
+      <workItem from="1621580076983" duration="23484000" />
+      <workItem from="1621609998447" duration="3429000" />
+      <workItem from="1622018787357" duration="2182000" />
+      <workItem from="1622639530984" duration="8870000" />
+      <workItem from="1622901949030" duration="31702000" />
+      <workItem from="1623138204971" duration="25290000" />
+      <workItem from="1623306730335" duration="13461000" />
+      <workItem from="1623327854962" duration="1039000" />
+      <workItem from="1623329550991" duration="1619000" />
+      <workItem from="1623435093369" duration="254000" />
+      <workItem from="1623509879425" duration="5000" />
+      <workItem from="1623534167452" duration="11578000" />
+      <workItem from="1623740864595" duration="55000" />
+      <workItem from="1623741443103" duration="974000" />
+      <workItem from="1623749445653" duration="2392000" />
+      <workItem from="1623758479430" duration="4714000" />
+      <workItem from="1623792900780" duration="5000" />
+      <workItem from="1623828529002" duration="4487000" />
+      <workItem from="1623840476502" duration="7000" />
+      <workItem from="1624910121342" duration="1393000" />
+      <workItem from="1624949501431" duration="2147000" />
+      <workItem from="1624968022486" duration="667000" />
     </task>
     <servers />
   </component>
